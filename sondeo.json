@@ -1,0 +1,339 @@
+{
+ "samsung_pagina": {
+  "estado": 200,
+  "bytes": 3363488,
+  "fold8": 1418,
+  "precios_vistos": [
+   "20000",
+   "20667",
+   "21419",
+   "21661",
+   "22237",
+   "22239",
+   "22355",
+   "22386",
+   "22434",
+   "22438",
+   "22828",
+   "22858"
+  ],
+  "bloqueo": false,
+  "final": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
+  "inicio": "<!DOCTYPE html> <html lang=\"es-MX\" itemscope=\"\"> <head> <!-- PWA - manifest <link rel=\"manifest\" href=\"/etc.clientlibs/samsung/clientlibs/co"
+ },
+ "samsung_searchapi": {
+  "estado": 200,
+  "bytes": 12993,
+  "fold8": 58,
+  "precios_vistos": [
+   "40799",
+   "43999",
+   "48499",
+   "53499"
+  ],
+  "bloqueo": false,
+  "final": "https://searchapi.samsung.com/v6/front/b2c/product/card/detail/newhybris?siteCode=mx&modelList=SM-F976BZKMLTM,SM-F971BZK",
+  "inicio": "{\"response\":{\"statusCode\":200,\"statusMessage\":\"OK\",\"siteCode\":\"mx\",\"resultData\":{\"productList\":[{\"familyRecord\":\"1\",\"familyId\":\"599030\",\"modelCount\":\"1\",\"fmyMar"
+ },
+ "samsung_simpleinfo": {
+  "estado": 200,
+  "bytes": 3293,
+  "fold8": 0,
+  "precios_vistos": [
+   "40799",
+   "43999",
+   "48499",
+   "53499"
+  ],
+  "bloqueo": true,
+  "final": "https://shop.samsung.com/mx/servicesv2/getSimpleProductsInfo?productCodes=SM-F976BZKMLTM,SM-F971BZKMLTM",
+  "inicio": "{\"resultCode\":\"0000\",\"resultMessage\":\"SUCCESS\",\"productDatas\":[{\"productCode\":\"SM-F976BZKMLTM\",\"stockLevelStatus\":\"inStock\",\"stockLevelStatusDisplay\":\"En stock\""
+ },
+ "samsung_addcart": {
+  "estado": 200,
+  "bytes": 85,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": false,
+  "final": "https://shop.samsung.com/mx/ng/p4v1/addCart?productCode=SM-F976BZKMLTM&quantity=1",
+  "inicio": "{\"resultCode\":\"0000\",\"resultMessage\":\"SUCCESS\",\"cartCount\":1,\"productPickupFlag\":\"T\"}"
+ },
+ "walmart_busca": {
+  "estado": 412,
+  "bytes": 396,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.walmart.com.mx/search?q=galaxy+z+fold8+ultra",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=53ddecd6-e46a-11f1-846a-fbbd7d9bdb1a\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+ },
+ "walmart_ficha": {
+  "estado": 412,
+  "bytes": 396,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.walmart.com.mx/ip/Smartphone-Samsung-Galaxy-ZFold8-Ultra-512GB-Grafito-Desbloqueado/00880609919959",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=540ad270-e46a-11f1-a539-4a5d628b1802\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+ },
+ "sams_busca": {
+  "estado": 412,
+  "bytes": 396,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.sams.com.mx/search?q=galaxy+z+fold8",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=5438f14f-e46a-11f1-bc17-b680f1ffd7ff\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\""
+ },
+ "bodega_busca": {
+  "estado": 412,
+  "bytes": 396,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.bodegaaurrera.com.mx/search?q=galaxy+z+fold8",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=54577772-e46a-11f1-a963-054fc0e9016c\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+ },
+ "amazon_ficha": {
+  "estado": 200,
+  "bytes": 1743961,
+  "fold8": 69,
+  "precios_vistos": [
+   "20000",
+   "20200",
+   "20512",
+   "21063",
+   "21132",
+   "21506",
+   "21617",
+   "21875",
+   "22004",
+   "25027",
+   "28337",
+   "28899"
+  ],
+  "bloqueo": false,
+  "final": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
+  "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
+ },
+ "amazon_busca": {
+  "estado": 200,
+  "bytes": 1886233,
+  "fold8": 673,
+  "precios_vistos": [
+   "20200",
+   "20512",
+   "20600",
+   "20825",
+   "20990",
+   "20999",
+   "21000",
+   "21063",
+   "21132",
+   "21400",
+   "21506",
+   "21575"
+  ],
+  "bloqueo": false,
+  "final": "https://www.amazon.com.mx/s?k=samsung+galaxy+z+fold8+ultra+512",
+  "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
+ },
+ "ml_producto": {
+  "estado": 200,
+  "bytes": 26509,
+  "fold8": 6,
+  "precios_vistos": [],
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Fwww.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold",
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-fronte"
+ },
+ "ml_listado": {
+  "estado": 200,
+  "bytes": 26373,
+  "fold8": 6,
+  "precios_vistos": [
+   "47848",
+   "53555"
+  ],
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fsamsung-galaxy-z-",
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-fronte"
+ },
+ "ml_api_producto": {
+  "estado": 401,
+  "bytes": 67,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": false,
+  "final": "https://api.mercadolibre.com/products/MLM73221955",
+  "inicio": "{\"code\":\"unauthorized\",\"message\":\"authorization value not present\"}"
+ },
+ "ml_api_busca": {
+  "estado": 403,
+  "bytes": 67,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": false,
+  "final": "https://api.mercadolibre.com/sites/MLM/search?q=galaxy%20z%20fold8%20ultra&limit=10",
+  "inicio": "{\"message\":\"forbidden\",\"error\":\"forbidden\",\"status\":403,\"cause\":[]}"
+ },
+ "liverpool_busca": {
+  "estado": 200,
+  "bytes": 664753,
+  "fold8": 103,
+  "precios_vistos": [
+   "20279",
+   "20664",
+   "21332",
+   "21499",
+   "21725",
+   "22147",
+   "22499",
+   "22564",
+   "22999",
+   "23125",
+   "23178",
+   "23202"
+  ],
+  "bloqueo": true,
+  "final": "https://www.liverpool.com.mx/tienda?s=galaxy+z+fold8",
+  "inicio": "<!DOCTYPE html><html lang=\"es\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"stylesheet\" href=\"/_"
+ },
+ "suburbia_busca": {
+  "estado": 302,
+  "bytes": 0,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": false,
+  "final": "https://www.suburbia.com.mx/tienda?s=galaxy+z+fold8",
+  "inicio": ""
+ },
+ "costco_api": {
+  "estado": 200,
+  "bytes": 72566,
+  "fold8": 23,
+  "precios_vistos": [
+   "23399",
+   "29499",
+   "35999",
+   "44999",
+   "46798",
+   "58998",
+   "59999"
+  ],
+  "bloqueo": false,
+  "final": "https://www.costco.com.mx/rest/v2/mexico/products/search?query=galaxy%20z%20fold&fields=FULL&lang=es_MX&curr=MXN",
+  "inicio": "{ \"type\" : \"productCategorySearchPageWsDTO\", \"addSiteName\" : true, \"autoSpellCheck\" : false, \"breadcrumbs\" : [ ], \"currentQuery\" : { \"query"
+ },
+ "costco_busca": {
+  "estado": 200,
+  "bytes": 931188,
+  "fold8": 0,
+  "precios_vistos": [
+   "26052",
+   "30000",
+   "30200",
+   "32029",
+   "36999",
+   "44112",
+   "51787",
+   "54753",
+   "60023"
+  ],
+  "bloqueo": true,
+  "final": "https://www.costco.com.mx/search?text=galaxy+z+fold8",
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-critters-container=\"\" dir=\"ltr\"><head> <meta charset=\"utf-8\"> <title>Costco</title> <base href=\"/spartacus/as"
+ },
+ "elektra_api": {
+  "estado": 206,
+  "bytes": 245932,
+  "fold8": 167,
+  "precios_vistos": [
+   "26999",
+   "28375",
+   "29999",
+   "33999",
+   "36999",
+   "39599",
+   "42599",
+   "44000",
+   "44510",
+   "53300",
+   "55383",
+   "59639"
+  ],
+  "bloqueo": false,
+  "final": "https://www.elektra.mx/api/catalog_system/pub/products/search?ft=galaxy%20z%20fold8",
+  "inicio": "[{\"productId\":\"1302051911\",\"productName\":\"Samsung Galaxy Z Fold8 12+512GB Crema\",\"brand\":\"SAMSUNG\",\"brandId\":6,\"brandImageUrl\":null,\"linkText\":\"samsung-galaxy-z"
+ },
+ "coppel_busca": {
+  "estado": 403,
+  "bytes": 377,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.coppel.com/search?q=galaxy%20z%20fold8",
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&"
+ },
+ "sears_busca": {
+  "estado": 200,
+  "bytes": 764568,
+  "fold8": 1,
+  "precios_vistos": [
+   "20325",
+   "20410",
+   "21111",
+   "21197",
+   "21370",
+   "21557",
+   "21566",
+   "21573",
+   "21574",
+   "21578",
+   "21579",
+   "21580"
+  ],
+  "bloqueo": false,
+  "final": "https://www.sears.com.mx/resultados/q=galaxy%20z%20fold8/pagina=1",
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width\"/><title>SEARS - Me entiende</title><link rel=\""
+ },
+ "palacio_busca": {
+  "estado": 403,
+  "bytes": 5855,
+  "fold8": 3,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.elpalaciodehierro.com/buscar?q=galaxy+z+fold8",
+  "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA"
+ },
+ "telcel_busca": {
+  "estado": 403,
+  "bytes": 390,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
+  "final": "https://www.telcel.com/tienda/buscar?q=fold8",
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;telcel&#46;com&"
+ },
+ "promodescuentos_rss": {
+  "estado": 200,
+  "bytes": 43024,
+  "fold8": 9,
+  "precios_vistos": [
+   "20134",
+   "20498",
+   "20999",
+   "21560",
+   "21659",
+   "22159",
+   "23033",
+   "23999",
+   "26999",
+   "27134",
+   "29159"
+  ],
+  "bloqueo": false,
+  "final": "https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
+  "inicio": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <rss xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:dc=\""
+ }
+}
