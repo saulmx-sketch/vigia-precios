@@ -1,6 +1,26 @@
 {
+ "avisado": {},
  "ciego_avisado": false,
+ "cupones_cosechados": [
+  "BF26_5",
+  "S26CLUB_NOV",
+  "EPP10_NOV",
+  "MEMBER_NOV15",
+  "CENEVAL26",
+  "EPPMX_QUINCENA",
+  "EPP1O_NOV",
+  "WINDC_600",
+  "CRP26TV"
+ ],
  "fallos": 0,
+ "fallos_fuente": {
+  "Amazon": 0,
+  "Costco": 0,
+  "Elektra": 0,
+  "Foro": 0,
+  "Liverpool": 0,
+  "Samsung": 0
+ },
  "sembrado": true,
  "vistos": {
   "https://www.promodescuentos.com/ofertas/samsung-estudiantes-galaxy-z-fold8-galaxy-watch-9-con-banorte-1211089": "Tue, 17 Nov 2026 11:20:43 -0600",
