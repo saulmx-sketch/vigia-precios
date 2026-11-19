@@ -1,0 +1,16 @@
+# Codigos de cupon que el vigia prueba en el carrito de Samsung en cada corrida (uno por renglon).
+# Los que no aplican se ignoran solos; los que encarecen se quitan. Agregar aqui cualquier codigo nuevo.
+FOLD8_20CLUB
+BF1000
+FOLD8U_35CLUB
+PROMODESC_FOLD8U
+FOLD8U_20CLUB
+FOLD8MEMBER_20
+CLUB_FOLD30
+LIVESEM
+BF26_10
+BF26_5
+ECO_CLUB30
+ECO_CLUB25
+ECO_25
+ECO_20
