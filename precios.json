@@ -4,14 +4,14 @@
   "nota": "",
   "precio": 34499.0,
   "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
-  "vendedor": "ver ficha"
+  "vendedor": "Amazon México"
  },
  "Amazon|ultra|512": {
   "leido": "2026-11-19 16:50",
   "nota": "",
   "precio": 38999.0,
   "url": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
-  "vendedor": "ver ficha"
+  "vendedor": "Amazon México"
  },
  "Costco|fold8|512": {
   "leido": "2026-11-19 16:50",
@@ -19,13 +19,6 @@
   "precio": 35999.0,
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
   "vendedor": "Costco (pide membresia)"
- },
- "Elektra|fold8|512": {
-  "leido": "2026-11-19 16:50",
-  "nota": "",
-  "precio": 26999.0,
-  "url": "https://www.elektra.mx/samsung-galaxy-z-fold8-12512gb-lavanda-1302051913/p",
-  "vendedor": "Systore"
  },
  "Liverpool|fold8|None": {
   "leido": "2026-11-19 16:50",
