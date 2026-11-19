@@ -42,7 +42,18 @@ FRACCIONES = (0.411, 0.449, 0.486)
 TOPES_FIJOS = {}
 PISO = 12000            # menos que esto no es el telefono (fundas, micas, errores)
 BAJA_MINIMA = 300       # una tienda ya avisada vuelve a avisar solo si baja al menos esto
-EXCLUIR = r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed)\b"
+EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
+           r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version)\b")
+# REGLA DE SAUL (2026-11-19): "deben ser ventas con garantia y de samsung mx, no me sirve un tercero que vende
+# importados". Solo cuenta lo que vende Samsung o la propia tienda como distribuidor autorizado en Mexico.
+VENDEDOR_OK = {
+    "Amazon": r"^\s*(amazon(\s+m[eé]xico)?|samsung(\s+m[eé]xico)?)\s*$",   # no terceros ni "Remates de Almacen"
+    "Elektra": r"^\s*elektra\s*$",                                        # no vendedores del marketplace
+    "Mercado Libre": r"samsung",                                          # solo la tienda oficial de Samsung
+}
+# En el foro solo se atienden ofertas de tiendas establecidas en Mexico (no importadores ni revendedores).
+TIENDAS_FORO = (r"samsung|walmart|bodega|sam'?s|amazon|mercado\s*libre|liverpool|suburbia|coppel|costco|elektra|sears|"
+                r"sanborns|palacio|telcel|at&t|office\s*depot|best\s*buy|claro\s*shop|chedraui|soriana|heb|doto")
 PATRON = r"fold\s*-?\s*8|zfold8|fold\s*ultra\s*8"
 
 BANCOS_PROPIOS = {"BBVA": r"bbva|bancomer", "Revolut": r"revolut", "PayPal": r"paypal"}
@@ -250,14 +261,27 @@ def leer_amazon(estado):
                         nota="con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else "")
             if of:
                 visto.add(m.group(1))
-                of["vendedor"] = "ver ficha"
+                of["asin"] = m.group(1)
                 salida.append(of)
-    for of in salida:  # solo si esta bajo tope se gasta una peticion en saber quien vende
-        if nivel(of["precio"], of["modelo"], of["cap"]):
+    # Quien vende solo se ve en la ficha. Se recuerda por articulo y precio para no pedir la ficha en cada corrida.
+    memo, buenas = estado.setdefault("vendedor_amazon", {}), []
+    for of in salida:
+        previo = memo.get(of["asin"])
+        if previo and previo[0] == of["precio"]:
+            vend = previo[1]
+        else:
             e, t = pedir(of["url"], pausa=1.0)
-            v = re.search(r'offer-display-feature-text-message">\s*([^<]{2,60})<', t)
-            of["vendedor"] = v.group(1).strip() if v else "ver ficha"
-    return salida
+            v = re.search(r"Vendido por:?\s*(?:<[^>]*>\s*)*([^<]{2,60})<", t) or \
+                re.search(r'offer-display-feature-text-message">\s*([^<]{2,60})<', t)
+            vend = html.unescape(v.group(1)).strip() if v else ""
+            if vend:
+                memo[of["asin"]] = [of["precio"], vend]
+        of["vendedor"] = vend or "sin confirmar"
+        if re.search(VENDEDOR_OK["Amazon"], vend, re.I):
+            buenas.append(of)
+    for asin in [a for a in memo if a not in {o["asin"] for o in salida}]:
+        del memo[asin]
+    return buenas
 
 
 def leer_costco(estado):
@@ -287,7 +311,7 @@ def leer_elektra(estado):
         for it in p.get("items", []):
             for s in it.get("sellers", []):
                 co = s.get("commertialOffer", {})
-                if co.get("AvailableQuantity", 0) > 0 and co.get("Price"):
+                if co.get("AvailableQuantity", 0) > 0 and co.get("Price") and re.search(VENDEDOR_OK["Elektra"], s.get("sellerName", ""), re.I):
                     of = oferta("Elektra", p.get("productName", ""), co["Price"], p.get("link", ""), s.get("sellerName", ""))
                     if of:
                         salida.append(of)
@@ -369,7 +393,7 @@ def leer_foro(estado):
 
 def aviso_foro(it):
     cl = clasifica(it["titulo"])
-    if not cl or cl[1] == 256:
+    if not cl or cl[1] == 256 or not re.search(TIENDAS_FORO, it["tienda"], re.I):
         return None
     precio = a_numero(it["precio_txt"])
     if precio is not None and (precio < PISO or not nivel(precio, cl[0], cl[1])):
@@ -387,7 +411,8 @@ def aviso_foro(it):
         "- Topes de {} {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(NOMBRE[cl[0]], cap_txt(cl[1]), g, c, t),
         "- Publicada: {}".format(it["fecha"]), "- Oferta: {}".format(it["link"]), "",
         "> " + limpio(it["descripcion"]).replace("\n", "\n> "), "",
-        "Antes de pagar: confirma en la tienda que siga viva y quien vende (Samsung o la tienda, no un tercero)."])
+        "Antes de pagar: confirma en la tienda que siga viva y que la venda Samsung o la propia tienda, con garantia de "
+        "Samsung Mexico. Si la vende un tercero o es importado, no cuenta."])
     return asunto, cuerpo
 
 
@@ -526,7 +551,10 @@ def main():
             previos = json.load(f)
     except Exception:
         previos = {}
-    actuales = dict(previos)
+    # lo que una tienda ya no ofrece (o ya no cumple la regla de garantia) sale de la tabla; si la tienda
+    # no se pudo leer en esta corrida, se conserva su ultimo dato
+    leidas = {n for n, _ in TIENDAS if fallos.get(n, 0) == 0}
+    actuales = {k: v for k, v in previos.items() if k.split("|")[0] not in leidas}
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")
     cambios = []
     for clave, o in mejores.items():
@@ -541,6 +569,7 @@ def main():
             if nuevo:
                 w.writerow(["fecha", "tienda", "modelo", "capacidad", "precio", "vendedor", "como", "liga"])
             w.writerows(cambios)
+    if cambios or set(actuales) != set(previos):
         with open(PRECIOS, "w", encoding="utf-8") as f:
             json.dump(actuales, f, ensure_ascii=False, indent=1, sort_keys=True)
     if len(vistos) > 600:
