@@ -1,0 +1,36 @@
+name: vigia
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: 'Mandar un aviso de prueba'
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: vigia
+  cancel-in-progress: false
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revisar tiendas y foro
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRUEBA: ${{ inputs.prueba }}
+        run: python3 vigia.py
+      - name: Guardar memoria y bitacora de precios
+        run: |
+          git add -A
+          if ! git diff --cached --quiet; then
+            git config user.name "vigia"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "estado del vigia"
+            git push
+          fi
