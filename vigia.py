@@ -191,29 +191,54 @@ def samsung_carrito(sku, cupones):
     def total():
         e2, t2 = pedir(url_cart, abridor=ab, json_api=True, pausa=0.25)
         d = json.loads(t2)
-        return float(d["totalPriceWithTax"]["value"]), d
+        puestos = [v.get("voucherCode") or v.get("code") for v in d.get("appliedVouchers", []) or []]
+        return float(d["totalPriceWithTax"]["value"]), puestos, d
 
-    actual, d = total()
-    base, buenos = actual, []
-    for cup in cupones:
+    def poner(cup):
         e2, t2 = pedir(url_vou + "?lang=es_MX&curr=MXN", {"voucherId": cup, "voucherPopup": False}, abridor=ab,
                        json_api=True, pausa=0.25)
-        if e2 != 200 or '"errors" : [ ]' not in t2 and '"errors":[]' not in t2:
+        return e2 == 200 and ('"errors" : [ ]' in t2 or '"errors":[]' in t2)
+
+    def quitar(cup):   # la orden real de la pagina (capturada el 2026-11-19); DELETE .../vouchers/<codigo> da 404
+        pedir(SAMSUNG_API + "/users/current/carts/current/removeVoucher?lang=es_MX&curr=MXN", {"voucherId": cup},
+              abridor=ab, json_api=True, pausa=0.25)
+
+    def dejar_solo(conjunto):
+        """Deja en el carrito exactamente ese conjunto de cupones (un cupon puede desplazar a otro al entrar)."""
+        _, puestos, _ = total()
+        for c in puestos:
+            if c not in conjunto:
+                quitar(c)
+        _, puestos, _ = total()
+        for c in conjunto:
+            if c not in puestos:
+                poner(c)
+        return total()
+
+    base, _, d = total()
+    # Pasada 1: cada cupon solo. Asi el resultado no depende del orden de la lista.
+    solos = {}
+    for cup in cupones:
+        if not poner(cup):
             continue
-        nuevo, d = total()
-        if nuevo < actual - 1:
-            actual = nuevo
-            buenos.append(cup)
-        elif nuevo > actual + 1:  # cupon que encarece (reemplaza un descuento mejor): se quita
-            pedir(url_vou + "/" + urllib.parse.quote(cup) + "?lang=es_MX&curr=MXN", metodo="DELETE", abridor=ab,
-                  json_api=True, pausa=0.25)
-            vuelto, d = total()
-            if vuelto > actual + 1:
-                raise RuntimeError("el cupon %s encarecio el carrito y no se pudo quitar" % cup)
+        t1, puestos, d = total()
+        if cup in puestos and t1 < base - 1:
+            solos[cup] = t1
+        dejar_solo([])
+    # Pasada 2: se parte del mejor y se le suman los demas solo si bajan el total.
+    mejor_total, mejor, fin_d = base, [], d
+    for cup in sorted(solos, key=solos.get):
+        prueba = mejor + [cup]
+        t2, puestos, d2 = dejar_solo(prueba)
+        if all(c in puestos for c in prueba) and t2 < mejor_total - 1:
+            mejor_total, mejor, fin_d = t2, prueba, d2
+    final, puestos, d = dejar_solo(mejor)
+    if abs(final - mejor_total) > 1:   # el carrito no quedo como se midio: se reporta lo que de verdad hay
+        mejor_total, mejor = final, puestos
     fin = ""
     for p in d.get("appliedProductPromotions", []) or []:
         fin = (p.get("promotion", {}).get("endDate") or "")[:10] or fin
-    return base, actual, buenos, fin
+    return base, mejor_total, mejor, fin
 
 
 def leer_samsung(prod, cfg, estado):
@@ -230,6 +255,16 @@ def leer_samsung(prod, cfg, estado):
                 vid, color, pagina = skus[sku]
                 if vid not in venta or float(precio) < venta[vid][1]:
                     venta[vid] = (sku, float(precio), color, m.get("ctaType"), pagina)
+    # Codigos que Samsung publica en su propia pagina de la app (primera fuente de cupones).
+    try:
+        e, t = pedir("https://www.samsung.com/mx/apps/samsung-shop-app/")
+        plano = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t)) if e == 200 else ""
+        cosecha = estado.setdefault("cupones_cosechados", [])
+        for c in re.findall(r"cup[oó]n[^.]{0,80}?\b([A-Z][A-Z0-9_]{4,20})\b", plano):
+            if c not in cosecha and re.search(r"\d|_", c):
+                cosecha.append(c)
+    except Exception:
+        pass
     salida, cupones = [], cupones_candidatos(prod, estado)
     for vid, (sku, precio, color, cta, pagina) in venta.items():
         nota = "preventa" if cta == "preOrder" else ""

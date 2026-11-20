@@ -2,6 +2,8 @@
 # Los que no aplican se ignoran solos; los que encarecen se quitan. Agregar aqui cualquier codigo nuevo.
 FOLD8_20CLUB
 BF1000
+BFLIVESEM      # 10 %, aviso de la app Samsung Shop del 19-nov-2026 (vale al 22-nov); no se suma al de 20 %
+ECO_30
 FOLD8U_35CLUB
 PROMODESC_FOLD8U
 FOLD8U_20CLUB
