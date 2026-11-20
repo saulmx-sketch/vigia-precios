@@ -1,5 +1,7 @@
 {
  "avisado": {},
+ "caida_avisada": [],
+ "caida_desde": {},
  "ciego_avisado": false,
  "cupones_cosechados": [
   "BF26_5",
@@ -16,6 +18,9 @@
   "ECO_20",
   "ECO_30"
  ],
+ "diag_amazon": [
+  "11-20 09:24 busqueda 200 de 2319 bytes, reintento ok; busqueda ok"
+ ],
  "fallos": 0,
  "fallos_fuente": {
   "Amazon": 0,
@@ -30,19 +35,27 @@
  "vendedor_amazon": {
   "B0H76XJTG2": [
    34499.0,
-   "Amazon México"
+   "Amazon México",
+   false,
+   "fold8"
   ],
   "B0H773GGWG": [
    35999.2,
-   "Amazon México"
+   "Amazon México",
+   false,
+   "fold8"
   ],
   "B0H773PLWP": [
    38999.0,
-   "Amazon México"
+   "Amazon México",
+   false,
+   "fold8"
   ],
   "B0H779SQRZ": [
    38376.57,
-   "Amazon México"
+   "Amazon México",
+   false,
+   "fold8"
   ],
   "B0H92G9GNW": [
    38999.0,
