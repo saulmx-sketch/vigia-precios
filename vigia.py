@@ -37,7 +37,11 @@ MX = dt.timezone(dt.timedelta(hours=-6))
 
 BAJA_MINIMA = 300        # una tienda ya avisada vuelve a avisar solo si baja al menos esto
 DIAS_FRESCO = 3          # ofertas del foro mas viejas que esto no se avisan
-FALLOS_PARA_AVISAR = 8   # corridas seguidas con una fuente caida (unas 2 horas)
+# Horas sin una sola lectura buena antes de avisar que una fuente esta caida. Amazon rechaza a ratos las
+# peticiones que salen de la nube de GitHub (medido el 20 nov 2026: 3 de cada 4 corridas, con tramos de hasta
+# 3 horas); por eso a Amazon se le da mas margen y un rechazo suelto no abre aviso.
+HORAS_SIN_LEER = {"Amazon": 6}
+HORAS_SIN_LEER_DEFECTO = 2
 # Nunca interesan: accesorios, usados, importados declarados en el titulo.
 EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
            r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version)\b")
@@ -286,14 +290,58 @@ def leer_samsung(prod, cfg, estado):
     return salida
 
 
+def amazon_rechazo(e, t, senal):
+    """'' si la pagina trae datos (contiene la senal); si no, el tipo de rechazo, para diagnosticar.
+    Medido el 20 nov 2026 desde GitHub: 503 de ~1.7 KB (pagina de robots) y 200 de ~2.3 KB (pagina corta sin datos);
+    desde casa, con el mismo programa, la misma peticion da 200 con la pagina completa."""
+    if e == 200 and senal in t:
+        return ""
+    return "%s de %d bytes%s" % (e, len(t), " con captcha" if "captcha" in t.lower() else "")
+
+
+def ficha_amazon(t):
+    """Titulo, precio a pagar (None si esta agotado o sin precio), vendedor e importado, leidos de la ficha."""
+    tit = re.search(r'id="productTitle"[^>]*>(.*?)</span>', t, re.S)
+    titulo = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", tit.group(1)))).strip() if tit else ""
+    pr = re.search(r'apex-pricetopay-value.{0,800}?a-price-whole">([\d,]+).{0,200}?a-price-fraction">(\d\d)', t, re.S)
+    precio = float(pr.group(1).replace(",", "") + "." + pr.group(2)) if pr else None
+    v = re.search(r"Vendido por:?\s*(?:<[^>]*>\s*)*([^<]{2,60})<", t) or \
+        re.search(r'offer-display-feature-text-message">\s*([^<]{2,60})<', t)
+    vend = html.unescape(v.group(1)).strip() if v else ""
+    caja = re.sub(r"<[^>]+>", " ", t[t.find('id="desktop_buybox"'):][:60000]) if 'id="desktop_buybox"' in t else ""
+    return titulo, precio, vend, bool(re.search(SENAL_IMPORTADO, caja, re.I))
+
+
 def leer_amazon(prod, cfg, estado):
-    candidatas, visto = [], set()
+    """Busqueda de Amazon; si Amazon la rechaza, segunda via: las fichas ya conocidas del producto, una por una.
+    Cada corrida deja en visto.json (diag_amazon) que pagina respondio y como, para medir el rechazo en el tiempo."""
+    diag = []
+    try:
+        return _leer_amazon(prod, cfg, estado, diag)
+    finally:
+        d = estado.setdefault("diag_amazon", [])
+        d.append("%s %s" % (dt.datetime.now(MX).strftime("%m-%d %H:%M"), "; ".join(diag)))
+        del d[:-60]
+
+
+def _leer_amazon(prod, cfg, estado, diag):
+    memo = estado.setdefault("vendedor_amazon", {})
+    solo_oficial = prod["requisitos"].get("solo_vendedor_oficial")
+    candidatas, visto, fallo = [], set(), ""
     for q in cfg["consultas"]:
-        e, t = pedir("https://www.amazon.com.mx/s?k=" + q, pausa=1.0)
-        if e != 200 or "s-search-result" not in t:   # Amazon a veces responde 503 un momento: un solo reintento
-            e, t = pedir("https://www.amazon.com.mx/s?k=" + q, pausa=25.0)
-        if e != 200 or "s-search-result" not in t:
-            raise RuntimeError("Amazon respondio %s (%d bytes)%s" % (e, len(t), " con captcha" if "captcha" in t.lower() else ""))
+        url = "https://www.amazon.com.mx/s?k=" + q
+        e, t = pedir(url, pausa=1.0)
+        r = amazon_rechazo(e, t, "s-search-result")
+        if r:   # un reintento tras una pausa por si el rechazo es de un momento
+            e, t = pedir(url, pausa=25.0)
+            r2 = amazon_rechazo(e, t, "s-search-result")
+            diag.append("busqueda %s, reintento %s" % (r, r2 or "ok"))
+            r = r2
+        else:
+            diag.append("busqueda ok")
+        if r:
+            fallo = "Amazon respondio %s en la busqueda" % r
+            break
         marcas = list(re.finditer(r'data-asin="([A-Z0-9]{10})"[^>]{0,400}data-component-type="s-search-result"', t))
         for i, m in enumerate(marcas):
             bloque = t[m.end():marcas[i + 1].start() if i + 1 < len(marcas) else m.end() + 20000]
@@ -308,24 +356,43 @@ def leer_amazon(prod, cfg, estado):
             if variante(prod, titulo) and precio >= prod["piso"]:
                 visto.add(m.group(1))
                 candidatas.append((m.group(1), titulo, precio, "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""))
-    # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio.
-    memo, salida = estado.setdefault("vendedor_amazon", {}), []
-    for asin, titulo, precio, nota in candidatas:
-        url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
-        previo = memo.get(asin)
-        if previo and previo[0] == precio:
-            vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
-        else:
-            e, t = pedir(url, pausa=1.0)
-            v = re.search(r"Vendido por:?\s*(?:<[^>]*>\s*)*([^<]{2,60})<", t) or \
-                re.search(r'offer-display-feature-text-message">\s*([^<]{2,60})<', t)
-            vend = html.unescape(v.group(1)).strip() if v else ""
-            caja = re.sub(r"<[^>]+>", " ", t[t.find('id="desktop_buybox"'):][:60000]) if 'id="desktop_buybox"' in t else ""
-            importado = bool(re.search(SENAL_IMPORTADO, caja, re.I))
+    salida = []
+    if not fallo:
+        # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio.
+        for asin, titulo, precio, nota in candidatas:
+            url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
+            previo = memo.get(asin)
+            if previo and previo[0] == precio:
+                vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
+            else:
+                e, t = pedir(url, pausa=1.0)
+                diag.append("ficha %s %s" % (asin, amazon_rechazo(e, t, 'id="productTitle"') or "ok"))
+                _, _, vend, importado = ficha_amazon(t)
             if vend:
-                memo[asin] = [precio, vend, importado]
-        of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", nota, importado=importado)
-        if of and (vend or not prod["requisitos"].get("solo_vendedor_oficial")):
+                memo[asin] = [precio, vend, importado, prod["id"]]
+            of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", nota, importado=importado)
+            if of and (vend or not solo_oficial):
+                salida.append(of)
+        return salida
+    # Segunda via: el buscador rechazo; se lee directo la ficha de cada articulo ya conocido de este producto.
+    # Todo o nada: si una ficha tambien se rechaza, la fuente falla y la tabla conserva el ultimo dato de Amazon.
+    conocidas = [a for a, v in memo.items() if len(v) < 4 or v[3] == prod["id"]]
+    if not conocidas:
+        raise RuntimeError(fallo)
+    for asin in conocidas:
+        url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
+        e, t = pedir(url, pausa=2.0)
+        r = amazon_rechazo(e, t, 'id="productTitle"')
+        diag.append("ficha %s %s" % (asin, r or "ok"))
+        if r:
+            raise RuntimeError("%s y %s en la ficha %s" % (fallo, r, asin))
+        titulo, precio, vend, importado = ficha_amazon(t)
+        if precio is None or (prod.get("marca") and not re.search(prod["marca"], titulo, re.I)):
+            continue   # agotado o sin precio a la vista: hoy no se ofrece
+        if vend:
+            memo[asin] = [precio, vend, importado, prod["id"]]
+        of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", "", importado=importado)
+        if of and (vend or not solo_oficial):
             salida.append(of)
     return salida
 
@@ -524,6 +591,18 @@ def selftest():
     o = oferta(libre, "Amazon", "Samsung Galaxy Z Fold8 512GB", 20000, "u", "Tienda X", importado=True)
     assert o["precio"] == 23400.0 and "importado" in o["nota"], o
     assert "tercero" in oferta(libre, "Elektra", "Samsung Galaxy Z Fold8 512GB", 26999, "u", "Systore")["nota"]
+    # Amazon: rechazos medidos desde GitHub y lectura de la ficha (estructura real de una ficha del 20 nov 2026)
+    assert amazon_rechazo(503, "x" * 1669, "s-search-result") == "503 de 1669 bytes"
+    assert amazon_rechazo(200, "x" * 2321, "s-search-result") == "200 de 2321 bytes"
+    assert amazon_rechazo(200, '<div data-component-type="s-search-result">', "s-search-result") == ""
+    ficha = ('<span id="productTitle" class="a-size-medium">  Samsung Galaxy Z Fold8 Crema 512GB </span>'
+             '<span class="a-price aok-align-center priceToPay apex-pricetopay-value" data-a-size="xl">'
+             '<span class="a-offscreen"> </span><span aria-hidden="true"><span class="a-price-symbol">$</span>'
+             '<span class="a-price-whole">34,499<span class="a-price-decimal">.</span></span>'
+             '<span class="a-price-fraction">00</span></span></span>'
+             '<div id="desktop_buybox"><span>Vendido por</span> <span>Amazon México</span></div>')
+    assert ficha_amazon(ficha) == ("Samsung Galaxy Z Fold8 Crema 512GB", 34499.0, "Amazon México", False), ficha_amazon(ficha)
+    assert ficha_amazon(ficha.replace("apex-pricetopay-value", ""))[1] is None   # agotado: sin precio a pagar
     print("selftest OK: %d titulos, topes, vendedor oficial e importacion" % len(casos))
     return 0
 
@@ -545,11 +624,19 @@ def main():
     fallos, avisado = estado.setdefault("fallos_fuente", {}), estado.setdefault("avisado", {})
     vistos = estado.setdefault("vistos", {})
 
+    caidas, avisadas = estado.setdefault("caida_desde", {}), estado.setdefault("caida_avisada", [])
+
     def fuente(nombre, funcion):
         try:
             r = funcion()
-            if fallos.get(nombre, 0) >= FALLOS_PARA_AVISAR and not seco:
-                abrir_issue("El vigia volvio a leer %s" % nombre, "La fuente %s responde de nuevo." % nombre)
+            if nombre in avisadas and not seco:
+                try:
+                    abrir_issue("El vigia volvio a leer %s" % nombre, "La fuente %s responde de nuevo (sin leerse desde %s UTC)."
+                                % (nombre, caidas.get(nombre, "?")))
+                    avisadas.remove(nombre)
+                except Exception as ex2:
+                    print("   no se pudo abrir el aviso:", ex2)
+            caidas.pop(nombre, None)
             fallos[nombre] = 0
             estado.setdefault("ultimo_error", {}).pop(nombre, None)
             print("fuente ok    %-10s %d" % (nombre, len(r)))
@@ -557,10 +644,18 @@ def main():
         except Exception as ex:
             fallos[nombre] = fallos.get(nombre, 0) + 1
             estado.setdefault("ultimo_error", {})[nombre] = str(ex)[:160]   # queda en visto.json para diagnosticar
-            print("fuente FALLA %-10s (%d seguidas) %s" % (nombre, fallos[nombre], str(ex)[:150]))
-            if fallos[nombre] == FALLOS_PARA_AVISAR and not seco:
-                abrir_issue("El vigia no puede leer %s desde hace 2 horas" % nombre,
-                            "Ultimo error: %s\n\nMientras siga asi no vera precios de esa fuente; las demas siguen vigiladas." % str(ex)[:300])
+            desde = caidas.setdefault(nombre, ahora.isoformat(timespec="minutes"))
+            horas = (ahora - dt.datetime.fromisoformat(desde)).total_seconds() / 3600
+            print("fuente FALLA %-10s (%d seguidas, %.1f h sin leer) %s" % (nombre, fallos[nombre], horas, str(ex)[:150]))
+            limite = HORAS_SIN_LEER.get(nombre, HORAS_SIN_LEER_DEFECTO)
+            if horas >= limite and nombre not in avisadas and not seco:
+                try:
+                    abrir_issue("El vigia no puede leer %s desde hace %d horas" % (nombre, int(horas)),
+                                "Ultimo error: %s\n\nCorridas seguidas con falla: %d. Mientras siga asi la tabla conserva el ultimo "
+                                "precio leido de esa fuente; las demas siguen vigiladas." % (str(ex)[:300], fallos[nombre]))
+                    avisadas.append(nombre)
+                except Exception as ex2:
+                    print("   no se pudo abrir el aviso:", ex2)
             return None
 
     # El foro va primero: de ahi salen codigos de cupon nuevos que Samsung prueba en esta misma corrida.
