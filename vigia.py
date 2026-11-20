@@ -255,8 +255,10 @@ def leer_amazon(prod, cfg, estado):
     candidatas, visto = [], set()
     for q in cfg["consultas"]:
         e, t = pedir("https://www.amazon.com.mx/s?k=" + q, pausa=1.0)
+        if e != 200 or "s-search-result" not in t:   # Amazon a veces responde 503 un momento: un solo reintento
+            e, t = pedir("https://www.amazon.com.mx/s?k=" + q, pausa=25.0)
         if e != 200 or "s-search-result" not in t:
-            raise RuntimeError("Amazon respondio %s (%d bytes)" % (e, len(t)))
+            raise RuntimeError("Amazon respondio %s (%d bytes)%s" % (e, len(t), " con captcha" if "captcha" in t.lower() else ""))
         marcas = list(re.finditer(r'data-asin="([A-Z0-9]{10})"[^>]{0,400}data-component-type="s-search-result"', t))
         for i, m in enumerate(marcas):
             bloque = t[m.end():marcas[i + 1].start() if i + 1 < len(marcas) else m.end() + 20000]
@@ -514,10 +516,12 @@ def main():
             if fallos.get(nombre, 0) >= FALLOS_PARA_AVISAR and not seco:
                 abrir_issue("El vigia volvio a leer %s" % nombre, "La fuente %s responde de nuevo." % nombre)
             fallos[nombre] = 0
+            estado.setdefault("ultimo_error", {}).pop(nombre, None)
             print("fuente ok    %-10s %d" % (nombre, len(r)))
             return r
         except Exception as ex:
             fallos[nombre] = fallos.get(nombre, 0) + 1
+            estado.setdefault("ultimo_error", {})[nombre] = str(ex)[:160]   # queda en visto.json para diagnosticar
             print("fuente FALLA %-10s (%d seguidas) %s" % (nombre, fallos[nombre], str(ex)[:150]))
             if fallos[nombre] == FALLOS_PARA_AVISAR and not seco:
                 abrir_issue("El vigia no puede leer %s desde hace 2 horas" % nombre,
