@@ -18,7 +18,7 @@
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 2,
+  "Amazon": 3,
   "Costco": 0,
   "Elektra": 0,
   "Foro": 0,
@@ -27,7 +27,7 @@
  },
  "sembrado": true,
  "ultimo_error": {
-  "Amazon": "Amazon respondio 503 (1669 bytes)"
+  "Amazon": "Amazon respondio 200 (2321 bytes)"
  },
  "vendedor_amazon": {
   "B0H76XJTG2": [
