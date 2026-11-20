@@ -1,0 +1,53 @@
+{
+ "_como_usar": "Un bloque por producto vigilado. Guia completa: skill compra-estrategica, archivo vigia-precios.md.",
+ "productos": [
+  {
+   "id": "fold8",
+   "nombre": "Galaxy Z Fold8",
+   "marca": "samsung",
+   "patron": "fold\\s*-?\\s*8|zfold8|fold\\s*ultra\\s*8",
+   "excluir": "",
+   "piso": 12000,
+   "fracciones": [0.411, 0.449, 0.486],
+   "topes_fijos": {},
+   "requisitos": {
+    "_regla": "Saul 2026-11-19: deben ser ventas con garantia y de samsung mx, no me sirve un tercero que vende importados",
+    "solo_vendedor_oficial": true,
+    "permite_importados": false,
+    "importacion_estimada": 0.2
+   },
+   "variantes": [
+    {"id": "ultra-1tb", "nombre": "Fold8 Ultra 1 TB", "todas": ["ultra", "\\b1\\s*tb\\b|1024\\s*gb"], "lista": 63499},
+    {"id": "ultra-512", "nombre": "Fold8 Ultra 512 GB", "todas": ["ultra", "512"], "lista": 53499},
+    {"id": "ultra", "nombre": "Fold8 Ultra (capacidad sin dato)", "todas": ["ultra"], "ninguna": ["256"], "lista": 53499},
+    {"id": "normal-1tb", "nombre": "Fold8 1 TB", "todas": ["\\b1\\s*tb\\b|1024\\s*gb"], "ninguna": ["ultra"], "lista": 57600},
+    {"id": "normal-512", "nombre": "Fold8 512 GB", "todas": ["512"], "ninguna": ["ultra"], "lista": 48499},
+    {"id": "normal", "nombre": "Fold8 (capacidad sin dato)", "ninguna": ["ultra", "256"], "lista": 48499}
+   ],
+   "tiendas": {
+    "Samsung": {
+     "cupones": "cupones_samsung.txt",
+     "skus": {
+      "SM-F976BZKMLTM": ["ultra-512", "Grafito", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F976BZVMLTM": ["ultra-512", "Violeta", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F976BDGMLTM": ["ultra-512", "Verde", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F976BZKVLTM": ["ultra-1tb", "Grafito", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F976BZVVLTM": ["ultra-1tb", "Violeta", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F976BDGVLTM": ["ultra-1tb", "Verde", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
+      "SM-F971BZKMLTM": ["normal-512", "Grafito", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
+      "SM-F971BLVMLTM": ["normal-512", "Lavanda", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
+      "SM-F971BZWMLTM": ["normal-512", "Crema", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
+      "SM-F971BZGMLTM": ["normal-512", "Verde", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"]
+     }
+    },
+    "Amazon": {"consultas": ["samsung+galaxy+z+fold8+ultra", "samsung+galaxy+z+fold8+512"]},
+    "Costco": {"consulta": "galaxy z fold"},
+    "Elektra": {"consulta": "galaxy z fold8"},
+    "Liverpool": {"consulta": "galaxy+z+fold8"}
+   },
+   "foro": {
+    "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]
+   }
+  }
+ ]
+}

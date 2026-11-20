@@ -1,10 +1,14 @@
-"""Vigia de precios de primera fuente. Lee directamente las tiendas (Samsung con prueba de cupones en un
-carrito anonimo, Amazon, Costco, Elektra, Liverpool) y, como red de respaldo para las tiendas que rechazan
-lectores automaticos (Walmart, Sam's, Coppel...), los feeds publicos del foro Promodescuentos.
-Abre un aviso (issue de GitHub, que llega por correo) cuando un modelo vigilado baja de su tope.
+"""Vigia de precios de primera fuente ("un Keepa propio, de varias tiendas").
 
-Solo biblioteca estandar. Corre en GitHub Actions cada 15 minutos.
-Prueba local:  python vigia.py --seco
+Que hace, cada 15 minutos, sin tokens y sin la computadora de Saul:
+  1. Lee directamente las tiendas configuradas por producto en productos.json (Samsung con prueba de cupones
+     en un carrito anonimo, Amazon, Costco, Elektra, Liverpool).
+  2. Aplica los requisitos del producto (quien vende, importados si o no, cargo de importacion estimado).
+  3. Compara contra los topes de cada variante y abre un aviso (issue de GitHub = correo) si baja de su tope.
+  4. Guarda lo leido en precios.json e historial.csv (el historial de precios propio).
+  5. De respaldo, lee los feeds del foro Promodescuentos para las tiendas que rechazan lectores automaticos.
+
+Solo biblioteca estandar.  Prueba local:  python vigia.py --seco      Autoprueba:  python vigia.py --selftest
 """
 import csv
 import datetime as dt
@@ -25,60 +29,35 @@ import xml.etree.ElementTree as ET
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ESTADO = os.path.join(AQUI, "visto.json")
 PRECIOS = os.path.join(AQUI, "precios.json")
-HISTORIAL = os.path.join(AQUI, "historial.csv")
-CUPONES = os.path.join(AQUI, "cupones_samsung.txt")
+HISTORIAL = os.path.join(AQUI, "historial_precios.csv")
+CONFIG = os.path.join(AQUI, "productos.json")
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/130.0.0.0 Safari/537.36")
 MX = dt.timezone(dt.timedelta(hours=-6))
 
-# ---------------------------------------------------------------------------------------------
-# QUE SE VIGILA Y CON QUE TOPES
-# Cada modelo tiene topes propios: el mismo porcentaje sobre SU precio de lista en Samsung.
-#   ganga = 41 % de lista, comprar = 45 %, tope (mirar) = 48.6 %.
-# Para cambiar un tope a mano, poner la cifra en TOPES_FIJOS, p. ej. {("fold8", 512): (19000, 21000, 23000)}.
-# ---------------------------------------------------------------------------------------------
-LISTA = {("ultra", 512): 53499, ("ultra", 1024): 63499, ("fold8", 512): 48499, ("fold8", 1024): 57600}
-FRACCIONES = (0.411, 0.449, 0.486)
-TOPES_FIJOS = {}
-PISO = 12000            # menos que esto no es el telefono (fundas, micas, errores)
-BAJA_MINIMA = 300       # una tienda ya avisada vuelve a avisar solo si baja al menos esto
+BAJA_MINIMA = 300        # una tienda ya avisada vuelve a avisar solo si baja al menos esto
+DIAS_FRESCO = 3          # ofertas del foro mas viejas que esto no se avisan
+FALLOS_PARA_AVISAR = 8   # corridas seguidas con una fuente caida (unas 2 horas)
+# Nunca interesan: accesorios, usados, importados declarados en el titulo.
 EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
            r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version)\b")
-# REGLA DE SAUL (2026-11-19): "deben ser ventas con garantia y de samsung mx, no me sirve un tercero que vende
-# importados". Solo cuenta lo que vende Samsung o la propia tienda como distribuidor autorizado en Mexico.
-VENDEDOR_OK = {
-    "Amazon": r"^\s*(amazon(\s+m[eé]xico)?|samsung(\s+m[eé]xico)?)\s*$",   # no terceros ni "Remates de Almacen"
+# Quien cuenta como vendedor oficial en cada tienda cuando el producto pide "solo_vendedor_oficial".
+# {marca} se cambia por la marca del producto. Tienda que no aparece aqui = la tienda vende ella misma.
+VENDEDOR_OFICIAL = {
+    "Amazon": r"^\s*(amazon(\s+m[eé]xico)?|{marca}(\s+m[eé]xico)?)\s*$",   # no terceros ni "Remates de Almacen"
     "Elektra": r"^\s*elektra\s*$",                                        # no vendedores del marketplace
-    "Mercado Libre": r"samsung",                                          # solo la tienda oficial de Samsung
 }
-# En el foro solo se atienden ofertas de tiendas establecidas en Mexico (no importadores ni revendedores).
+SENAL_IMPORTADO = r"importaci[oó]n|desde Estados Unidos|Amazon Estados Unidos|Amazon Global|Env[ií]o internacional"
+# En el foro solo se atienden tiendas establecidas en Mexico (no importadores ni revendedores).
 TIENDAS_FORO = (r"samsung|walmart|bodega|sam'?s|amazon|mercado\s*libre|liverpool|suburbia|coppel|costco|elektra|sears|"
-                r"sanborns|palacio|telcel|at&t|office\s*depot|best\s*buy|claro\s*shop|chedraui|soriana|heb|doto")
-PATRON = r"fold\s*-?\s*8|zfold8|fold\s*ultra\s*8"
-
+                r"sanborns|palacio|telcel|at&t|office\s*depot|best\s*buy|claro\s*shop|chedraui|soriana|heb|doto|huawei|"
+                r"lenovo|apple|xiaomi|motorola|sony|lg\b|hp\b|dell")
 BANCOS_PROPIOS = {"BBVA": r"bbva|bancomer", "Revolut": r"revolut", "PayPal": r"paypal"}
 BANCOS_AJENOS = {"Banorte": r"banorte", "Santander": r"santander", "Banamex": r"banamex|citibanamex",
                  "HSBC": r"hsbc", "Scotiabank": r"scotiabank", "Amex": r"amex|american\s*express",
                  "Inbursa": r"inbursa", "Afirme": r"afirme", "BanCoppel": r"bancoppel",
                  "Mercado Pago": r"mercado\s*pago", "Nu": r"\bnu\b", "Hey Banco": r"hey\s*banco"}
-
-FEEDS = ["https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
-         "https://www.promodescuentos.com/rss/grupo/samsung",
-         "https://www.promodescuentos.com/rss/grupo/celulares",
-         "https://www.promodescuentos.com/rss/tendencias",
-         "https://www.promodescuentos.com/rss/todas"]
-DIAS_FRESCO = 3
-FALLOS_PARA_AVISAR = 8   # corridas seguidas con una fuente caida (8 x 15 min = 2 horas)
-
 SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v2/mx"
-SAMSUNG_SKUS = {
-    "SM-F976BZKMLTM": ("ultra", 512, "Grafito"), "SM-F976BZVMLTM": ("ultra", 512, "Violeta"),
-    "SM-F976BDGMLTM": ("ultra", 512, "Verde"), "SM-F976BZKVLTM": ("ultra", 1024, "Grafito"),
-    "SM-F976BZVVLTM": ("ultra", 1024, "Violeta"), "SM-F976BDGVLTM": ("ultra", 1024, "Verde"),
-    "SM-F971BZKMLTM": ("fold8", 512, "Grafito"), "SM-F971BLVMLTM": ("fold8", 512, "Lavanda"),
-    "SM-F971BZWMLTM": ("fold8", 512, "Crema"), "SM-F971BZGMLTM": ("fold8", 512, "Verde"),
-}
-NOMBRE = {"ultra": "Fold8 Ultra", "fold8": "Fold8"}
 
 
 # ------------------------------------------------------------------------------- utilidades
@@ -112,52 +91,83 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0)
         return e.code, b.decode("utf-8", "replace")
 
 
-def topes(modelo, cap):
-    clave = (modelo, cap if cap in (512, 1024) else 512)
-    if clave in TOPES_FIJOS:
-        return TOPES_FIJOS[clave]
-    lista = LISTA[clave]
-    return tuple(int(round(lista * f / 100.0)) * 100 for f in FRACCIONES)
+def cargar_config(ruta=CONFIG):
+    with open(ruta, encoding="utf-8") as f:
+        prods = json.load(f)["productos"]
+    for p in prods:  # validacion: un producto mal escrito aborta con mensaje claro, no vigila a medias
+        for campo in ("id", "nombre", "patron", "piso", "fracciones", "variantes", "tiendas", "requisitos"):
+            if campo not in p:
+                raise SystemExit("productos.json: al producto %s le falta '%s'" % (p.get("id", "?"), campo))
+        for v in p["variantes"]:
+            if "id" not in v or "nombre" not in v or "lista" not in v:
+                raise SystemExit("productos.json: variante incompleta en %s: %s" % (p["id"], v))
+        re.compile(p["patron"])
+    return prods
 
 
-def clasifica(titulo):
-    """(modelo, capacidad) si el titulo es un Fold8 nuevo; None si no interesa."""
-    if not re.search(PATRON, titulo, re.I) or re.search(EXCLUIR, titulo, re.I):
+def variante(prod, titulo):
+    """La variante del producto que casa con el titulo, o None si no interesa."""
+    if not re.search(prod["patron"], titulo, re.I) or re.search(EXCLUIR, titulo, re.I):
         return None
-    modelo = "ultra" if re.search(r"ultra", titulo, re.I) else "fold8"
-    if re.search(r"\b1\s*tb\b|1024\s*gb", titulo, re.I):
-        cap = 1024
-    elif re.search(r"512", titulo):
-        cap = 512
-    elif re.search(r"256", titulo):
-        cap = 256
-    else:
-        cap = None
-    return modelo, cap
+    if prod.get("excluir") and re.search(prod["excluir"], titulo, re.I):
+        return None
+    for v in prod["variantes"]:
+        if all(re.search(x, titulo, re.I) for x in v.get("todas", [])) and \
+           not any(re.search(x, titulo, re.I) for x in v.get("ninguna", [])):
+            return v
+    return None
 
 
-def cap_txt(cap):
-    return {1024: "1 TB", 512: "512 GB", 256: "256 GB"}.get(cap, "capacidad sin dato")
+def var_por_id(prod, vid):
+    return next(v for v in prod["variantes"] if v["id"] == vid)
 
 
-def nivel(precio, modelo, cap):
-    g, c, t = topes(modelo, cap)
+def topes(prod, var):
+    fijos = prod.get("topes_fijos", {}).get(var["id"])
+    if fijos:
+        return tuple(fijos)
+    return tuple(int(round(var["lista"] * f / 100.0)) * 100 for f in prod["fracciones"])
+
+
+def nivel(precio, prod, var):
+    g, c, t = topes(prod, var)
     return "GANGA" if precio <= g else "COMPRAR" if precio <= c else "MIRAR" if precio <= t else None
 
 
-def oferta(tienda, titulo, precio, url, vendedor="", nota=""):
-    cl = clasifica(titulo)
-    if not cl or precio is None or precio < PISO or cl[1] == 256:
+def vendedor_oficial(prod, tienda, vendedor):
+    regla = VENDEDOR_OFICIAL.get(tienda)
+    if not regla:
+        return True
+    return bool(re.search(regla.replace("{marca}", re.escape(prod.get("marca", "zzzz"))), vendedor or "", re.I))
+
+
+def oferta(prod, tienda, titulo, precio, url, vendedor="", nota="", importado=False, var=None):
+    """Arma la oferta ya filtrada por los requisitos del producto; None si no cuenta."""
+    var = var or variante(prod, titulo)
+    req = prod["requisitos"]
+    if not var or precio is None or precio < prod["piso"]:
         return None
-    return {"tienda": tienda, "modelo": cl[0], "cap": cl[1], "precio": float(precio), "url": url,
-            "vendedor": vendedor, "nota": nota, "titulo": titulo.strip()[:140]}
+    oficial = vendedor_oficial(prod, tienda, vendedor)
+    if req.get("solo_vendedor_oficial") and not oficial:
+        return None
+    if importado and not req.get("permite_importados"):
+        return None
+    paga = float(precio)
+    if importado:  # el cargo real solo se ve en el carrito o al pagar: aqui va estimado y se dice
+        est = float(req.get("importacion_estimada", 0.2))
+        paga = round(paga * (1 + est), 2)
+        nota = "; ".join(x for x in [nota, "importado: ficha ${:,.0f} + cargo de importacion estimado {:.0f} % (sin leer)".format(precio, est * 100)] if x)
+    elif not oficial:
+        nota = "; ".join(x for x in [nota, "vendedor tercero"] if x)
+    return {"prod": prod["id"], "var": var["id"], "nombre": var["nombre"], "tienda": tienda, "precio": paga,
+            "url": url, "vendedor": vendedor, "nota": nota, "titulo": titulo.strip()[:140]}
 
 
 # ------------------------------------------------------------------------------- tiendas
-def cupones_candidatos(estado):
+def cupones_candidatos(prod, estado):
     lista = []
     try:
-        with open(CUPONES, encoding="utf-8") as f:
+        with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
             lista = [l.split("#")[0].strip() for l in f if l.split("#")[0].strip()]
     except Exception:
         pass
@@ -206,23 +216,22 @@ def samsung_carrito(sku, cupones):
     return base, actual, buenos, fin
 
 
-def leer_samsung(estado):
+def leer_samsung(prod, cfg, estado):
+    skus = cfg["skus"]
     e, t = pedir("https://searchapi.samsung.com/v6/front/b2c/product/card/detail/newhybris?siteCode=mx&modelList="
-                 + ",".join(SAMSUNG_SKUS) + "&commonCodeYN=N&saleSkuYN=N&onlyRequestSkuYN=Y&keySummaryYN=N&shopSiteCode=mx")
+                 + ",".join(skus) + "&commonCodeYN=N&saleSkuYN=N&onlyRequestSkuYN=Y&keySummaryYN=N&shopSiteCode=mx")
     if e != 200:
         raise RuntimeError("catalogo de Samsung respondio %s" % e)
     venta = {}
-    for prod in json.loads(t)["response"]["resultData"]["productList"]:
-        for m in prod.get("modelList", []):
+    for item in json.loads(t)["response"]["resultData"]["productList"]:
+        for m in item.get("modelList", []):
             sku, precio = m.get("modelCode"), m.get("promotionPrice") or m.get("price")
-            if sku in SAMSUNG_SKUS and precio and m.get("ctaType") in ("inStock", "preOrder", "lowStock"):
-                modelo, cap, color = SAMSUNG_SKUS[sku]
-                previo = venta.get((modelo, cap))
-                if not previo or float(precio) < previo[1]:
-                    venta[(modelo, cap)] = (sku, float(precio), color, m.get("ctaType"))
-    salida, cupones = [], cupones_candidatos(estado)
-    for (modelo, cap), (sku, precio, color, cta) in venta.items():
-        pagina = "https://www.samsung.com/mx/smartphones/galaxy-z-fold8%s/buy/" % ("-ultra" if modelo == "ultra" else "")
+            if sku in skus and precio and m.get("ctaType") in ("inStock", "preOrder", "lowStock"):
+                vid, color, pagina = skus[sku]
+                if vid not in venta or float(precio) < venta[vid][1]:
+                    venta[vid] = (sku, float(precio), color, m.get("ctaType"), pagina)
+    salida, cupones = [], cupones_candidatos(prod, estado)
+    for vid, (sku, precio, color, cta, pagina) in venta.items():
         nota = "preventa" if cta == "preOrder" else ""
         try:
             base, final, buenos, fin = samsung_carrito(sku, cupones)
@@ -233,16 +242,18 @@ def leer_samsung(estado):
             precio = final
         except Exception as ex:
             nota = "precio de pagina, cupones sin probar (%s)" % str(ex)[:60]
-        salida.append({"tienda": "Samsung", "modelo": modelo, "cap": cap, "precio": precio, "url": pagina,
-                       "vendedor": "Samsung", "nota": nota, "titulo": "Galaxy Z %s %s %s" % (NOMBRE[modelo], cap_txt(cap), color)})
+        var = var_por_id(prod, vid)
+        of = oferta(prod, "Samsung", "%s %s" % (var["nombre"], color), precio, pagina, "Samsung", nota, var=var)
+        if of:
+            salida.append(of)
     if not salida:
         raise RuntimeError("Samsung no listo ningun modelo a la venta")
     return salida
 
 
-def leer_amazon(estado):
-    salida, visto = [], set()
-    for q in ("samsung+galaxy+z+fold8+ultra", "samsung+galaxy+z+fold8+512"):
+def leer_amazon(prod, cfg, estado):
+    candidatas, visto = [], set()
+    for q in cfg["consultas"]:
         e, t = pedir("https://www.amazon.com.mx/s?k=" + q, pausa=1.0)
         if e != 200 or "s-search-result" not in t:
             raise RuntimeError("Amazon respondio %s (%d bytes)" % (e, len(t)))
@@ -254,38 +265,37 @@ def leer_amazon(estado):
             if not tit or not pr or m.group(1) in visto:
                 continue
             titulo = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", tit.group(1)))).strip()
-            if not re.search(r"samsung", titulo, re.I):
+            precio = float(pr.group(1).replace(",", ""))
+            if prod.get("marca") and not re.search(prod["marca"], titulo, re.I):
                 continue
-            of = oferta("Amazon", titulo, float(pr.group(1).replace(",", "")),
-                        "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % m.group(1),
-                        nota="con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else "")
-            if of:
+            if variante(prod, titulo) and precio >= prod["piso"]:
                 visto.add(m.group(1))
-                of["asin"] = m.group(1)
-                salida.append(of)
-    # Quien vende solo se ve en la ficha. Se recuerda por articulo y precio para no pedir la ficha en cada corrida.
-    memo, buenas = estado.setdefault("vendedor_amazon", {}), []
-    for of in salida:
-        previo = memo.get(of["asin"])
-        if previo and previo[0] == of["precio"]:
-            vend = previo[1]
+                candidatas.append((m.group(1), titulo, precio, "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""))
+    # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio.
+    memo, salida = estado.setdefault("vendedor_amazon", {}), []
+    for asin, titulo, precio, nota in candidatas:
+        url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
+        previo = memo.get(asin)
+        if previo and previo[0] == precio:
+            vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
         else:
-            e, t = pedir(of["url"], pausa=1.0)
+            e, t = pedir(url, pausa=1.0)
             v = re.search(r"Vendido por:?\s*(?:<[^>]*>\s*)*([^<]{2,60})<", t) or \
                 re.search(r'offer-display-feature-text-message">\s*([^<]{2,60})<', t)
             vend = html.unescape(v.group(1)).strip() if v else ""
+            caja = re.sub(r"<[^>]+>", " ", t[t.find('id="desktop_buybox"'):][:60000]) if 'id="desktop_buybox"' in t else ""
+            importado = bool(re.search(SENAL_IMPORTADO, caja, re.I))
             if vend:
-                memo[of["asin"]] = [of["precio"], vend]
-        of["vendedor"] = vend or "sin confirmar"
-        if re.search(VENDEDOR_OK["Amazon"], vend, re.I):
-            buenas.append(of)
-    for asin in [a for a in memo if a not in {o["asin"] for o in salida}]:
-        del memo[asin]
-    return buenas
+                memo[asin] = [precio, vend, importado]
+        of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", nota, importado=importado)
+        if of and (vend or not prod["requisitos"].get("solo_vendedor_oficial")):
+            salida.append(of)
+    return salida
 
 
-def leer_costco(estado):
-    e, t = pedir("https://www.costco.com.mx/rest/v2/mexico/products/search?query=galaxy%20z%20fold&fields=FULL&lang=es_MX&curr=MXN")
+def leer_costco(prod, cfg, estado):
+    e, t = pedir("https://www.costco.com.mx/rest/v2/mexico/products/search?query=%s&fields=FULL&lang=es_MX&curr=MXN"
+                 % urllib.parse.quote(cfg["consulta"]))
     if e != 200:
         raise RuntimeError("Costco respondio %s" % e)
     salida = []
@@ -296,14 +306,14 @@ def leer_costco(estado):
         cup = (p.get("couponDiscount") or {})
         precio = base - (cup.get("discountValue") or 0)
         nota = "descuento de tienda ${:,.0f} hasta {}".format(cup["discountValue"], (cup.get("discountEndDate") or "")[:10]) if cup.get("discountValue") else ""
-        of = oferta("Costco", p.get("name", ""), precio, "https://www.costco.com.mx" + p.get("url", ""), "Costco (pide membresia)", nota)
+        of = oferta(prod, "Costco", p.get("name", ""), precio, "https://www.costco.com.mx" + p.get("url", ""), "Costco (pide membresia)", nota)
         if of:
             salida.append(of)
     return salida
 
 
-def leer_elektra(estado):
-    e, t = pedir("https://www.elektra.mx/api/catalog_system/pub/products/search?ft=galaxy%20z%20fold8&_from=0&_to=49")
+def leer_elektra(prod, cfg, estado):
+    e, t = pedir("https://www.elektra.mx/api/catalog_system/pub/products/search?ft=%s&_from=0&_to=49" % urllib.parse.quote(cfg["consulta"]))
     if e not in (200, 206):
         raise RuntimeError("Elektra respondio %s" % e)
     salida = []
@@ -311,15 +321,15 @@ def leer_elektra(estado):
         for it in p.get("items", []):
             for s in it.get("sellers", []):
                 co = s.get("commertialOffer", {})
-                if co.get("AvailableQuantity", 0) > 0 and co.get("Price") and re.search(VENDEDOR_OK["Elektra"], s.get("sellerName", ""), re.I):
-                    of = oferta("Elektra", p.get("productName", ""), co["Price"], p.get("link", ""), s.get("sellerName", ""))
+                if co.get("AvailableQuantity", 0) > 0 and co.get("Price"):
+                    of = oferta(prod, "Elektra", p.get("productName", ""), co["Price"], p.get("link", ""), s.get("sellerName", ""))
                     if of:
                         salida.append(of)
     return salida
 
 
-def leer_liverpool(estado):
-    e, t = pedir("https://www.liverpool.com.mx/tienda?s=galaxy+z+fold8")
+def leer_liverpool(prod, cfg, estado):
+    e, t = pedir("https://www.liverpool.com.mx/tienda?s=" + cfg["consulta"])
     if e != 200 or "-price" not in t:
         raise RuntimeError("Liverpool respondio %s (%d bytes)" % (e, len(t)))
     salida = []
@@ -328,16 +338,17 @@ def leer_liverpool(estado):
              re.search(r"\$(?:<!-- -->)?([\d,]+)", m.group(3))
         if not pr:
             continue
-        of = oferta("Liverpool", html.unescape(m.group(1)), float(pr.group(1).replace(",", "")),
+        of = oferta(prod, "Liverpool", html.unescape(m.group(1)), float(pr.group(1).replace(",", "")),
                     "https://www.liverpool.com.mx/tienda/pdp/p/" + m.group(2), "Liverpool",
-                    "la tarjeta no dice capacidad: es el precio mas bajo de sus variantes")
+                    "es el precio mas bajo de sus variantes")
         if of:
             salida.append(of)
     return salida
 
 
-TIENDAS = [("Samsung", leer_samsung), ("Amazon", leer_amazon), ("Costco", leer_costco),
-           ("Elektra", leer_elektra), ("Liverpool", leer_liverpool)]
+# Para sumar una tienda: correr sondeo.py, escribir leer_<tienda>(prod, cfg, estado) y registrarla aqui.
+LECTORES = {"Samsung": leer_samsung, "Amazon": leer_amazon, "Costco": leer_costco,
+            "Elektra": leer_elektra, "Liverpool": leer_liverpool}
 
 
 # ------------------------------------------------------------------------------- foro (respaldo)
@@ -365,10 +376,15 @@ def bancos(texto):
     return "sin banco", True
 
 
-def leer_foro(estado):
+def leer_foro(prods, estado):
+    feeds = []
+    for p in prods:
+        for f in p.get("foro", {}).get("feeds", []):
+            if f not in feeds:
+                feeds.append(f)
     items = {}
-    for url in FEEDS:
-        e, t = pedir(url)
+    for f in feeds:
+        e, t = pedir("https://www.promodescuentos.com/rss/" + f)
         if e != 200:
             continue
         for it in ET.fromstring(t.encode("utf-8")).iter("item"):
@@ -379,10 +395,10 @@ def leer_foro(estado):
                 if h.tag.endswith("merchant"):
                     d["tienda"], d["precio_txt"] = h.attrib.get("name", ""), h.attrib.get("price", "")
             items.setdefault(d["guid"], d)
-    if not items:
+    if feeds and not items:
         raise RuntimeError("ningun feed del foro respondio")
     cosecha = estado.setdefault("cupones_cosechados", [])
-    for d in items.values():  # codigos de cupon que la gente publica para Samsung: se prueban en el carrito real
+    for d in items.values():  # codigos de cupon publicados para Samsung: se prueban en el carrito real
         if re.search(r"samsung", d["tienda"], re.I):
             for c in re.findall(r"\b[A-Z][A-Z0-9]{2,}(?:_[A-Z0-9]+)+\b|\b[A-Z]{3,}\d{2,}[A-Z0-9]*\b", limpio(d["descripcion"], 3000)):
                 if c not in cosecha and 5 <= len(c) <= 22:
@@ -391,28 +407,33 @@ def leer_foro(estado):
     return list(items.values())
 
 
-def aviso_foro(it):
-    cl = clasifica(it["titulo"])
-    if not cl or cl[1] == 256 or not re.search(TIENDAS_FORO, it["tienda"], re.I):
+def aviso_foro(prods, it):
+    for prod in prods:
+        var = variante(prod, it["titulo"])
+        if var:
+            break
+    else:
+        return None
+    if not re.search(TIENDAS_FORO, it["tienda"], re.I):
         return None
     precio = a_numero(it["precio_txt"])
-    if precio is not None and (precio < PISO or not nivel(precio, cl[0], cl[1])):
+    if precio is not None and (precio < prod["piso"] or not nivel(precio, prod, var)):
         return None
     nota, me_aplica = bancos(it["titulo"] + " " + limpio(it["descripcion"], 3000))
-    niv = "SIN PRECIO, REVISAR" if precio is None else nivel(precio, cl[0], cl[1]) if me_aplica else "SOLO CON OTRO BANCO"
+    niv = "SIN PRECIO, REVISAR" if precio is None else nivel(precio, prod, var) if me_aplica else "SOLO CON OTRO BANCO"
     ptxt = "${:,.0f}".format(precio) if precio is not None else "sin precio"
-    g, c, t = topes(cl[0], cl[1])
-    asunto = "[foro] {} {} {} en {} · {} · {}".format(NOMBRE[cl[0]], cap_txt(cl[1]), ptxt, it["tienda"] or "tienda", niv, nota)
+    g, c, t = topes(prod, var)
+    asunto = "[foro] {} {} en {} · {} · {}".format(var["nombre"], ptxt, it["tienda"] or "tienda", niv, nota)
     cuerpo = "\n".join([
         "**{}**".format(it["titulo"]), "",
         "Fuente: publicacion de un usuario en el foro de ofertas (no leida en la tienda; esta tienda no deja leer sus precios a programas).",
         "", "- Precio publicado: **{}** en {}".format(ptxt, it["tienda"] or "(sin dato)"),
         "- Veredicto: **{}** ({})".format(niv, nota),
-        "- Topes de {} {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(NOMBRE[cl[0]], cap_txt(cl[1]), g, c, t),
+        "- Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t),
         "- Publicada: {}".format(it["fecha"]), "- Oferta: {}".format(it["link"]), "",
         "> " + limpio(it["descripcion"]).replace("\n", "\n> "), "",
-        "Antes de pagar: confirma en la tienda que siga viva y que la venda Samsung o la propia tienda, con garantia de "
-        "Samsung Mexico. Si la vende un tercero o es importado, no cuenta."])
+        "Antes de pagar: confirma en la tienda que siga viva y que la venda la marca o la propia tienda, con garantia en "
+        "Mexico. Si la vende un tercero o es importado, revisa si cumple lo que pediste para este producto."])
     return asunto, cuerpo
 
 
@@ -435,17 +456,49 @@ def abrir_issue(titulo, texto):
 
 
 def tabla(mejores):
-    filas = ["| Modelo | Tienda | Precio | Vendedor | Como |", "|---|---|---|---|---|"]
-    for o in sorted(mejores.values(), key=lambda o: (o["modelo"] != "ultra", o["cap"] or 0, o["precio"])):
-        filas.append("| {} {} | [{}]({}) | ${:,.0f} | {} | {} |".format(
-            NOMBRE[o["modelo"]], cap_txt(o["cap"]), o["tienda"], o["url"], o["precio"], o["vendedor"] or "", o["nota"] or ""))
+    filas = ["| Producto | Tienda | Precio | Vendedor | Como |", "|---|---|---|---|---|"]
+    for o in sorted(mejores.values(), key=lambda o: (o["prod"], o["nombre"], o["precio"])):
+        filas.append("| {} | [{}]({}) | ${:,.0f} | {} | {} |".format(
+            o["nombre"], o["tienda"], o["url"], o["precio"], o["vendedor"] or "", o["nota"] or ""))
     return "\n".join(filas)
 
 
+def selftest():
+    prods = cargar_config()
+    p = prods[0]
+    casos = [("Samsung Galaxy Z Fold8 Ultra Grafito 512GB", "ultra-512"), ("Galaxy Z Fold 8 512GB Crema", "normal-512"),
+             ("Samsung Galaxy ZFold8 Ultra 1TB Grafito", "ultra-1tb"), ("Funda para Samsung Galaxy Z Fold8 Ultra", None),
+             ("Samsung Galaxy Z Fold8 256GB", None), ("Galaxy Z Fold8 Ultra 512GB version internacional", None),
+             ("Samsung Galaxy Z Fold7 512GB", None), ("Smartphone Galaxy Z Fold8 Ultra Super AMOLED", "ultra")]
+    for titulo, esperado in casos:
+        v = variante(p, titulo)
+        assert (v["id"] if v else None) == esperado, (titulo, v and v["id"], esperado)
+    assert topes(p, var_por_id(p, "ultra-512")) == (22000, 24000, 26000), topes(p, var_por_id(p, "ultra-512"))
+    assert topes(p, var_por_id(p, "normal-512")) == (19900, 21800, 23600), topes(p, var_por_id(p, "normal-512"))
+    assert nivel(23999, p, var_por_id(p, "ultra-512")) == "COMPRAR" and nivel(23999, p, var_por_id(p, "normal-512")) is None
+    # requisitos: tercero e importado fuera cuando el producto lo pide
+    assert oferta(p, "Elektra", "Samsung Galaxy Z Fold8 512GB", 26999, "u", "Systore") is None
+    assert oferta(p, "Amazon", "Samsung Galaxy Z Fold8 512GB", 30000, "u", "Amazon Remates de Almacén") is None
+    assert oferta(p, "Amazon", "Samsung Galaxy Z Fold8 512GB", 30000, "u", "Amazon México")["precio"] == 30000
+    assert oferta(p, "Amazon", "Samsung Galaxy Z Fold8 512GB", 30000, "u", "Amazon México", importado=True) is None
+    # producto que si admite terceros e importados: el precio comparado ya suma el cargo estimado
+    libre = json.loads(json.dumps(p))
+    libre["requisitos"] = {"solo_vendedor_oficial": False, "permite_importados": True, "importacion_estimada": 0.17}
+    o = oferta(libre, "Amazon", "Samsung Galaxy Z Fold8 512GB", 20000, "u", "Tienda X", importado=True)
+    assert o["precio"] == 23400.0 and "importado" in o["nota"], o
+    assert "tercero" in oferta(libre, "Elektra", "Samsung Galaxy Z Fold8 512GB", 26999, "u", "Systore")["nota"]
+    print("selftest OK: %d titulos, topes, vendedor oficial e importacion" % len(casos))
+    return 0
+
+
 def main():
+    if "--selftest" in sys.argv:
+        return selftest()
     seco = "--seco" in sys.argv
     prueba = os.environ.get("PRUEBA", "").lower() in ("1", "true", "yes")
     ahora = dt.datetime.now(dt.timezone.utc)
+    prods = cargar_config()
+    por_id = {p["id"]: p for p in prods}
     try:
         with open(ESTADO, encoding="utf-8") as f:
             estado = json.load(f)
@@ -457,7 +510,7 @@ def main():
 
     def fuente(nombre, funcion):
         try:
-            r = funcion(estado)
+            r = funcion()
             if fallos.get(nombre, 0) >= FALLOS_PARA_AVISAR and not seco:
                 abrir_issue("El vigia volvio a leer %s" % nombre, "La fuente %s responde de nuevo." % nombre)
             fallos[nombre] = 0
@@ -472,38 +525,52 @@ def main():
             return None
 
     # El foro va primero: de ahi salen codigos de cupon nuevos que Samsung prueba en esta misma corrida.
-    foro = fuente("Foro", leer_foro)
-    ofertas = []
-    for nombre, funcion in TIENDAS:
-        ofertas += fuente(nombre, funcion) or []
+    foro = fuente("Foro", lambda: leer_foro(prods, estado))
+    ofertas, leidas = [], set()
+    for tienda, lector in LECTORES.items():
+        usan = [p for p in prods if tienda in p["tiendas"]]
+        if not usan:
+            continue
+
+        def todas(lector=lector, usan=usan, tienda=tienda):
+            r = []
+            for p in usan:
+                r += lector(p, p["tiendas"][tienda], estado)
+            return r
+        res = fuente(tienda, todas)
+        if res is not None:
+            leidas.add(tienda)
+            ofertas += res
 
     mejores = {}
     for o in ofertas:
-        clave = "%s|%s|%s" % (o["tienda"], o["modelo"], o["cap"])
+        clave = "%s|%s|%s" % (o["tienda"], o["prod"], o["var"])
         if clave not in mejores or o["precio"] < mejores[clave]["precio"]:
             mejores[clave] = o
     for clave, o in sorted(mejores.items()):
-        print("  %-28s $%9.0f  %-6s %s | %s" % (clave, o["precio"], nivel(o["precio"], o["modelo"], o["cap"]) or "", o["vendedor"], o["nota"]))
+        print("  %-34s $%9.0f  %-7s %s | %s" % (clave, o["precio"], nivel(o["precio"], por_id[o["prod"]], var_por_id(por_id[o["prod"]], o["var"])) or "", o["vendedor"], o["nota"]))
 
     # --- avisos por precio leido en tienda
     for clave, o in mejores.items():
-        niv = nivel(o["precio"], o["modelo"], o["cap"])
+        prod = por_id[o["prod"]]
+        var = var_por_id(prod, o["var"])
+        niv = nivel(o["precio"], prod, var)
         if not niv:
             avisado.pop(clave, None)   # subio del tope: la proxima baja vuelve a avisar
             continue
         if clave in avisado and o["precio"] > avisado[clave] - BAJA_MINIMA:
             continue
-        g, c, t = topes(o["modelo"], o["cap"])
-        asunto = "{} {} ${:,.0f} en {} · {} · leido en la tienda".format(NOMBRE[o["modelo"]], cap_txt(o["cap"]), o["precio"], o["tienda"], niv)
+        g, c, t = topes(prod, var)
+        asunto = "{} ${:,.0f} en {} · {} · leido en la tienda".format(var["nombre"], o["precio"], o["tienda"], niv)
         cuerpo = "\n".join([
             "**{}**".format(o["titulo"]), "",
             "- Precio leido ahora en la tienda: **${:,.0f}** ({})".format(o["precio"], o["tienda"]),
             "- Como se llega: {}".format(o["nota"] or "precio directo, sin cupon"),
             "- Quien vende: {}".format(o["vendedor"] or "sin dato"),
-            "- Veredicto: **{}**. Topes de {} {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(niv, NOMBRE[o["modelo"]], cap_txt(o["cap"]), g, c, t),
+            "- Veredicto: **{}**. Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(niv, var["nombre"], g, c, t),
             "- Liga: {}".format(o["url"]), "",
             "Lo mejor de cada tienda en este momento:", "", tabla(mejores), "",
-            "No incluye devoluciones de banco (se ven hasta pagar). El seguro Care+ se contrata aparte dentro de 30 dias."])
+            "No incluye devoluciones de banco (se ven hasta pagar)."])
         print(" * AVISO", asunto)
         if not seco:
             try:
@@ -515,7 +582,7 @@ def main():
     # --- avisos del foro (tiendas que no se dejan leer, y recetas con banco)
     sembrar = not estado.get("sembrado")
     for it in foro or []:
-        av = aviso_foro(it)
+        av = aviso_foro(prods, it)
         if not av or it["guid"] in vistos:
             continue
         try:
@@ -538,10 +605,14 @@ def main():
         estado["sembrado"] = True
 
     if prueba and not seco:
+        lineas = []
+        for p in prods:
+            for v in p["variantes"]:
+                lineas.append("{}: ganga ${:,}, comprar ${:,}, mirar ${:,}".format(v["nombre"], *topes(p, v)))
         abrir_issue("PRUEBA del vigia: precios leidos ahora directamente en las tiendas",
                     "Esto es una prueba de que el vigia lee las tiendas y de que el aviso te llega.\n\n" + tabla(mejores)
                     + "\n\nFuentes caidas en esta corrida: " + (", ".join(n for n, v in fallos.items() if v) or "ninguna")
-                    + "\n\nTopes: " + "; ".join("{} {}: ganga ${:,}, comprar ${:,}, mirar ${:,}".format(NOMBRE[m], cap_txt(cp), *topes(m, cp)) for (m, cp) in LISTA))
+                    + "\n\nTopes:\n- " + "\n- ".join(lineas))
 
     if seco:
         return 0
@@ -551,23 +622,23 @@ def main():
             previos = json.load(f)
     except Exception:
         previos = {}
-    # lo que una tienda ya no ofrece (o ya no cumple la regla de garantia) sale de la tabla; si la tienda
-    # no se pudo leer en esta corrida, se conserva su ultimo dato
-    leidas = {n for n, _ in TIENDAS if fallos.get(n, 0) == 0}
+    # lo que una tienda ya no ofrece (o ya no cumple los requisitos) sale de la tabla; si la tienda no se
+    # pudo leer en esta corrida, se conserva su ultimo dato
     actuales = {k: v for k, v in previos.items() if k.split("|")[0] not in leidas}
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")
     cambios = []
     for clave, o in mejores.items():
         ant = previos.get(clave, {}).get("precio")
         if ant != o["precio"]:
-            cambios.append([hoy, o["tienda"], NOMBRE[o["modelo"]], cap_txt(o["cap"]), "%.2f" % o["precio"], o["vendedor"], o["nota"], o["url"]])
-        actuales[clave] = {"precio": o["precio"], "vendedor": o["vendedor"], "nota": o["nota"], "url": o["url"], "leido": hoy if ant != o["precio"] else previos.get(clave, {}).get("leido", hoy)}
+            cambios.append([hoy, o["tienda"], o["nombre"], "%.2f" % o["precio"], o["vendedor"], o["nota"], o["url"]])
+        actuales[clave] = {"producto": o["nombre"], "precio": o["precio"], "vendedor": o["vendedor"], "nota": o["nota"],
+                           "url": o["url"], "leido": hoy if ant != o["precio"] else previos.get(clave, {}).get("leido", hoy)}
     if cambios:
         nuevo = not os.path.exists(HISTORIAL)
         with open(HISTORIAL, "a", encoding="utf-8", newline="") as f:
             w = csv.writer(f)
             if nuevo:
-                w.writerow(["fecha", "tienda", "modelo", "capacidad", "precio", "vendedor", "como", "liga"])
+                w.writerow(["fecha", "tienda", "producto", "precio", "vendedor", "como", "liga"])
             w.writerows(cambios)
     if cambios or set(actuales) != set(previos):
         with open(PRECIOS, "w", encoding="utf-8") as f:
