@@ -10,7 +10,11 @@
   "EPPMX_QUINCENA",
   "EPP1O_NOV",
   "WINDC_600",
-  "CRP26TV"
+  "CRP26TV",
+  "ECO_25",
+  "BF1000",
+  "ECO_20",
+  "ECO_30"
  ],
  "fallos": 0,
  "fallos_fuente": {
