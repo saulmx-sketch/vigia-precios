@@ -13,45 +13,51 @@
   "url": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
   "vendedor": "Amazon México"
  },
- "Costco|fold8|512": {
-  "leido": "2026-11-19 16:50",
+ "Costco|fold8|normal-512": {
+  "leido": "2026-11-19 18:57",
   "nota": "descuento de tienda $9,000 hasta 2026-11-23",
   "precio": 35999.0,
+  "producto": "Fold8 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
   "vendedor": "Costco (pide membresia)"
  },
- "Liverpool|fold8|None": {
-  "leido": "2026-11-19 16:50",
-  "nota": "la tarjeta no dice capacidad: es el precio mas bajo de sus variantes",
+ "Liverpool|fold8|normal": {
+  "leido": "2026-11-19 18:57",
+  "nota": "es el precio mas bajo de sus variantes",
   "precio": 44999.0,
+  "producto": "Fold8 (capacidad sin dato)",
   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
   "vendedor": "Liverpool"
  },
- "Liverpool|ultra|None": {
-  "leido": "2026-11-19 16:50",
-  "nota": "la tarjeta no dice capacidad: es el precio mas bajo de sus variantes",
+ "Liverpool|fold8|ultra": {
+  "leido": "2026-11-19 18:57",
+  "nota": "es el precio mas bajo de sus variantes",
   "precio": 55999.0,
+  "producto": "Fold8 Ultra (capacidad sin dato)",
   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314",
   "vendedor": "Liverpool"
  },
- "Samsung|fold8|512": {
-  "leido": "2026-11-19 16:50",
+ "Samsung|fold8|normal-512": {
+  "leido": "2026-11-19 18:57",
   "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $40,799; promocion vigente hasta 2026-12-01",
   "precio": 31639.2,
+  "producto": "Fold8 512 GB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
   "vendedor": "Samsung"
  },
- "Samsung|ultra|1024": {
-  "leido": "2026-11-19 16:50",
+ "Samsung|fold8|ultra-1tb": {
+  "leido": "2026-11-19 18:57",
   "nota": "con cupones BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
   "precio": 62499.0,
+  "producto": "Fold8 Ultra 1 TB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
   "vendedor": "Samsung"
  },
- "Samsung|ultra|512": {
-  "leido": "2026-11-19 16:50",
+ "Samsung|fold8|ultra-512": {
+  "leido": "2026-11-19 18:57",
   "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $43,999; promocion vigente hasta 2026-12-01; preventa",
   "precio": 34199.2,
+  "producto": "Fold8 Ultra 512 GB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
   "vendedor": "Samsung"
  }
