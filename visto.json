@@ -42,7 +42,8 @@
   "11-20 14:36 busqueda ok; busqueda ok",
   "11-20 14:51 busqueda ok; busqueda ok",
   "11-20 15:06 busqueda 200 de 2321 bytes, reintento ok; busqueda ok",
-  "11-20 15:21 busqueda 200 de 2321 bytes, reintento ok; busqueda ok"
+  "11-20 15:21 busqueda 200 de 2321 bytes, reintento ok; busqueda ok",
+  "11-20 15:35 busqueda ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
