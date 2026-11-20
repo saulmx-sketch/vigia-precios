@@ -1,0 +1,54 @@
+name: vigia
+# Cadena: cada corrida espera 13 minutos (regla "wait timer" del entorno "espera", que no ocupa maquina),
+# revisa tiendas y foro, y al terminar lanza la siguiente. No depende del horario de GitHub, que en esta
+# cuenta llega con horas de retraso. El horario de abajo solo es salvavidas por si la cadena se rompe.
+on:
+  workflow_dispatch:
+    inputs:
+      prueba:
+        description: 'Mandar un aviso de prueba'
+        type: boolean
+        default: false
+  schedule:
+    - cron: '13 */2 * * *'
+permissions:
+  contents: write
+  issues: write
+  actions: write
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    environment: espera
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revisar tiendas y foro
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRUEBA: ${{ inputs.prueba }}
+        run: python3 vigia.py
+      - name: Guardar memoria y bitacora de precios
+        if: always()
+        run: |
+          git add -A
+          if ! git diff --cached --quiet; then
+            git config user.name "vigia"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "estado del vigia"
+            git pull --rebase
+            git push
+          fi
+      - name: Lanzar la siguiente corrida de la cadena
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          otras=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status \
+            --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.status != \"completed\")] | length")
+          echo "otras corridas vivas: $otras"
+          if [ "$otras" = "0" ]; then
+            gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main
+            echo "siguiente corrida lanzada"
+          else
+            echo "ya hay otra corrida esperando: esta no encadena"
+          fi
