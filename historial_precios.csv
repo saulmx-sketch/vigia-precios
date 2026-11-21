@@ -12,3 +12,7 @@ fecha,tienda,producto,precio,vendedor,como,liga
 2026-11-20 22:35,Amazon,Fold8 Ultra 512 GB,36479.00,Amazon México,,https://www.amazon.com.mx/dp/B0H773PLWP?th=1&psc=1
 2026-11-21 00:04,Samsung,Fold8 Ultra 1 TB,57149.10,Samsung,"con cupones BFLIVESEM; sin cupon $63,499; promocion vigente hasta 2026-12-07",https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/
 2026-11-21 00:19,Samsung,Fold8 Ultra 1 TB,56149.10,Samsung,"con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/
+2026-11-21 03:46,Samsung,Fold8 Ultra 1 TB,63499.00,Samsung,"precio de pagina, cupones sin probar (Expecting value: line 1 column 1 (char 0))",https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/
+2026-11-21 03:46,Samsung,Fold8 512 GB,40799.00,Samsung,"precio de pagina, cupones sin probar (no se pudo agregar al carrito: 200 <!DOCTYPE html>
+<html>
+<h)",https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/
