@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-20 18:04 busqueda 503 de 1669 bytes, reintento 200 de 2319 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-20 18:18 busqueda ok; busqueda ok",
   "11-20 18:33 busqueda ok; busqueda ok",
   "11-20 18:48 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -78,7 +77,8 @@
   "11-21 08:05 busqueda 200 de 2321 bytes, reintento ok; busqueda ok",
   "11-21 08:19 busqueda ok; busqueda ok",
   "11-21 08:34 busqueda ok; busqueda ok",
-  "11-21 08:48 busqueda ok; busqueda ok"
+  "11-21 08:48 busqueda ok; busqueda ok",
+  "11-21 09:03 busqueda ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
