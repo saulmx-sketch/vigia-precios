@@ -76,7 +76,8 @@
   "11-20 23:06 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
   "11-20 23:21 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
   "11-20 23:36 busqueda ok; busqueda ok",
-  "11-20 23:51 busqueda ok; busqueda 503 de 1669 bytes, reintento ok"
+  "11-20 23:51 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-21 00:05 busqueda 503 de 1669 bytes, reintento ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
