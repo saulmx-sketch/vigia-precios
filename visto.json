@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-21 02:19 busqueda ok; busqueda ok",
   "11-21 02:33 busqueda ok; busqueda ok",
   "11-21 02:48 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
   "11-21 03:03 busqueda 200 de 2321 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento ok",
@@ -78,7 +77,8 @@
   "11-21 16:16 busqueda ok; busqueda ok",
   "11-21 16:30 busqueda ok; busqueda ok",
   "11-21 16:45 busqueda ok; busqueda ok",
-  "11-21 17:00 busqueda ok; busqueda 503 de 1669 bytes, reintento ok"
+  "11-21 17:00 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-21 17:14 busqueda ok; busqueda 200 de 2311 bytes, reintento ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
