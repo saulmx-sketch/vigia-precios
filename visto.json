@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-21 16:16 busqueda ok; busqueda ok",
   "11-21 16:30 busqueda ok; busqueda ok",
   "11-21 16:45 busqueda ok; busqueda ok",
   "11-21 17:00 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
@@ -78,7 +77,8 @@
   "11-22 06:14 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ 503 de 322 bytes",
   "11-22 06:29 busqueda 503 de 1669 bytes, reintento 200 de 2319 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 06:44 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG 503 de 322 bytes",
-  "11-22 06:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
+  "11-22 06:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-22 07:15 busqueda 200 de 2321 bytes, reintento ok; busqueda 200 de 2312 bytes, reintento 200 de 2312 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
