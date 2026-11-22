@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-21 06:37 busqueda ok; busqueda ok",
   "11-21 06:51 busqueda ok; busqueda ok",
   "11-21 07:06 busqueda 200 de 2321 bytes, reintento ok; busqueda ok",
   "11-21 07:21 busqueda ok; busqueda ok",
@@ -78,7 +77,8 @@
   "11-21 20:29 busqueda ok; busqueda ok",
   "11-21 20:44 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-21 20:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
-  "11-21 21:14 busqueda 200 de 2319 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
+  "11-21 21:14 busqueda 200 de 2319 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-21 21:29 busqueda ok; busqueda ok; ficha B0H76XJTG2 ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -93,7 +93,7 @@
  "ultimo_error": {},
  "vendedor_amazon": {
   "B0H76XJTG2": [
-   34499.0,
+   35999.2,
    "Amazon México",
    false,
    "fold8"
