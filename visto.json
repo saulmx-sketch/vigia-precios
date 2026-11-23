@@ -1,9 +1,7 @@
 {
  "avisado": {},
  "caida_avisada": [],
- "caida_desde": {
-  "Amazon": "2026-11-23T02:40+00:00"
- },
+ "caida_desde": {},
  "ciego_avisado": false,
  "cupones_cosechados": [
   "BF26_5",
@@ -21,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-22 05:59 busqueda 200 de 2321 bytes, reintento 200 de 2321 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 06:14 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ 503 de 322 bytes",
   "11-22 06:29 busqueda 503 de 1669 bytes, reintento 200 de 2319 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 06:44 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG 503 de 322 bytes",
@@ -80,11 +77,12 @@
   "11-22 19:57 busqueda ok; busqueda ok",
   "11-22 20:13 busqueda 200 de 2321 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 20:27 busqueda ok; busqueda ok",
-  "11-22 20:42 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG 503 de 322 bytes"
+  "11-22 20:42 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG 503 de 322 bytes",
+  "11-22 20:57 busqueda 503 de 1669 bytes, reintento ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 1,
+  "Amazon": 0,
   "Costco": 0,
   "Elektra": 0,
   "Foro": 0,
@@ -92,9 +90,7 @@
   "Samsung": 0
  },
  "sembrado": true,
- "ultimo_error": {
-  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B0H773GGWG"
- },
+ "ultimo_error": {},
  "vendedor_amazon": {
   "B0H76XJTG2": [
    35499.0,
