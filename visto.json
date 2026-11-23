@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-22 08:46 busqueda 200 de 2321 bytes, reintento 200 de 2321 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 09:01 busqueda 200 de 2322 bytes, reintento 200 de 2322 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 09:16 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 09:32 busqueda 200 de 2314 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento ok",
@@ -78,7 +77,8 @@
   "11-22 22:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 22:58 busqueda ok; busqueda ok",
   "11-22 23:13 busqueda ok; busqueda ok",
-  "11-22 23:26 busqueda ok; busqueda 503 de 1669 bytes, reintento ok"
+  "11-22 23:26 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-22 23:40 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -99,7 +99,7 @@
    "fold8"
   ],
   "B0H773GGWG": [
-   35999.2,
+   38171.64,
    "Amazon México",
    false,
    "fold8"
@@ -117,7 +117,7 @@
    "fold8"
   ],
   "B0H92G9GNW": [
-   38999.0,
+   43999.0,
    "Amazon México",
    false,
    "fold8"
