@@ -20,7 +20,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 02:12 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 02:27 busqueda 200 de 2322 bytes, reintento ok; busqueda ok",
   "11-23 02:42 busqueda 200 de 2320 bytes, reintento ok; busqueda ok",
   "11-23 02:57 busqueda ok; busqueda 200 de 2312 bytes, reintento ok",
@@ -79,7 +78,8 @@
   "11-23 16:19 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
   "11-23 16:35 busqueda ok; busqueda ok",
   "11-23 16:50 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
-  "11-23 17:05 busqueda ok; busqueda ok"
+  "11-23 17:05 busqueda ok; busqueda ok",
+  "11-23 17:21 busqueda ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
