@@ -19,7 +19,6 @@
   "ECO_30"
  ],
  "diag_amazon": [
-  "11-22 13:16 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento ok",
   "11-22 13:32 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-22 13:46 busqueda ok; busqueda ok",
   "11-22 14:02 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -78,7 +77,8 @@
   "11-23 03:12 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
   "11-23 03:27 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 03:43 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
-  "11-23 03:58 busqueda 503 de 1669 bytes, reintento ok; busqueda 200 de 2317 bytes, reintento ok"
+  "11-23 03:58 busqueda 503 de 1669 bytes, reintento ok; busqueda 200 de 2317 bytes, reintento ok",
+  "11-23 04:13 busqueda ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
