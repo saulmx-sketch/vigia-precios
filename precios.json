@@ -4,7 +4,7 @@
   "nota": "",
   "precio": 35499.0,
   "producto": "Fold8 512 GB",
-  "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
+  "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
   "vendedor": "Amazon México"
  },
  "Amazon|fold8|ultra-512": {
@@ -44,6 +44,14 @@
   "nota": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
   "precio": 56149.1,
   "producto": "Fold8 Ultra 1 TB",
+  "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
+  "vendedor": "Samsung"
+ },
+ "Samsung|fold8|ultra-512": {
+  "leido": "2026-11-23 14:28",
+  "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $43,999; promocion vigente hasta 2026-12-01",
+  "precio": 34199.2,
+  "producto": "Fold8 Ultra 512 GB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
   "vendedor": "Samsung"
  }
