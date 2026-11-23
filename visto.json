@@ -20,7 +20,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 00:11 busqueda ok; busqueda ok",
   "11-23 00:26 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 00:41 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 00:57 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -79,7 +78,8 @@
   "11-23 14:15 busqueda ok; busqueda 200 de 2312 bytes, reintento ok",
   "11-23 14:30 busqueda ok; busqueda ok",
   "11-23 14:45 busqueda ok; busqueda ok",
-  "11-23 15:02 busqueda 200 de 2322 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
+  "11-23 15:02 busqueda 200 de 2322 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-23 15:18 busqueda 200 de 2322 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -118,8 +118,8 @@
    "fold8"
   ],
   "B0H92G9GNW": [
-   39999.0,
-   "Amazon México",
+   37999.05,
+   "Amazon Remates de Almacén",
    false,
    "fold8"
   ]
