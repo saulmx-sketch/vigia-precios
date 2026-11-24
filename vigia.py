@@ -138,8 +138,16 @@ def nivel(precio, prod, var):
     return "GANGA" if precio <= g else "COMPRAR" if precio <= c else "MIRAR" if precio <= t else None
 
 
+def marca_ok(prod, titulo):
+    """En Amazon el titulo debe nombrar la marca (deja fuera accesorios de otras marcas). Un producto cuyo titulo
+    no suele traer la marca (PS5: "Consola PlayStation 5" sin "Sony") la da en marca_titulo."""
+    regla = prod.get("marca_titulo", prod.get("marca"))
+    return not regla or bool(re.search(regla, titulo, re.I))
+
+
 def vendedor_oficial(prod, tienda, vendedor):
-    regla = VENDEDOR_OFICIAL.get(tienda)
+    # el producto puede fijar su propia regla por tienda (PS5: en Amazon solo Amazon Mexico; Sony no vende directo)
+    regla = prod["requisitos"].get("vendedor_oficial", {}).get(tienda) or VENDEDOR_OFICIAL.get(tienda)
     if not regla:
         return True
     return bool(re.search(regla.replace("{marca}", re.escape(prod.get("marca", "zzzz"))), vendedor or "", re.I))
@@ -351,7 +359,7 @@ def _leer_amazon(prod, cfg, estado, diag):
                 continue
             titulo = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", tit.group(1)))).strip()
             precio = float(pr.group(1).replace(",", ""))
-            if prod.get("marca") and not re.search(prod["marca"], titulo, re.I):
+            if not marca_ok(prod, titulo):
                 continue
             if variante(prod, titulo) and precio >= prod["piso"]:
                 visto.add(m.group(1))
@@ -387,7 +395,7 @@ def _leer_amazon(prod, cfg, estado, diag):
         if r:
             raise RuntimeError("%s y %s en la ficha %s" % (fallo, r, asin))
         titulo, precio, vend, importado = ficha_amazon(t)
-        if precio is None or (prod.get("marca") and not re.search(prod["marca"], titulo, re.I)):
+        if precio is None or not marca_ok(prod, titulo):
             continue   # agotado o sin precio a la vista: hoy no se ofrece
         if vend:
             memo[asin] = [precio, vend, importado, prod["id"]]
@@ -567,6 +575,84 @@ def tabla(mejores):
     return "\n".join(filas)
 
 
+# Corridas seguidas sin ver un modelo en una tienda que si se leyo, antes de avisar que se agoto
+# (unos 15 min por corrida: 4 = una hora; evita avisos por un tropiezo de lectura).
+AUSENCIAS_AGOTADO = 4
+
+
+def clave_de(prods, tienda, producto):
+    for p in prods:
+        for v in p["variantes"]:
+            if v["nombre"] == producto:
+                return "%s|%s|%s" % (tienda, p["id"], v["id"])
+    return None
+
+
+def sembrar_conocidos(estado, prods, mejores, leidas, ruta=None):
+    """Primera vez: lo que el historial vio a la venta y hoy falta en una tienda leida queda como agotado, sin aviso."""
+    conocidos = estado.setdefault("conocidos", {})
+    agotados = estado.setdefault("agotados", {})
+    try:
+        with open(ruta or HISTORIAL, encoding="utf-8") as f:
+            filas = list(csv.DictReader(f))
+    except Exception:
+        filas = []
+    for fila in filas:
+        c = clave_de(prods, fila["tienda"], fila["producto"])
+        if c:
+            conocidos[c] = {"producto": fila["producto"], "precio": float(fila["precio"]), "url": fila["liga"],
+                            "visto": fila["fecha"]}
+    for c, info in conocidos.items():
+        if c not in mejores and c.split("|")[0] in leidas:
+            agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
+
+
+def disponibilidad(estado, prods, mejores, leidas, hoy):
+    """Devuelve avisos [(asunto, cuerpo)] de modelos agotados o de vuelta, y actualiza el estado."""
+    por_id = {p["id"]: p for p in prods}
+    conocidos = estado.setdefault("conocidos", {})
+    agotados = estado.setdefault("agotados", {})
+    ausente = estado.setdefault("ausente", {})
+    avisos = []
+    for c, o in mejores.items():
+        conocidos[c] = {"producto": o["nombre"], "precio": o["precio"], "url": o["url"], "visto": hoy}
+        ausente.pop(c, None)
+        if c in agotados:
+            prod = por_id[o["prod"]]
+            var = var_por_id(prod, o["var"])
+            g, cc, t = topes(prod, var)
+            niv = nivel(o["precio"], prod, var) or "arriba de tus topes"
+            avisos.append((
+                "Volvio a la venta: {} en {} a ${:,.0f} · {}".format(o["nombre"], o["tienda"], o["precio"], niv),
+                "\n".join([
+                    "**{}** estaba agotado en {} ({}; ultimo precio ${:,.0f}) y ya se puede comprar otra vez.".format(
+                        o["nombre"], o["tienda"], agotados[c].get("desde", "?"), agotados[c].get("precio", 0)), "",
+                    "- Precio leido ahora: **${:,.0f}**".format(o["precio"]),
+                    "- Como se llega: {}".format(o["nota"] or "precio directo, sin cupon"),
+                    "- Quien vende: {}".format(o["vendedor"] or "sin dato"),
+                    "- Veredicto: **{}**. Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(niv, var["nombre"], g, cc, t),
+                    "- Liga: {}".format(o["url"]), "",
+                    "Lo mejor de cada tienda en este momento:", "", tabla(mejores)])))
+            agotados.pop(c)
+    for c, info in conocidos.items():
+        if c in mejores or c.split("|")[0] not in leidas or c in agotados:
+            continue
+        ausente[c] = ausente.get(c, 0) + 1
+        if ausente[c] >= AUSENCIAS_AGOTADO:
+            tienda = c.split("|")[0]
+            avisos.append((
+                "Agotado: {} ya no esta a la venta en {}".format(info["producto"], tienda),
+                "\n".join([
+                    "{} no aparece a la venta en {} desde hace {} corridas seguidas (cerca de una hora), aunque la tienda "
+                    "si se leyo.".format(info["producto"], tienda, ausente[c]), "",
+                    "- Ultima vez a la venta: {} a ${:,.0f}".format(info["visto"], info["precio"]),
+                    "- Liga: {}".format(info["url"]), "",
+                    "Te aviso en cuanto vuelva a estar a la venta, con su precio."])))
+            agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
+            ausente.pop(c)
+    return avisos
+
+
 def selftest():
     prods = cargar_config()
     p = prods[0]
@@ -603,7 +689,52 @@ def selftest():
              '<div id="desktop_buybox"><span>Vendido por</span> <span>Amazon México</span></div>')
     assert ficha_amazon(ficha) == ("Samsung Galaxy Z Fold8 Crema 512GB", 34499.0, "Amazon México", False), ficha_amazon(ficha)
     assert ficha_amazon(ficha.replace("apex-pricetopay-value", ""))[1] is None   # agotado: sin precio a pagar
-    print("selftest OK: %d titulos, topes, vendedor oficial e importacion" % len(casos))
+    # agotado y regreso: 4 ausencias seguidas avisan una vez; tienda no leida no cuenta; al volver avisa con precio
+    est = {"conocidos": {"Samsung|fold8|ultra-512": {"producto": "Fold8 Ultra 512 GB", "precio": 34199.2, "url": "u",
+                                                     "visto": "2026-11-20 14:34"}}}
+    for _ in range(AUSENCIAS_AGOTADO - 1):
+        assert disponibilidad(est, prods, {}, {"Samsung"}, "h") == []
+    assert disponibilidad(est, prods, {}, set(), "h") == []          # Samsung sin leer: no suma ausencia
+    av = disponibilidad(est, prods, {}, {"Samsung"}, "h")
+    assert len(av) == 1 and av[0][0].startswith("Agotado: Fold8 Ultra 512 GB"), av
+    assert disponibilidad(est, prods, {}, {"Samsung"}, "h") == []    # ya avisado: no repite
+    vuelta = {"Samsung|fold8|ultra-512": {"prod": "fold8", "var": "ultra-512", "nombre": "Fold8 Ultra 512 GB",
+                                          "tienda": "Samsung", "precio": 23999.0, "url": "u", "nota": "", "vendedor": "Samsung"}}
+    av = disponibilidad(est, prods, vuelta, {"Samsung"}, "h")
+    assert len(av) == 1 and av[0][0].startswith("Volvio a la venta") and "COMPRAR" in av[0][0], av
+    assert disponibilidad(est, prods, vuelta, {"Samsung"}, "h") == [] and not est["agotados"]
+    # PS5: titulos reales de Amazon Mexico del 24 nov 2026 (precio de la ficha; vendedor Amazon Mexico)
+    ps = next(x for x in prods if x["id"] == "ps5")
+    casos_ps5 = [
+        ("Consola PlayStation 5 - Edición Digital de 825 GB: Astro Bot y Gran Turismo 7 - Digital Edition", 12499, "digital"),
+        ("Consola PlayStation 5 de 1 TB: ASTRO BOT y Gran Turismo 7, Modelo PS5STA-ASTRO - Standard Edition", 14599, "disco"),
+        ("PlayStation 5 Consola Slim Disco Digital + PS5 Digital 825GB con ASTRO BOT y GT7", 14498, "disco"),
+        ("Sony Death Stranding 2 PS5 + PlayStation 5 1TB ASTRO BOT/GT7", 15490, "disco"),
+        ("PlayStation 5 Unidad de Disco- Consola Slim digital", 1999, None),
+        ("PlayStation 5 Cubierta de Consola Digital Slim – Chroma Pearl", 1417.79, None),
+        ("PlayStation 5 Reproductor Remoto Portal Midnight Black", 5199, None),
+        ("PlayStation DualSense® Wireless Controller - Cosmic Red", 1153.33, None),
+        ("Saros - Playstation 5", 899, None),
+        ("Consola PlayStation 5 Pro Digital 2 TB", 19299, None)]
+    for titulo, precio, esperado in casos_ps5:
+        o = oferta(ps, "Amazon", titulo, precio, "u", "Amazon México")
+        assert (o["var"] if o else None) == esperado, (titulo, o and o["var"], esperado)
+        assert not esperado or marca_ok(ps, titulo), titulo
+    assert variante(ps, "Consola PlayStation 5 Pro Digital 2 TB") is None        # la Pro no casa ni sin el piso
+    assert variante(ps, "Consola PS5 Edicion Digital (sin lector de disco) 825 GB")["id"] == "digital"
+    assert variante(ps, "Consola PlayStation 5 Slim") is None                    # sin dato de variante: se ignora
+    dig = "Consola PlayStation 5 - Edición Digital de 825 GB"
+    assert oferta(ps, "Amazon", dig, 9500, "u", "GameStore MX") is None          # tercero: no entra ni avisa
+    assert oferta(ps, "Amazon", dig, 9500, "u", "Sony") is None                  # en Amazon solo Amazon Mexico
+    assert oferta(ps, "Amazon", dig, 9500, "u", "Amazon México")["precio"] == 9500
+    assert oferta(ps, "Elektra", dig, 9500, "u", "Elektra") and oferta(ps, "Elektra", dig, 9500, "u", "Gamers MX") is None
+    assert topes(ps, var_por_id(ps, "digital")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "digital"))
+    assert topes(ps, var_por_id(ps, "disco")) == (8800, 10500, 12600), topes(ps, var_por_id(ps, "disco"))
+    # productos separados: la variante de cada clave del historial se encuentra en su producto
+    assert clave_de(prods, "Amazon", "PS5 Digital (sin lector)") == "Amazon|ps5|digital"
+    assert clave_de(prods, "Amazon", "Fold8 512 GB") == "Amazon|fold8|normal-512"
+    print("selftest OK: %d titulos Fold8 y %d PS5, topes, vendedor oficial, importacion y agotado/regreso"
+          % (len(casos), len(casos_ps5)))
     return 0
 
 
@@ -710,6 +841,18 @@ def main():
             try:
                 abrir_issue(asunto, cuerpo)
                 avisado[clave] = o["precio"]
+            except Exception as ex:
+                print("   no se pudo abrir el aviso:", ex)
+
+    # --- avisos de modelo agotado o de vuelta a la venta (solo cuenta tiendas leidas en esta corrida)
+    if "conocidos" not in estado:
+        sembrar_conocidos(estado, prods, mejores, leidas)
+        print("   disponibilidad sembrada; agotados de arranque:", ", ".join(estado["agotados"]) or "ninguno")
+    for asunto, cuerpo in disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")):
+        print(" * DISPONIBILIDAD", asunto)
+        if not seco:
+            try:
+                abrir_issue(asunto, cuerpo)
             except Exception as ex:
                 print("   no se pudo abrir el aviso:", ex)
 

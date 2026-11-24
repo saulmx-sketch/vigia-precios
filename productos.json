@@ -48,6 +48,37 @@
    "foro": {
     "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]
    }
+  },
+  {
+   "id": "ps5",
+   "nombre": "PlayStation 5",
+   "marca": "sony",
+   "marca_titulo": "sony|play\\s*station|\\bps5\\b",
+   "patron": "play\\s*station\\s*®?\\s*5|\\bps5\\b",
+   "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
+   "piso": 5500,
+   "fracciones": [0.60, 0.72, 0.86],
+   "topes_fijos": {},
+   "requisitos": {
+    "_regla": "Saul, perfil de comprador 2026-11-19: en aparatos caros el precio que cuenta es el de la marca o de la tienda misma; un vendedor tercero de marketplace no cuenta como piso; importados no",
+    "solo_vendedor_oficial": true,
+    "permite_importados": false,
+    "importacion_estimada": 0.2,
+    "vendedor_oficial": {"Amazon": "^\\s*amazon(\\s+m[eé]xico)?\\s*$"}
+   },
+   "variantes": [
+    {"id": "disco", "nombre": "PS5 con lector de disco", "todas": ["disco|lector|blu-?ray|^(?!.*digital).*(\\b1\\s*tb\\b|standard|est[aá]ndar)"], "ninguna": ["sin\\s+(lector|unidad|disco)"], "lista": 14599},
+    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499}
+   ],
+   "tiendas": {
+    "Amazon": {"consultas": ["playstation+5+digital", "playstation+5+1tb"]},
+    "Costco": {"consulta": "playstation 5"},
+    "Elektra": {"consulta": "consola playstation 5"},
+    "Liverpool": {"consulta": "playstation+5"}
+   },
+   "foro": {
+    "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]
+   }
   }
  ]
 }
