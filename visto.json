@@ -19,7 +19,7 @@
    "precio": 32399.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Amazon|fold8|ultra-512": {
    "precio": 32399.0,
@@ -31,31 +31,25 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-24 11:25"
-  },
-  "Amazon|ps5|disco": {
-   "precio": 14498.0,
-   "producto": "PS5 con lector de disco",
-   "url": "https://www.amazon.com.mx/dp/B0G76YF472?th=1&psc=1",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Costco|fold8|normal-512": {
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Liverpool|fold8|normal": {
    "precio": 44999.0,
    "producto": "Fold8 (capacidad sin dato)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Liverpool|fold8|ultra": {
    "precio": 55999.0,
@@ -67,37 +61,25 @@
    "precio": 19998.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1180626294",
-   "visto": "2026-11-24 11:25"
-  },
-  "Liverpool|ps5|disco": {
-   "precio": 14699.0,
-   "producto": "PS5 con lector de disco",
-   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785793",
-   "visto": "2026-11-24 11:25"
-  },
-  "Liverpool|ps5|sin-dato": {
-   "precio": 12499.0,
-   "producto": "PS5 (modelo sin dato)",
-   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Samsung|fold8|ultra-1tb": {
    "precio": 56149.1,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-24 11:25"
+   "visto": "2026-11-24 11:41"
   }
  },
  "cupones_cosechados": [
@@ -117,8 +99,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 21:33 busqueda 200 de 2319 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
-  "11-23 21:49 busqueda ok; busqueda ok",
   "11-23 22:05 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
   "11-23 22:20 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 22:36 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
@@ -176,7 +156,9 @@
   "11-24 11:11 busqueda ok; busqueda ok",
   "11-24 11:11 busqueda ok; busqueda ok",
   "11-24 11:27 busqueda ok; busqueda ok",
-  "11-24 11:28 busqueda ok; busqueda ok"
+  "11-24 11:28 busqueda ok; busqueda ok",
+  "11-24 11:43 busqueda ok; busqueda ok",
+  "11-24 11:43 busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
