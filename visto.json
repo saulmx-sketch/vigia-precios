@@ -20,7 +20,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 15:48 busqueda ok; busqueda ok",
   "11-23 16:04 busqueda ok; busqueda ok",
   "11-23 16:19 busqueda 503 de 1669 bytes, reintento ok; busqueda ok",
   "11-23 16:35 busqueda ok; busqueda ok",
@@ -79,7 +78,8 @@
   "11-24 06:24 busqueda ok; busqueda ok",
   "11-24 06:39 busqueda ok; busqueda ok",
   "11-24 06:54 busqueda ok; busqueda ok",
-  "11-24 07:10 busqueda ok; busqueda ok"
+  "11-24 07:10 busqueda ok; busqueda ok",
+  "11-24 07:25 busqueda 200 de 2314 bytes, reintento ok; busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
