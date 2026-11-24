@@ -2,7 +2,7 @@
 
 Que hace, cada 15 minutos, sin tokens y sin la computadora de Saul:
   1. Lee directamente las tiendas configuradas por producto en productos.json (Samsung con prueba de cupones
-     en un carrito anonimo, Amazon, Costco, Elektra, Liverpool).
+     en un carrito anonimo, Amazon, Costco, Elektra, Liverpool, Gameplanet).
   2. Aplica los requisitos del producto (quien vende, importados si o no, cargo de importacion estimado).
   3. Compara contra los topes de cada variante y abre un aviso (issue de GitHub = correo) si baja de su tope.
   4. Guarda lo leido en precios.json e historial.csv (el historial de precios propio).
@@ -40,7 +40,7 @@ DIAS_FRESCO = 3          # ofertas del foro mas viejas que esto no se avisan
 # Horas sin una sola lectura buena antes de avisar que una fuente esta caida. Amazon rechaza a ratos las
 # peticiones que salen de la nube de GitHub (medido el 20 nov 2026: 3 de cada 4 corridas, con tramos de hasta
 # 3 horas); por eso a Amazon se le da mas margen y un rechazo suelto no abre aviso.
-HORAS_SIN_LEER = {"Amazon": 6}
+HORAS_SIN_LEER = {"Amazon": 6, "Gameplanet": 2}
 HORAS_SIN_LEER_DEFECTO = 2
 # Nunca interesan: accesorios, usados, importados declarados en el titulo.
 EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
@@ -50,6 +50,7 @@ EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|se
 VENDEDOR_OFICIAL = {
     "Amazon": r"^\s*(amazon(\s+m[eé]xico)?|{marca}(\s+m[eé]xico)?)\s*$",   # no terceros ni "Remates de Almacen"
     "Elektra": r"^\s*elektra\s*$",                                        # no vendedores del marketplace
+    "Gameplanet": r"^\s*game\s*planet\s*$",                               # vendedor leido de la ficha (ld+json)
 }
 SENAL_IMPORTADO = r"importaci[oó]n|desde Estados Unidos|Amazon Estados Unidos|Amazon Global|Env[ií]o internacional"
 # En el foro solo se atienden tiendas establecidas en Mexico (no importadores ni revendedores).
@@ -458,9 +459,54 @@ def leer_liverpool(prod, cfg, estado):
     return salida
 
 
+GAMEPLANET = "https://www.gameplanet.com"
+GP_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas", "PreOrder": "preventa"}
+
+
+def ficha_gameplanet(t):
+    """Nombre y ofertas [(precio, existencia, condicion, vendedor)] del ld+json de una ficha de Gameplanet
+    (medido el 24 nov 2026: el catalogo no trae existencia; la ficha si, con el vendedor de cada oferta)."""
+    m = re.search(r'<script type="application/ld\+json" data-testid="product-jsonld">(.*?)</script>', t, re.S)
+    if not m:
+        return "", []
+    d = json.loads(m.group(1))
+    ofs = d.get("offers") or []
+    ofs = ofs if isinstance(ofs, list) else [ofs]
+    fin = lambda x: (x or "").rsplit("/", 1)[-1]
+    return d.get("name", ""), [(float(o["price"]) if o.get("price") else None, fin(o.get("availability")),
+                                fin(o.get("itemCondition")), (o.get("seller") or {}).get("name", "")) for o in ofs]
+
+
+def leer_gameplanet(prod, cfg, estado):
+    """Catalogo de busqueda (titulo y precio) y, para lo que casa con el producto, su ficha (existencia, condicion,
+    vendedor). Solo ofertas nuevas y a la venta; el vendedor se lee de la ficha, nunca se supone."""
+    e, t = pedir(GAMEPLANET + "/catalogo?q=" + urllib.parse.quote(cfg["consulta"]))
+    if e != 200 or ('data-testid="product-card"' not in t and 'data-testid="no-products"' not in t):
+        raise RuntimeError("Gameplanet respondio %s (%d bytes)" % (e, len(t)))
+    lista = t[t.find('data-testid="products-list"'):] if 'data-testid="products-list"' in t else ""
+    salida, vistos = [], set()
+    for href, cuerpo in re.findall(r'data-testid="product-card" href="(/products/[^"]+)">(.*?)</a></li>', lista, re.S):
+        tit = re.search(r"<h3[^>]*>(.*?)</h3>", cuerpo, re.S)
+        pr = re.search(r'data-testid="product-price" data-value="([\d.]+)"', cuerpo)
+        titulo = html.unescape(re.sub(r"<[^>]+>", " ", tit.group(1))).strip() if tit else ""
+        if href in vistos or not pr or not variante(prod, titulo) or float(pr.group(1)) < prod["piso"]:
+            continue
+        vistos.add(href)
+        e, f = pedir(GAMEPLANET + href, pausa=1.0)
+        if e != 200:
+            raise RuntimeError("Gameplanet respondio %s en la ficha %s" % (e, href))
+        nombre, ofs = ficha_gameplanet(f)
+        for precio, existe, cond, vend in ofs:
+            if existe in GP_EN_VENTA and cond == "NewCondition":
+                of = oferta(prod, "Gameplanet", nombre or titulo, precio, GAMEPLANET + href, vend, GP_EN_VENTA[existe])
+                if of:
+                    salida.append(of)
+    return salida
+
+
 # Para sumar una tienda: correr sondeo.py, escribir leer_<tienda>(prod, cfg, estado) y registrarla aqui.
 LECTORES = {"Samsung": leer_samsung, "Amazon": leer_amazon, "Costco": leer_costco,
-            "Elektra": leer_elektra, "Liverpool": leer_liverpool}
+            "Elektra": leer_elektra, "Liverpool": leer_liverpool, "Gameplanet": leer_gameplanet}
 
 
 # ------------------------------------------------------------------------------- foro (respaldo)
@@ -722,7 +768,8 @@ def selftest():
         assert not esperado or marca_ok(ps, titulo), titulo
     assert variante(ps, "Consola PlayStation 5 Pro Digital 2 TB") is None        # la Pro no casa ni sin el piso
     assert variante(ps, "Consola PS5 Edicion Digital (sin lector de disco) 825 GB")["id"] == "digital"
-    assert variante(ps, "Consola PlayStation 5 Slim") is None                    # sin dato de variante: se ignora
+    assert variante(ps, "Consola PlayStation 5 Slim")["id"] == "sin-dato"        # sin dato de variante: la de topes mas bajos
+    assert topes(ps, var_por_id(ps, "sin-dato")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "sin-dato"))
     dig = "Consola PlayStation 5 - Edición Digital de 825 GB"
     assert oferta(ps, "Amazon", dig, 9500, "u", "GameStore MX") is None          # tercero: no entra ni avisa
     assert oferta(ps, "Amazon", dig, 9500, "u", "Sony") is None                  # en Amazon solo Amazon Mexico
@@ -733,8 +780,30 @@ def selftest():
     # productos separados: la variante de cada clave del historial se encuentra en su producto
     assert clave_de(prods, "Amazon", "PS5 Digital (sin lector)") == "Amazon|ps5|digital"
     assert clave_de(prods, "Amazon", "Fold8 512 GB") == "Amazon|fold8|normal-512"
-    print("selftest OK: %d titulos Fold8 y %d PS5, topes, vendedor oficial, importacion y agotado/regreso"
-          % (len(casos), len(casos_ps5)))
+    # Gameplanet: titulos reales de su catalogo del 24 nov 2026 (precio de la ficha; vendedor leido del ld+json)
+    casos_gp = [
+        ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING", 10999.99, "Gameplanet", "digital"),
+        ("CONSOLA PLAYSTATION 5 DIGITAL 30 ANIVERSARIO", 19999.99, "Gameplanet", "digital"),
+        ("CONSOLA PLAYSTATION 5 SLIM", 11999.99, "Gameplanet", "sin-dato"),    # con lector, pero el titulo no lo dice
+        ("CONSOLA PLAYSTATION 5 BUNDLE GOD OF WAR RAGNAROK", 11999.99, "Gameplanet", "sin-dato"),
+        ("CONSOLA PLAYSTATION 5 PRO DIGITAL 2TB", 9999.99, "Gameplanet", None),
+        ("CONSOLA PLAYSTATION 5 PORTAL REMOTE", 6999.99, "Gameplanet", None),
+        ("CONTROL PLAYSTATION 5 DUALSENSE EDICION LIMITADA GRAN TURISMO", 1699.99, "Gameplanet", None),
+        ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING", 10999.99, "Vendedor Externo MX", None),
+        ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING", 10999.99, "", None)]   # vendedor sin leer: no entra
+    for titulo, precio, vend, esperado in casos_gp:
+        o = oferta(ps, "Gameplanet", titulo, precio, "u", vend)
+        assert (o["var"] if o else None) == esperado, (titulo, vend, o and o["var"], esperado)
+    ficha_gp = ('<script type="application/ld+json" data-testid="product-jsonld">{"@context":"https://schema.org",'
+                '"@type":"Product","name":"CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING","offers":[{"@type":"Offer",'
+                '"price":"10999.99","priceCurrency":"MXN","itemCondition":"https://schema.org/NewCondition",'
+                '"availability":"https://schema.org/InStock","sku":"711719022046","seller":{"@type":"Organization",'
+                '"name":"Gameplanet"}}]}</script>')
+    assert ficha_gameplanet(ficha_gp) == ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING",
+                                          [(10999.99, "InStock", "NewCondition", "Gameplanet")]), ficha_gameplanet(ficha_gp)
+    assert ficha_gameplanet("<html></html>") == ("", [])
+    print("selftest OK: %d titulos Fold8, %d PS5 y %d Gameplanet, topes, vendedor oficial, importacion y agotado/regreso"
+          % (len(casos), len(casos_ps5), len(casos_gp)))
     return 0
 
 

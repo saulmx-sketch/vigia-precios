@@ -68,13 +68,15 @@
    },
    "variantes": [
     {"id": "disco", "nombre": "PS5 con lector de disco", "todas": ["disco|lector|blu-?ray|^(?!.*digital).*(\\b1\\s*tb\\b|standard|est[aá]ndar)"], "ninguna": ["sin\\s+(lector|unidad|disco)"], "lista": 14599},
-    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499}
+    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499},
+    {"id": "sin-dato", "nombre": "PS5 (modelo sin dato)", "lista": 12499}
    ],
    "tiendas": {
     "Amazon": {"consultas": ["playstation+5+digital", "playstation+5+1tb"]},
     "Costco": {"consulta": "playstation 5"},
     "Elektra": {"consulta": "consola playstation 5"},
-    "Liverpool": {"consulta": "playstation+5"}
+    "Liverpool": {"consulta": "playstation+5"},
+    "Gameplanet": {"consulta": "consola playstation 5"}
    },
    "foro": {
     "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]

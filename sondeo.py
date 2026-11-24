@@ -36,7 +36,11 @@ URLS = {
     "sears_busca": "https://www.sears.com.mx/resultados/q=galaxy%20z%20fold8/pagina=1",
     "palacio_busca": "https://www.elpalaciodehierro.com/buscar?q=galaxy+z+fold8",
     "telcel_busca": "https://www.telcel.com/tienda/buscar?q=fold8",
-    "promodescuentos_rss": "https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
+    "gameplanet_ps5": "https://www.gameplanet.com/catalogo?q=consola%20playstation%205",
+    "gameplanet_fold8": "https://www.gameplanet.com/catalogo?q=galaxy%20z%20fold8",
+    "sanborns_ps5": "https://www.sanborns.com.mx/resultados/q=playstation%205/pagina=1",
+    "sanborns_fold8": "https://www.sanborns.com.mx/resultados/q=galaxy%20z%20fold8/pagina=1",
+    "promodescuentos_rss":"https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
 }
 
 
