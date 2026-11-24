@@ -660,6 +660,11 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
     agotados = estado.setdefault("agotados", {})
     ausente = estado.setdefault("ausente", {})
     avisos = []
+    # claves que una regla de titulos mal puesta dejo sembradas: se olvidan sin aviso de "agotado"
+    for p in prods:
+        for c in p.get("olvidar", []):
+            if c not in mejores:
+                conocidos.pop(c, None); ausente.pop(c, None); agotados.pop(c, None)
     for c, o in mejores.items():
         conocidos[c] = {"producto": o["nombre"], "precio": o["precio"], "url": o["url"], "visto": hoy}
         ausente.pop(c, None)

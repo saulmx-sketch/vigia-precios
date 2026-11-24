@@ -55,7 +55,8 @@
    "marca": "sony",
    "marca_titulo": "sony|play\\s*station|\\bps5\\b",
    "patron": "play\\s*station\\s*®?\\s*5|\\bps5\\b",
-   "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
+   "olvidar": ["Amazon|ps5|sin-dato"],
+   "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|\\bssd\\b|nvme|estado\\s+s[oó]lido|disco\\s+duro|wd_?black|seagate|almacenamiento\\s+(interno|externo)|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
    "piso": 6500,
    "fracciones": [0.60, 0.72, 0.86],
    "topes_fijos": {},
@@ -69,7 +70,7 @@
    "variantes": [
     {"id": "disco", "nombre": "PS5 con lector de disco", "todas": ["disco|lector|blu-?ray|^(?!.*digital).*(\\b1\\s*tb\\b|standard|est[aá]ndar)"], "ninguna": ["sin\\s+(lector|unidad|disco)"], "lista": 14599},
     {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499},
-    {"id": "sin-dato", "nombre": "PS5 (modelo sin dato)", "todas": ["slim|bundle|megapack|paquete|edici[oó]n|825\\s*gb|\\b1\\s*tb\\b"], "lista": 12499}
+    {"id": "sin-dato", "nombre": "PS5 (modelo sin dato)", "todas": ["consola|console", "slim|bundle|megapack|paquete|edici[oó]n|825\\s*gb|\\b1\\s*tb\\b"], "lista": 12499}
    ],
    "tiendas": {
     "Amazon": {"consultas": ["playstation+5+digital", "playstation+5+1tb"]},
