@@ -770,6 +770,9 @@ def selftest():
     assert variante(ps, "Consola PS5 Edicion Digital (sin lector de disco) 825 GB")["id"] == "digital"
     assert variante(ps, "Consola PlayStation 5 Slim")["id"] == "sin-dato"        # sin dato de variante: la de topes mas bajos
     assert topes(ps, var_por_id(ps, "sin-dato")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "sin-dato"))
+    # Liverpool titula "Consola PS5" a secas al PlayStation Portal ($5,999; aviso falso de GANGA, 24 nov 2026)
+    assert oferta(ps, "Liverpool", "Consola PS5", 5999, "u", "Liverpool") is None
+    assert variante(ps, "Consola PS5") is None and variante(ps, "Consola PlayStation 5") is None
     dig = "Consola PlayStation 5 - Edición Digital de 825 GB"
     assert oferta(ps, "Amazon", dig, 9500, "u", "GameStore MX") is None          # tercero: no entra ni avisa
     assert oferta(ps, "Amazon", dig, 9500, "u", "Sony") is None                  # en Amazon solo Amazon Mexico
@@ -786,6 +789,7 @@ def selftest():
         ("CONSOLA PLAYSTATION 5 DIGITAL 30 ANIVERSARIO", 19999.99, "Gameplanet", "digital"),
         ("CONSOLA PLAYSTATION 5 SLIM", 11999.99, "Gameplanet", "sin-dato"),    # con lector, pero el titulo no lo dice
         ("CONSOLA PLAYSTATION 5 BUNDLE GOD OF WAR RAGNAROK", 11999.99, "Gameplanet", "sin-dato"),
+        ("CONSOLA PLAYSTATION 5", 5999.99, "Gameplanet", None),               # a secas: sin pista de consola completa
         ("CONSOLA PLAYSTATION 5 PRO DIGITAL 2TB", 9999.99, "Gameplanet", None),
         ("CONSOLA PLAYSTATION 5 PORTAL REMOTE", 6999.99, "Gameplanet", None),
         ("CONTROL PLAYSTATION 5 DUALSENSE EDICION LIMITADA GRAN TURISMO", 1699.99, "Gameplanet", None),
