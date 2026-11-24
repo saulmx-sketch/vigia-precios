@@ -20,7 +20,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 04:28 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 04:43 busqueda 200 de 2327 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 04:58 busqueda ok; busqueda ok",
   "11-23 05:13 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -79,7 +78,8 @@
   "11-23 18:40 busqueda ok; busqueda ok",
   "11-23 18:55 busqueda ok; busqueda ok",
   "11-23 19:11 busqueda ok; busqueda ok",
-  "11-23 19:27 busqueda ok; busqueda ok"
+  "11-23 19:27 busqueda ok; busqueda ok",
+  "11-23 19:43 busqueda 200 de 2314 bytes, reintento ok; busqueda ok; ficha B0H92G9GNW ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -118,7 +118,7 @@
    "fold8"
   ],
   "B0H92G9GNW": [
-   37999.05,
+   22499.0,
    "Amazon Remates de Almacén",
    false,
    "fold8"
