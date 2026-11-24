@@ -665,6 +665,7 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
         for c in p.get("olvidar", []):
             if c not in mejores:
                 conocidos.pop(c, None); ausente.pop(c, None); agotados.pop(c, None)
+                estado.get("avisado", {}).pop(c, None)   # y sin aviso de precio pendiente de esa clave
     for c, o in mejores.items():
         conocidos[c] = {"producto": o["nombre"], "precio": o["precio"], "url": o["url"], "visto": hoy}
         ausente.pop(c, None)
@@ -710,7 +711,11 @@ def selftest():
     casos = [("Samsung Galaxy Z Fold8 Ultra Grafito 512GB", "ultra-512"), ("Galaxy Z Fold 8 512GB Crema", "normal-512"),
              ("Samsung Galaxy ZFold8 Ultra 1TB Grafito", "ultra-1tb"), ("Funda para Samsung Galaxy Z Fold8 Ultra", None),
              ("Samsung Galaxy Z Fold8 256GB", None), ("Galaxy Z Fold8 Ultra 512GB version internacional", None),
-             ("Samsung Galaxy Z Fold7 512GB", None), ("Smartphone Galaxy Z Fold8 Ultra Super AMOLED", "ultra")]
+             ("Samsung Galaxy Z Fold7 512GB", None), ("Smartphone Galaxy Z Fold8 Ultra Super AMOLED", "ultra"),
+             # titulos reales del 24 nov 2026: Elektra (Ultra 256 GB, sin lista de Samsung: se ignora), Costco, Liverpool
+             ("Samsung Galaxy Z Fold 8 Ultra 256 GB Grafito", None), ("Samsung Galaxy Z Fold Ultra 8 512GB Violeta", "ultra-512"),
+             ("Samsung Galaxy Z Fold8 12+512GB Lavanda", "normal-512"), ("Fold8 super AMOLED plus 7.6 pulgadas", "normal"),
+             ("Funda para Samsung Galaxy Fold8 Ultra de policarbonato", None), ("Smartphone Samsung Galaxy Z Fold7 5G 256GB", None)]
     for titulo, esperado in casos:
         v = variante(p, titulo)
         assert (v["id"] if v else None) == esperado, (titulo, v and v["id"], esperado)
@@ -758,9 +763,9 @@ def selftest():
     ps = next(x for x in prods if x["id"] == "ps5")
     casos_ps5 = [
         ("Consola PlayStation 5 - Edición Digital de 825 GB: Astro Bot y Gran Turismo 7 - Digital Edition", 12499, "digital"),
-        ("Consola PlayStation 5 de 1 TB: ASTRO BOT y Gran Turismo 7, Modelo PS5STA-ASTRO - Standard Edition", 14599, "disco"),
-        ("PlayStation 5 Consola Slim Disco Digital + PS5 Digital 825GB con ASTRO BOT y GT7", 14498, "disco"),
-        ("Sony Death Stranding 2 PS5 + PlayStation 5 1TB ASTRO BOT/GT7", 15490, "disco"),
+        ("Consola PlayStation 5 de 1 TB: ASTRO BOT y Gran Turismo 7, Modelo PS5STA-ASTRO - Standard Edition", 14599, None),
+        ("PlayStation 5 Consola Slim Disco Digital + PS5 Digital 825GB con ASTRO BOT y GT7", 14498, "digital"),
+        ("Sony Death Stranding 2 PS5 + PlayStation 5 1TB ASTRO BOT/GT7", 15490, None),
         ("PlayStation 5 Unidad de Disco- Consola Slim digital", 1999, None),
         ("PlayStation 5 Cubierta de Consola Digital Slim – Chroma Pearl", 1417.79, None),
         ("PlayStation 5 Reproductor Remoto Portal Midnight Black", 5199, None),
@@ -773,8 +778,15 @@ def selftest():
         assert not esperado or marca_ok(ps, titulo), titulo
     assert variante(ps, "Consola PlayStation 5 Pro Digital 2 TB") is None        # la Pro no casa ni sin el piso
     assert variante(ps, "Consola PS5 Edicion Digital (sin lector de disco) 825 GB")["id"] == "digital"
-    assert variante(ps, "Consola PlayStation 5 Slim")["id"] == "sin-dato"        # sin dato de variante: la de topes mas bajos
-    assert topes(ps, var_por_id(ps, "sin-dato")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "sin-dato"))
+    assert variante(ps, "Consola PlayStation 5 Slim") is None                    # Saul 24 nov: solo la Digital
+    assert [v["id"] for v in ps["variantes"]] == ["digital"]
+    # olvidar: las claves de variantes retiradas se borran sin aviso de agotado y sin aviso de precio pendiente
+    est_o = {"conocidos": {"Liverpool|ps5|disco": {"producto": "PS5 con lector de disco", "precio": 14699, "url": "u",
+                                                   "visto": "h"}},
+             "ausente": {"Liverpool|ps5|disco": 3}, "avisado": {"Amazon|ps5|sin-dato": 9000}}
+    for _ in range(AUSENCIAS_AGOTADO + 1):
+        assert disponibilidad(est_o, prods, {}, {"Liverpool", "Amazon"}, "h") == []
+    assert not est_o["conocidos"] and not est_o["ausente"] and not est_o["avisado"], est_o
     # Liverpool titula "Consola PS5" a secas al PlayStation Portal ($5,999; aviso falso de GANGA, 24 nov 2026)
     assert oferta(ps, "Liverpool", "Consola PS5", 5999, "u", "Liverpool") is None
     assert variante(ps, "Consola PS5") is None and variante(ps, "Consola PlayStation 5") is None
@@ -784,7 +796,6 @@ def selftest():
     assert oferta(ps, "Amazon", dig, 9500, "u", "Amazon México")["precio"] == 9500
     assert oferta(ps, "Elektra", dig, 9500, "u", "Elektra") and oferta(ps, "Elektra", dig, 9500, "u", "Gamers MX") is None
     assert topes(ps, var_por_id(ps, "digital")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "digital"))
-    assert topes(ps, var_por_id(ps, "disco")) == (8800, 10500, 12600), topes(ps, var_por_id(ps, "disco"))
     # productos separados: la variante de cada clave del historial se encuentra en su producto
     assert clave_de(prods, "Amazon", "PS5 Digital (sin lector)") == "Amazon|ps5|digital"
     assert clave_de(prods, "Amazon", "Fold8 512 GB") == "Amazon|fold8|normal-512"
@@ -792,8 +803,8 @@ def selftest():
     casos_gp = [
         ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING", 10999.99, "Gameplanet", "digital"),
         ("CONSOLA PLAYSTATION 5 DIGITAL 30 ANIVERSARIO", 19999.99, "Gameplanet", "digital"),
-        ("CONSOLA PLAYSTATION 5 SLIM", 11999.99, "Gameplanet", "sin-dato"),    # con lector, pero el titulo no lo dice
-        ("CONSOLA PLAYSTATION 5 BUNDLE GOD OF WAR RAGNAROK", 11999.99, "Gameplanet", "sin-dato"),
+        ("CONSOLA PLAYSTATION 5 SLIM", 11999.99, "Gameplanet", None),          # con lector: fuera (solo Digital)
+        ("CONSOLA PLAYSTATION 5 BUNDLE GOD OF WAR RAGNAROK", 11999.99, "Gameplanet", None),
         ("CONSOLA PLAYSTATION 5", 5999.99, "Gameplanet", None),               # a secas: sin pista de consola completa
         ("CONSOLA PLAYSTATION 5 PRO DIGITAL 2TB", 9999.99, "Gameplanet", None),
         ("CONSOLA PLAYSTATION 5 PORTAL REMOTE", 6999.99, "Gameplanet", None),

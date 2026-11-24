@@ -37,7 +37,7 @@
       "SM-F971BZKMLTM": ["normal-512", "Grafito", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
       "SM-F971BLVMLTM": ["normal-512", "Lavanda", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
       "SM-F971BZWMLTM": ["normal-512", "Crema", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"],
-      "SM-F971BZGMLTM": ["normal-512", "Verde", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"]
+      "SM-F971BZGMLTM": ["normal-512", "Pistache", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/"]
      }
     },
     "Amazon": {"consultas": ["samsung+galaxy+z+fold8+ultra", "samsung+galaxy+z+fold8+512"]},
@@ -55,7 +55,10 @@
    "marca": "sony",
    "marca_titulo": "sony|play\\s*station|\\bps5\\b",
    "patron": "play\\s*station\\s*®?\\s*5|\\bps5\\b",
-   "olvidar": ["Amazon|ps5|sin-dato"],
+   "_variantes": "Saul 2026-11-24: Limita las PlayStations a la digital. Para que quiero pagar mas por el disco? (el paquete Digital + unidad de disco cuenta como Digital)",
+   "olvidar": ["Amazon|ps5|disco", "Amazon|ps5|sin-dato", "Liverpool|ps5|disco", "Liverpool|ps5|sin-dato",
+               "Gameplanet|ps5|disco", "Gameplanet|ps5|sin-dato", "Costco|ps5|disco", "Costco|ps5|sin-dato",
+               "Elektra|ps5|disco", "Elektra|ps5|sin-dato"],
    "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|\\bssd\\b|nvme|estado\\s+s[oó]lido|disco\\s+duro|wd_?black|seagate|almacenamiento\\s+(interno|externo)|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
    "piso": 6500,
    "fracciones": [0.60, 0.72, 0.86],
@@ -68,12 +71,10 @@
     "vendedor_oficial": {"Amazon": "^\\s*amazon(\\s+m[eé]xico)?\\s*$"}
    },
    "variantes": [
-    {"id": "disco", "nombre": "PS5 con lector de disco", "todas": ["disco|lector|blu-?ray|^(?!.*digital).*(\\b1\\s*tb\\b|standard|est[aá]ndar)"], "ninguna": ["sin\\s+(lector|unidad|disco)"], "lista": 14599},
-    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499},
-    {"id": "sin-dato", "nombre": "PS5 (modelo sin dato)", "todas": ["consola|console", "slim|bundle|megapack|paquete|edici[oó]n|825\\s*gb|\\b1\\s*tb\\b"], "lista": 12499}
+    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499}
    ],
    "tiendas": {
-    "Amazon": {"consultas": ["playstation+5+digital", "playstation+5+1tb"]},
+    "Amazon": {"consultas": ["playstation+5+digital"]},
     "Costco": {"consulta": "playstation 5"},
     "Elektra": {"consulta": "consola playstation 5"},
     "Liverpool": {"consulta": "playstation+5"},
