@@ -795,7 +795,7 @@ def selftest():
     assert oferta(ps, "Amazon", dig, 9500, "u", "Sony") is None                  # en Amazon solo Amazon Mexico
     assert oferta(ps, "Amazon", dig, 9500, "u", "Amazon México")["precio"] == 9500
     assert oferta(ps, "Elektra", dig, 9500, "u", "Elektra") and oferta(ps, "Elektra", dig, 9500, "u", "Gamers MX") is None
-    assert topes(ps, var_por_id(ps, "digital")) == (7500, 9000, 10700), topes(ps, var_por_id(ps, "digital"))
+    assert topes(ps, var_por_id(ps, "digital")) == (7500, 9000, 10800), topes(ps, var_por_id(ps, "digital"))
     # productos separados: la variante de cada clave del historial se encuentra en su producto
     assert clave_de(prods, "Amazon", "PS5 Digital (sin lector)") == "Amazon|ps5|digital"
     assert clave_de(prods, "Amazon", "Fold8 512 GB") == "Amazon|fold8|normal-512"

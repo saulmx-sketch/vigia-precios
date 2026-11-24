@@ -61,7 +61,8 @@
                "Elektra|ps5|disco", "Elektra|ps5|sin-dato"],
    "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|\\bssd\\b|nvme|estado\\s+s[oó]lido|disco\\s+duro|wd_?black|seagate|almacenamiento\\s+(interno|externo)|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
    "piso": 6500,
-   "fracciones": [0.60, 0.72, 0.86],
+   "_fracciones": "Calibradas el 2026-11-24 con la grafica Keepa de dos anios del ASIN B0FTP523RH (vende Amazon Mexico): minimo $6,900 (Black Friday 2025; esa ventana fue 6,900-7,900), precio tipico feb-jun 2026 $9,000 (piso Hot Sale ~$8,300), y $10,740 en el Buen Fin 2026, ya con la lista subida a 12,499",
+   "fracciones": [0.60, 0.72, 0.864],
    "topes_fijos": {},
    "requisitos": {
     "_regla": "Saul, perfil de comprador 2026-11-19: en aparatos caros el precio que cuenta es el de la marca o de la tienda misma; un vendedor tercero de marketplace no cuenta como piso; importados no",
