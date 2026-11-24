@@ -23,14 +23,6 @@
   "url": "https://www.amazon.com.mx/dp/B0G76YF472?th=1&psc=1",
   "vendedor": "Amazon México"
  },
- "Amazon|ps5|sin-dato": {
-  "leido": "2026-11-24 10:53",
-  "nota": "",
-  "precio": 16667.26,
-  "producto": "PS5 (modelo sin dato)",
-  "url": "https://www.amazon.com.mx/dp/B0D9WTKV1B?th=1&psc=1",
-  "vendedor": "Amazon México"
- },
  "Costco|fold8|normal-512": {
   "leido": "2026-11-23 01:55",
   "nota": "descuento de tienda $7,000 hasta 2026-11-30",
@@ -72,11 +64,11 @@
   "vendedor": "Liverpool"
  },
  "Liverpool|ps5|sin-dato": {
-  "leido": "2026-11-24 10:53",
+  "leido": "2026-11-24 11:25",
   "nota": "es el precio mas bajo de sus variantes",
-  "precio": 5999.0,
+  "precio": 12499.0,
   "producto": "PS5 (modelo sin dato)",
-  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1156059630",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807",
   "vendedor": "Liverpool"
  },
  "Samsung|fold8|normal-512": {
