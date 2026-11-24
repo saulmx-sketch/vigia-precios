@@ -23,6 +23,14 @@
   "url": "https://www.amazon.com.mx/dp/B0G76YF472?th=1&psc=1",
   "vendedor": "Amazon México"
  },
+ "Amazon|ps5|sin-dato": {
+  "leido": "2026-11-24 10:53",
+  "nota": "",
+  "precio": 16667.26,
+  "producto": "PS5 (modelo sin dato)",
+  "url": "https://www.amazon.com.mx/dp/B0D9WTKV1B?th=1&psc=1",
+  "vendedor": "Amazon México"
+ },
  "Costco|fold8|normal-512": {
   "leido": "2026-11-23 01:55",
   "nota": "descuento de tienda $7,000 hasta 2026-11-30",
@@ -30,6 +38,14 @@
   "producto": "Fold8 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
   "vendedor": "Costco (pide membresia)"
+ },
+ "Gameplanet|ps5|digital": {
+  "leido": "2026-11-24 10:53",
+  "nota": "",
+  "precio": 10999.99,
+  "producto": "PS5 Digital (sin lector)",
+  "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
+  "vendedor": "Gameplanet"
  },
  "Liverpool|fold8|normal": {
   "leido": "2026-11-19 18:57",
@@ -53,6 +69,14 @@
   "precio": 14699.0,
   "producto": "PS5 con lector de disco",
   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785793",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|ps5|sin-dato": {
+  "leido": "2026-11-24 10:53",
+  "nota": "es el precio mas bajo de sus variantes",
+  "precio": 5999.0,
+  "producto": "PS5 (modelo sin dato)",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1156059630",
   "vendedor": "Liverpool"
  },
  "Samsung|fold8|normal-512": {
