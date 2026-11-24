@@ -20,7 +20,6 @@
   "CART5_EPP"
  ],
  "diag_amazon": [
-  "11-23 05:28 busqueda 200 de 2319 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 05:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 05:58 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-23 06:14 busqueda 200 de 2322 bytes, reintento 200 de 2322 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -79,7 +78,8 @@
   "11-23 19:43 busqueda 200 de 2314 bytes, reintento ok; busqueda ok; ficha B0H92G9GNW ok",
   "11-23 19:59 busqueda ok; busqueda 200 de 2311 bytes, reintento ok",
   "11-23 20:14 busqueda ok; busqueda ok",
-  "11-23 20:30 busqueda ok; busqueda 200 de 2311 bytes, reintento ok"
+  "11-23 20:30 busqueda ok; busqueda 200 de 2311 bytes, reintento ok",
+  "11-23 20:45 busqueda ok; busqueda ok; ficha B0H779SQRZ ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -112,7 +112,7 @@
    "fold8"
   ],
   "B0H779SQRZ": [
-   35499.0,
+   32399.0,
    "Amazon México",
    false,
    "fold8"
