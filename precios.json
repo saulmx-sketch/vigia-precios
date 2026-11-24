@@ -7,6 +7,22 @@
   "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
   "vendedor": "Amazon México"
  },
+ "Amazon|ps5|digital": {
+  "leido": "2026-11-24 10:06",
+  "nota": "",
+  "precio": 12499.0,
+  "producto": "PS5 Digital (sin lector)",
+  "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
+  "vendedor": "Amazon México"
+ },
+ "Amazon|ps5|disco": {
+  "leido": "2026-11-24 10:06",
+  "nota": "",
+  "precio": 14498.0,
+  "producto": "PS5 con lector de disco",
+  "url": "https://www.amazon.com.mx/dp/B0G76YF472?th=1&psc=1",
+  "vendedor": "Amazon México"
+ },
  "Costco|fold8|normal-512": {
   "leido": "2026-11-23 01:55",
   "nota": "descuento de tienda $7,000 hasta 2026-11-30",
@@ -21,6 +37,22 @@
   "precio": 44999.0,
   "producto": "Fold8 (capacidad sin dato)",
   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|ps5|digital": {
+  "leido": "2026-11-24 10:06",
+  "nota": "es el precio mas bajo de sus variantes",
+  "precio": 19998.0,
+  "producto": "PS5 Digital (sin lector)",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1180626294",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|ps5|disco": {
+  "leido": "2026-11-24 10:06",
+  "nota": "es el precio mas bajo de sus variantes",
+  "precio": 14699.0,
+  "producto": "PS5 con lector de disco",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785793",
   "vendedor": "Liverpool"
  },
  "Samsung|fold8|normal-512": {
