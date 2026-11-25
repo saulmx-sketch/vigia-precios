@@ -74,7 +74,7 @@ BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cup
 DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
 HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
 TOPE_CUPONES = 40        # codigos probados por corrida y producto (los recien hallados primero)
-SEGUNDOS_CARRITO = 100   # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 8 min)
+SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
 NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|"
                          r"CUPON|CODIGO|ASESOR|EPROMOTER|DESCUENTO|GRATIS|ENVIO)$")
 
