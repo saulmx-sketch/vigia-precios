@@ -63,6 +63,20 @@ BANCOS_AJENOS = {"Banorte": r"banorte", "Santander": r"santander", "Banamex": r"
                  "Inbursa": r"inbursa", "Afirme": r"afirme", "BanCoppel": r"bancoppel",
                  "Mercado Pago": r"mercado\s*pago", "Nu": r"\bnu\b", "Hey Banco": r"hey\s*banco"}
 SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v2/mx"
+# Cupones: el vigia los sale a buscar en cada corrida (Saul, 25 nov 2026: "que tenga proactividad en buscar cupones";
+# hasta ese dia la cosecha automatica habia juntado cero codigos, ver INCIDENTES.md). Fuentes medidas ese dia:
+# las paginas de Samsung publican "cupon BF1000" / "20% cupon ECO_20" en sus banners, y el foro guarda en los datos de
+# cada hilo el campo voucherCode con la tienda (linkHost) y la fecha (publishedAt).
+PAGINAS_CUPON_SAMSUNG = ["https://www.samsung.com/mx/offer/", "https://www.samsung.com/mx/offer/black-friday/",
+                         "https://www.samsung.com/mx/smartphones/all-smartphones/",
+                         "https://www.samsung.com/mx/apps/samsung-shop-app/"]
+BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cupones_foro" de cada producto
+DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
+HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
+TOPE_CUPONES = 40        # codigos probados por corrida y producto (los recien hallados primero)
+SEGUNDOS_CARRITO = 100   # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 8 min)
+NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|"
+                         r"CUPON|CODIGO|ASESOR|EPROMOTER|DESCUENTO|GRATIS|ENVIO)$")
 
 
 # ------------------------------------------------------------------------------- utilidades
@@ -86,14 +100,29 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0)
             b = r.read()
             if r.headers.get("Content-Encoding") == "gzip":
                 b = gzip.decompress(b)
-            return r.status, b.decode("utf-8", "replace")
+            return r.status, decodificar(b, r.headers.get("Content-Type", ""))
     except urllib.error.HTTPError as e:
         b = e.read() or b""
         try:
             b = gzip.decompress(b)
         except Exception:
             pass
-        return e.code, b.decode("utf-8", "replace")
+        return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
+
+
+def decodificar(b, tipo=""):
+    """Texto de una respuesta. Samsung sirve sus paginas sin decir la codificacion y no en UTF-8: leidas como UTF-8,
+    'cupon' con acento salia roto y la busqueda de codigos nunca casaba (medido el 25 nov 2026)."""
+    m = re.search(r"charset=([\w-]+)", tipo or "", re.I)
+    if m:
+        try:
+            return b.decode(m.group(1), "replace")
+        except LookupError:
+            pass
+    try:
+        return b.decode("utf-8")
+    except UnicodeDecodeError:
+        return b.decode("cp1252", "replace")
 
 
 def cargar_config(ruta=CONFIG):
@@ -177,17 +206,107 @@ def oferta(prod, tienda, titulo, precio, url, vendedor="", nota="", importado=Fa
 
 
 # ------------------------------------------------------------------------------- tiendas
+def codigos_de(texto):
+    """Codigos sueltos de un campo de cupones ('BFLIVESEM + CRP26TV + CARRITO5', 'A | B o C', 'Cupon del Asesor')."""
+    salida = []
+    for pieza in re.split(r"[+|/,;]|\s+(?:o|y|u|or)\s+|\s+-\s+|\s{2,}", texto or ""):
+        pieza = pieza.strip(" .:'\"“”()")
+        if (re.fullmatch(r"[A-Z0-9][A-Z0-9_\-]{3,21}", pieza) and re.search(r"[A-Z]", pieza)
+                and not NO_ES_CUPON.match(pieza) and pieza not in salida):
+            salida.append(pieza)
+    return salida
+
+
+def cupones_en_texto(plano):
+    """Codigos anunciados en una pagina: 'con el cupon BF1000', '20% cupon ECO_20', 'usa el codigo X'."""
+    salida = []
+    for m in re.finditer(r"(?i:cup[oó]n(?:es)?|c[oó]digo)\s*(?:(?i:de\s+descuento)\s*)?[:\"“]?\s*"
+                         r"([A-Z0-9][A-Z0-9_\-]{3,21})\b", plano):
+        for c in codigos_de(m.group(1)):
+            if c not in salida:
+                salida.append(c)
+    return salida
+
+
+HILO_FORO = re.compile(r'"publishedAt":(\d+)[^{}]{0,400}?"voucherCode":"((?:[^"\\]|\\.)*)","linkHost":"([^"]*)"')
+
+
+def cosechar_cupones(prods, estado, ahora):
+    """Sale a buscar codigos de Samsung en cada corrida: paginas de ofertas y de compra de Samsung, y los datos
+    del foro. Lo hallado queda en estado['cupones_cosechados'] = {codigo: dia en que se vio por ultima vez}."""
+    cosecha = estado.get("cupones_cosechados")
+    if not isinstance(cosecha, dict):          # formato anterior: lista
+        cosecha = {c: ahora.astimezone(MX).strftime("%Y-%m-%d") for c in (cosecha or [])}
+    paginas, busquedas = list(PAGINAS_CUPON_SAMSUNG), list(BUSQUEDAS_CUPON_FORO)
+    for p in prods:
+        sam = p["tiendas"].get("Samsung")
+        if not sam:
+            continue
+        for info in sam["skus"].values():
+            if len(info) > 2 and info[2] not in paginas:
+                paginas.append(info[2])
+        for b in sam.get("cupones_foro", [p["nombre"]]):
+            if b not in busquedas:
+                busquedas.append(b)
+    hallados, leidas = {}, 0
+    for u in paginas:
+        try:
+            e, t = pedir(u)
+        except Exception:
+            continue
+        if e != 200:
+            continue
+        leidas += 1
+        plano = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t)))
+        for c in cupones_en_texto(plano) + cupones_en_texto(html.unescape(t)):
+            hallados.setdefault(c, "Samsung")
+    for b in busquedas:
+        try:
+            e, t = pedir("https://www.promodescuentos.com/search?q=" + urllib.parse.quote(b) + "&sortBy=new")
+        except Exception:
+            continue
+        if e != 200:
+            continue
+        leidas += 1
+        for pub, crudo, host in HILO_FORO.findall(t):
+            if "samsung" not in host.lower() or ahora.timestamp() - int(pub) > DIAS_CUPON * 86400:
+                continue
+            try:
+                crudo = json.loads('"%s"' % crudo)
+            except Exception:
+                pass
+            for c in codigos_de(crudo):
+                hallados.setdefault(c, "foro")
+    if not leidas:
+        raise RuntimeError("ninguna fuente de cupones respondio")
+    hoy = ahora.astimezone(MX).strftime("%Y-%m-%d")
+    for c in hallados:
+        cosecha[c] = hoy
+    limite = (ahora.astimezone(MX) - dt.timedelta(days=DIAS_CUPON)).strftime("%Y-%m-%d")
+    estado["cupones_cosechados"] = {c: f for c, f in cosecha.items() if f >= limite}
+    estado["cupones_ultima_busqueda"] = {"cuando": ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
+                                         "fuentes_leidas": leidas, "hallados": hallados}
+    return sorted(hallados)
+
+
 def cupones_candidatos(prod, estado):
+    """Primero lo recien hallado (lo mas fresco), luego la lista fija; fuera los reprobados de las ultimas horas."""
     lista = []
     try:
         with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
             lista = [l.split("#")[0].strip() for l in f if l.split("#")[0].strip()]
     except Exception:
         pass
-    for c in estado.get("cupones_cosechados", []):
-        if c not in lista:
-            lista.append(c)
-    return lista[:30]
+    cosecha = estado.get("cupones_cosechados") or {}
+    if not isinstance(cosecha, dict):
+        cosecha = {c: "" for c in cosecha}
+    reprobados = estado.get("cupones_reprobados", {})
+    salida = []
+    for c in sorted(cosecha, key=lambda k: cosecha[k], reverse=True) + lista:
+        if c in salida or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < HORAS_REPROBADO * 3600:
+            continue
+        salida.append(c)
+    return salida[:TOPE_CUPONES]
 
 
 def samsung_carrito(sku, cupones):
@@ -229,15 +348,20 @@ def samsung_carrito(sku, cupones):
         return total()
 
     base, _, d = total()
-    # Pasada 1: cada cupon solo. Asi el resultado no depende del orden de la lista.
-    solos = {}
+    # Pasada 1: cada cupon solo. Asi el resultado no depende del orden de la lista. Un codigo muerto cuesta una
+    # sola peticion (el carrito lo rechaza al ponerlo); hay tope de tiempo para no pasar el limite del trabajo.
+    solos, probados, inicio = {}, [], time.time()
     for cup in cupones:
+        if time.time() - inicio > SEGUNDOS_CARRITO:
+            break
+        probados.append(cup)
         if not poner(cup):
             continue
         t1, puestos, d = total()
         if cup in puestos and t1 < base - 1:
             solos[cup] = t1
-        dejar_solo([])
+        for c in puestos:
+            quitar(c)
     # Pasada 2: se parte del mejor y se le suman los demas solo si bajan el total.
     mejor_total, mejor, fin_d = base, [], d
     for cup in sorted(solos, key=solos.get):
@@ -251,7 +375,7 @@ def samsung_carrito(sku, cupones):
     fin = ""
     for p in d.get("appliedProductPromotions", []) or []:
         fin = (p.get("promotion", {}).get("endDate") or "")[:10] or fin
-    return base, mejor_total, mejor, fin
+    return base, mejor_total, mejor, fin, probados, list(solos)
 
 
 def leer_samsung(prod, cfg, estado):
@@ -268,23 +392,18 @@ def leer_samsung(prod, cfg, estado):
                 vid, color, pagina = skus[sku]
                 if vid not in venta or float(precio) < venta[vid][1]:
                     venta[vid] = (sku, float(precio), color, m.get("ctaType"), pagina)
-    # Codigos que Samsung publica en su propia pagina de la app (primera fuente de cupones).
-    try:
-        e, t = pedir("https://www.samsung.com/mx/apps/samsung-shop-app/")
-        plano = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", t)) if e == 200 else ""
-        cosecha = estado.setdefault("cupones_cosechados", [])
-        for c in re.findall(r"cup[oó]n[^.]{0,80}?\b([A-Z][A-Z0-9_]{4,20})\b", plano):
-            if c not in cosecha and re.search(r"\d|_", c):
-                cosecha.append(c)
-    except Exception:
-        pass
+    # Los codigos los sale a buscar cosechar_cupones (fuente "Cupones", antes de las tiendas, en cada corrida).
     salida, cupones = [], cupones_candidatos(prod, estado)
+    probados, sirven = set(), set()
     for vid, (sku, precio, color, cta, pagina) in venta.items():
         nota = "preventa" if cta == "preOrder" else ""
         try:
-            base, final, buenos, fin = samsung_carrito(sku, cupones)
+            base, final, buenos, fin, prob, solos = samsung_carrito(sku, cupones)
+            probados.update(prob)
+            sirven.update(solos)
             nota = "; ".join(x for x in [
-                ("con cupones " + " + ".join(buenos)) if buenos else "ningun cupon conocido baja el precio",
+                ("con cupones " + " + ".join(buenos)) if buenos else
+                "ninguno de %d cupones probados baja el precio" % len(prob),
                 "sin cupon ${:,.0f}".format(base) if buenos else "",
                 ("promocion vigente hasta " + fin) if fin else "", nota] if x)
             precio = final
@@ -294,6 +413,16 @@ def leer_samsung(prod, cfg, estado):
         of = oferta(prod, "Samsung", "%s %s" % (var["nombre"], color), precio, pagina, "Samsung", nota, var=var)
         if of:
             salida.append(of)
+    # Lo que no bajo el precio de ningun modelo descansa HORAS_REPROBADO; lo que si sirvio se sigue probando siempre.
+    reprobados = estado.setdefault("cupones_reprobados", {})
+    for c in probados:
+        clave = "%s|%s" % (prod["id"], c)
+        if c in sirven:
+            reprobados.pop(clave, None)
+        else:
+            reprobados[clave] = int(time.time())
+    for clave in [k for k, v in reprobados.items() if time.time() - v > 7 * 86400]:
+        del reprobados[clave]
     if not salida:
         raise RuntimeError("Samsung no listo ningun modelo a la venta")
     return salida
@@ -555,13 +684,7 @@ def leer_foro(prods, estado):
             items.setdefault(d["guid"], d)
     if feeds and not items:
         raise RuntimeError("ningun feed del foro respondio")
-    cosecha = estado.setdefault("cupones_cosechados", [])
-    for d in items.values():  # codigos de cupon publicados para Samsung: se prueban en el carrito real
-        if re.search(r"samsung", d["tienda"], re.I):
-            for c in re.findall(r"\b[A-Z][A-Z0-9]{2,}(?:_[A-Z0-9]+)+\b|\b[A-Z]{3,}\d{2,}[A-Z0-9]*\b", limpio(d["descripcion"], 3000)):
-                if c not in cosecha and 5 <= len(c) <= 22:
-                    cosecha.append(c)
-    del cosecha[:-25]
+    # Los codigos de cupon del foro los junta cosechar_cupones de los datos de cada hilo (campo voucherCode).
     return list(items.values())
 
 
@@ -822,6 +945,29 @@ def selftest():
     assert ficha_gameplanet(ficha_gp) == ("CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING",
                                           [(10999.99, "InStock", "NewCondition", "Gameplanet")]), ficha_gameplanet(ficha_gp)
     assert ficha_gameplanet("<html></html>") == ("", [])
+    # cupones: textos reales del 25 nov 2026 (banners de samsung.com/mx y campo voucherCode del foro)
+    assert decodificar("Obtén $1,000 con el cupón BF1000".encode("cp1252")) == "Obtén $1,000 con el cupón BF1000"
+    assert decodificar("cupón".encode("utf-8")) == "cupón"
+    assert cupones_en_texto("Obtén $1,000 de descuento con el cupón BF1000 en tu nuevo Galaxy S26 Ultra") == ["BF1000"]
+    assert cupones_en_texto("Galaxy Tab S12+ 20% cupón ECO_20") == ["ECO_20"]
+    assert cupones_en_texto("Recibe 15% de dto. con el cupón S26CRP_NOV") == ["S26CRP_NOV"]
+    assert cupones_en_texto("Sin este producto, el cupón no puede canjearse; cupón de primera compra") == []
+    casos_cup = [("BFLIVESEM + CRP26TV + CARRITO5", ["BFLIVESEM", "CRP26TV", "CARRITO5"]),
+                 ("BFLIVESEM - CARRITO5 - PRO-20 - ePromoter", ["BFLIVESEM", "CARRITO5", "PRO-20"]),
+                 ("CUPON ASESOR/ CARRITO5/ LIVESEM/ S26_CLUBJUK", ["CARRITO5", "LIVESEM", "S26_CLUBJUK"]),
+                 ("EPP10_NOV + Cashback Santander a 6 MSI o más", ["EPP10_NOV"]),
+                 ("FOLD8_20CLUB | BF1000 | ePromoter", ["FOLD8_20CLUB", "BF1000"]),
+                 ("MONDAYSPECIALSLIVE, NAVIDAD-30, XMAS-FOLD30CLUB1", ["MONDAYSPECIALSLIVE", "NAVIDAD-30", "XMAS-FOLD30CLUB1"]),
+                 ("Cupón del Asesor", [])]
+    for txt, esperado in casos_cup:
+        assert codigos_de(txt) == esperado, (txt, codigos_de(txt))
+    hilo = ('"publishedAt":1794710067,"lastCommentAt":1794755671,"updatedAt":1794771602,"voucherCode":"FLASHBP25",'
+            '"linkHost":"www.samsung.com","shareableLink":"x"')
+    assert HILO_FORO.findall(hilo) == [("1794710067", "FLASHBP25", "www.samsung.com")]
+    est_c = {"cupones_cosechados": {"NUEVO10": "2026-11-25", "VIEJO5": "2026-11-10"},
+             "cupones_reprobados": {"fold8|VIEJO5": int(time.time())}}
+    cand = cupones_candidatos(prods[0], est_c)
+    assert cand[0] == "NUEVO10" and "VIEJO5" not in cand, cand
     print("selftest OK: %d titulos Fold8, %d PS5 y %d Gameplanet, topes, vendedor oficial, importacion y agotado/regreso"
           % (len(casos), len(casos_ps5), len(casos_gp)))
     return 0
@@ -878,8 +1024,10 @@ def main():
                     print("   no se pudo abrir el aviso:", ex2)
             return None
 
-    # El foro va primero: de ahi salen codigos de cupon nuevos que Samsung prueba en esta misma corrida.
     foro = fuente("Foro", lambda: leer_foro(prods, estado))
+    # Busqueda de cupones antes de las tiendas: lo hallado se prueba en el carrito de Samsung en esta misma corrida.
+    if any("Samsung" in p["tiendas"] for p in prods):
+        fuente("Cupones", lambda: cosechar_cupones(prods, estado, ahora))
     ofertas, leidas = [], set()
     for tienda, lector in LECTORES.items():
         usan = [p for p in prods if tienda in p["tiendas"]]
@@ -978,6 +1126,9 @@ def main():
         abrir_issue("PRUEBA del vigia: precios leidos ahora directamente en las tiendas",
                     "Esto es una prueba de que el vigia lee las tiendas y de que el aviso te llega.\n\n" + tabla(mejores)
                     + "\n\nFuentes caidas en esta corrida: " + (", ".join(n for n, v in fallos.items() if v) or "ninguna")
+                    + "\n\nCupones hallados en esta busqueda: " + (", ".join(
+                        "%s (%s)" % kv for kv in sorted(estado.get("cupones_ultima_busqueda", {}).get("hallados", {}).items()))
+                        or "ninguno")
                     + "\n\nTopes:\n- " + "\n- ".join(lineas))
 
     if seco:

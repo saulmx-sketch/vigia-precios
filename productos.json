@@ -27,6 +27,7 @@
    "tiendas": {
     "Samsung": {
      "cupones": "cupones_samsung.txt",
+     "cupones_foro": ["fold8", "fold 8", "z fold"],
      "skus": {
       "SM-F976BZKMLTM": ["ultra-512", "Grafito", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
       "SM-F976BZVMLTM": ["ultra-512", "Violeta", "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/"],
