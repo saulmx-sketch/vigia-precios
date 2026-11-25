@@ -10,6 +10,7 @@ FOLD8U_20CLUB
 FOLD8MEMBER_20
 CLUB_FOLD30
 LIVESEM
+S26CRP_NOV     # 15 %, anuncio de TikTok del 25-nov-2026 (vale al 30-nov); probado ese dia: no aplica a ningun Fold8, si al S26 Ultra segun el anuncio
 BF26_10
 BF26_5
 ECO_CLUB30
