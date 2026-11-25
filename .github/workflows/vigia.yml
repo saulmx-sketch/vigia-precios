@@ -28,20 +28,31 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          vivas=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status,event \
-            --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.event != \"schedule\") | select(.status != \"completed\")] | length")
+          # Reintentos: el 25-nov GitHub respondio HTTP 500 a una sola peticion y la cadena se corto 8 horas.
+          for intento in 1 2 3 4 5; do
+            vivas=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status,event \
+              --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.event != \"schedule\") | select(.status != \"completed\")] | length") && break
+            sleep $((intento * 15))
+          done
           echo "corridas de la cadena vivas: $vivas"
-          if [ "$vivas" = "0" ]; then
-            gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main
-            echo "la cadena estaba detenida: relanzada"
-          else
-            echo "la cadena sigue viva: nada que hacer"
+          if [ "$vivas" != "0" ]; then
+            echo "la cadena sigue viva (o no se pudo saber): nada que hacer"
+            exit 0
           fi
+          for intento in 1 2 3 4 5; do
+            if gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main; then
+              echo "la cadena estaba detenida: relanzada (intento $intento)"
+              exit 0
+            fi
+            sleep $((intento * 15))
+          done
+          echo "no se pudo relanzar la cadena tras 5 intentos"
+          exit 1
   revisar:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     environment: espera
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
       - name: Revisar tiendas y foro
@@ -76,12 +87,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          otras=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status,event \
-            --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.event != \"schedule\") | select(.status != \"completed\")] | length")
+          # Reintentos: el 25-nov GitHub respondio HTTP 500 a una sola peticion y la cadena se corto 8 horas.
+          # Si no se puede saber si hay otra corrida viva, se lanza igual: dos cadenas se notan y se corrigen;
+          # una cadena muerta no avisa a nadie.
+          otras=0
+          for intento in 1 2 3 4 5; do
+            otras=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status,event \
+              --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.event != \"schedule\") | select(.status != \"completed\")] | length") && break
+            otras=0
+            sleep $((intento * 15))
+          done
           echo "otras corridas vivas: $otras"
-          if [ "$otras" = "0" ]; then
-            gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main
-            echo "siguiente corrida lanzada"
-          else
+          if [ "$otras" != "0" ]; then
             echo "ya hay otra corrida esperando: esta no encadena"
+            exit 0
           fi
+          for intento in 1 2 3 4 5; do
+            if gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main; then
+              echo "siguiente corrida lanzada (intento $intento)"
+              exit 0
+            fi
+            sleep $((intento * 15))
+          done
+          echo "no se pudo lanzar la siguiente corrida tras 5 intentos"
+          exit 1
