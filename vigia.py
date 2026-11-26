@@ -389,7 +389,9 @@ def cosechar_cupones(prods, estado, ahora):
                 hallados.setdefault(c, "foro")
     if promos:
         try:   # cuponeras medidas el 25 nov 2026 (promos.FUENTES_EXTRA); si fallan enteras, la cosecha queda como antes
-            extra = promos.cosechar_extra_si_toca(pedir, estado, ahora)   # cada 2 h; entre lecturas no pide nada
+            # cada 2 h; entre lecturas no pide nada. dormir busca time.sleep al llamar (junta-2): el default de promos lo
+            # ato al importarse y la corrida simulada de C dormia de verdad 200 s
+            extra = promos.cosechar_extra_si_toca(pedir, estado, ahora, dormir=lambda s: time.sleep(s))
             for crudo in extra.get("Samsung") or {}:
                 for c in codigos_de(crudo):
                     hallados.setdefault(c, "cuponera")
