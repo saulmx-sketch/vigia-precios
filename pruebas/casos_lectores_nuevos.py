@@ -413,18 +413,22 @@ def _probar_cyberpuerta(v, fold, ps5):
         with contextlib.redirect_stdout(salida):
             r = leer(fold, {"consulta": "galaxy z fold8"}, {})
         assert srv.pedidas == [qf], srv.pedidas
-        assert sorted((o["var"], o["precio"]) for o in r) == [("normal-512", 34319.0)] * 3 + [("ultra-512", 39999.0)], r
+        # Ronda 5 (Q1): LEM ya no queda fuera: entra con la nota de revisar la garantia ("revisar" en productos.json)
+        assert sorted((o["var"], o["precio"]) for o in r) == [("normal-512", 34319.0)] * 3 + [
+            ("normal-512", 38469.0), ("ultra-512", 39999.0)], r
         assert {o["vendedor"] for o in r} == {"Cyberpuerta"} and {o["tienda"] for o in r} == {"Cyberpuerta"}, r
-        assert all("confirma en la ficha que sea versión México" in o["nota"] for o in r), r
+        lem = [o for o in r if o["precio"] == 38469.0]
+        assert "clave de modelo LEM: confirma en la ficha que tenga garantía de Samsung México" in lem[0]["nota"], lem
+        assert all("confirma en la ficha que sea versión México" in o["nota"] for o in r if o not in lem), r
         assert CP_FICHA in [o["url"] for o in r], r
         fuera = [l for l in salida.getvalue().splitlines() if "clave de otra region" in l]
-        assert len(fuera) == 3 and all(any(s in l for l in fuera) for s in ("SM-F971BZKMLEM", "F971BLVMGTO", "F971BZWMGTO")), fuera
+        assert len(fuera) == 2 and all(any(s in l for l in fuera) for s in ("F971BLVMGTO", "F971BZWMGTO")), fuera   # GTO
         # (H3) la misma clave con region de Mexico (LTM) entra, sin la nota
         tabla[qf] = (200, b_fold.replace('"SM-F971BZKMLEM"', '"SM-F971BZKMLTM"'))
         with contextlib.redirect_stdout(io.StringIO()):
             r = leer(fold, {"consulta": "galaxy z fold8"}, {})
         gris = [o for o in r if o["precio"] == 38469.0]
-        assert len(gris) == 1 and "confirma en la ficha" not in gris[0]["nota"], r
+        assert len(gris) == 1 and "confirma en la ficha" not in gris[0]["nota"], r          # LTM: limpio
         tabla[qf] = (200, b_fold)
         # (H3) la regla vive en productos.json (requisitos.clave_region): el mismo producto sin ella no se filtra por
         # clave (entran los 7 en existencia, sin nota de region)
@@ -493,6 +497,8 @@ def _probar_cyberpuerta(v, fold, ps5):
             tabla[CP_FICHA] = (200, ficha.replace('"sku":"SM-F971B/512/VA"', '"sku":"F971BLVMGTO"'))
             assert '"F971BLVMGTO"' in tabla[CP_FICHA][1], "recorte cambiado"
             assert v.FICHAS["Cyberpuerta"](CP_FICHA)["importado"] is True
+            tabla[CP_FICHA] = (200, ficha.replace('"sku":"SM-F971B/512/VA"', '"sku":"SM-F971BZKMLEM"'))
+            assert v.FICHAS["Cyberpuerta"](CP_FICHA)["importado"] is False      # LEM: a revisar, no importado
             for resp in ((403, "x"), (200, "<html>ficha sin datos</html>")):
                 tabla[CP_FICHA] = resp
                 _espera_error(lambda: v.FICHAS["Cyberpuerta"](CP_FICHA), "ficha Cyberpuerta %s" % (resp,))

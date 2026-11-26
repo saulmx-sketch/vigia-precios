@@ -408,14 +408,22 @@ def e4_ficha_caida(v):
                    ("4f", asuntos(avs)), b2)
             afirma(avs[0][1].startswith("Corrección del aviso anterior") and "vendedor externo en Costco" in avs[0][1],
                    avs[0][1][:500], b2)
+            afirma(b2.json()["avisado_nivel"][K_COS] == ["SIN CONFIRMAR", 19000.0], b2.json()["avisado_nivel"], b2)
+            # 4g (R4-H1): la correccion no cierra la clave: se sigue releyendo como todo SIN CONFIRMAR, sin repetir correo
             for i in range(2):
                 c, avs, srv, _ = b2.correr(costco_a(19000.0, externo=True))
-                afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4g%d: repitio la correccion" % i, asuntos(avs)), b2)
+                afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 1, ("4g%d: repitio la correccion" % i, asuntos(avs)), b2)
+            # 4h: la ficha ya confirma: un correo confirmado mas, y ahi termina (sin bucle)
+            c, avs, srv, _ = b2.correr(costco_a(19000.0))
+            afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco"] and "Confirmado" in avs[0][1], ("4h", asuntos(avs)), b2)
+            for i in range(2):
+                c, avs, srv, _ = b2.correr(costco_a(19000.0))
+                afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4i%d: bucle tras confirmar" % i, asuntos(avs)), b2)
         finally:
             b2.borrar()
         return ("4 corridas: 1 GANGA 'ficha sin releer'; cinco corridas con la ficha caida: 0 correos (se relee, queda "
                 "pendiente); al leerse: 1 'Confirmacion del aviso anterior' y ya no se relee; y con tercero: 1 correccion "
-                "SIN CONFIRMAR y nada mas")
+                "SIN CONFIRMAR, se sigue releyendo sin repetir, y al confirmar 1 correo mas y nada despues")
     finally:
         b.borrar()
 
