@@ -1042,7 +1042,7 @@ def _skus_cerradas(prods):
     """Un SKU por producto y variante de Samsung: {sku: [prod, variante]}."""
     out, vistos = {}, set()
     for p in prods or []:
-        for sku, info in ((p.get("tiendas") or {}).get("Samsung") or {}).get("skus", {}).items():
+        for sku, info in (((p.get("tiendas") or {}).get("Samsung") or {}).get("skus") or {}).items():
             if (p["id"], info[0]) not in vistos:
                 vistos.add((p["id"], info[0]))
                 out[sku] = [p["id"], info[0]]
@@ -1160,7 +1160,9 @@ def _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito,
         hechos[clave] = {"precio": nuevo, "fecha": ahora.astimezone(MX).strftime("%Y-%m-%d")}
         avisos.append(av)
     except Exception as ex:
-        print("   promos: no se pudo abrir el aviso aparte:", str(ex)[:120])
+        # C8/P1: el issue pudo crearse y perderse solo la respuesta; se marca igual para no repetirlo cada 15 min
+        hechos[clave] = {"precio": nuevo, "fecha": ahora.astimezone(MX).strftime("%Y-%m-%d")}
+        print("   promos: no se pudo confirmar el aviso aparte (se marca igual):", str(ex)[:120])
 
 
 def _sin_reintento(pedir):
@@ -1240,8 +1242,10 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             for f in v.get("filas") or []:
                 # E13 (C6/C1): la misma cifra con otra promocion PayPal = la categoria puede ser de la anterior: sin cifra
                 if f.get("banco") == "PayPal" and f.get("valor") is not None:
-                    antes = pares.get(cod)
-                    if isinstance(antes, list) and len(antes) == 2 and antes[1] == f["valor"] and antes[0] != f.get("codigo"):
+                    # C8/P3: contra los pares de TODOS los articulos (uno nunca leido no hereda la cifra de otra promocion)
+                    antes = next((p for p in pares.values() if isinstance(p, list) and len(p) == 2
+                                  and p[1] == f["valor"] and p[0] != f.get("codigo")), None)
+                    if antes:
                         f["valor"], f["unidad"] = None, None
                         f["beneficio"] = (f.get("beneficio") or "") + " (cifra quizá de %s, la anterior)" % antes[0]
                     else:
@@ -2282,6 +2286,57 @@ def selftest():
         av = mejorar(of, {}, ps_e, a29, True, _pedir_falso({"estudiantes_mx/pd.%s" % sku_e: (200, CERRADA_PD % (sku_e, pr_e))}),
                      abrir, reloj=_Reloj(), dormir=lambda s: None)
         assert len(av) == espera and (espera or "estudiantes" not in of[0]["nota"]), (pr_e, av, of[0]["nota"])
+    # C8/P1: el issue se crea y se pierde la respuesta (excepcion): se marca igual; 3 corridas = 1 issue
+    t26 = dt.datetime(2026, 11, 26, 7, 0, tzinfo=dt.timezone.utc)
+    of_c = [{"prod": "fold8", "var": "normal-512", "nombre": "Fold8 512 GB", "tienda": "Costco", "precio": 37999.0,
+             "url": "https://www.costco.com.mx/x/p/648324", "vendedor": "Costco", "nota": "", "titulo": "t"}]
+    ps_c = [{"id": "fold8", "tiendas": {"Costco": {}}}]
+    creados = []
+
+    def abre_y_corta(asunto, cuerpo):
+        creados.append(asunto)
+        raise TimeoutError("la respuesta de GitHub no llego")
+
+    est_p1 = {}
+    for i in range(3):
+        mejorar([dict(o) for o in of_c], est_p1, ps_c, t26 + dt.timedelta(minutes=15 * i), False,
+                _pedir_falso({"/648324?": (200, COSTCO_648324)}), abre_y_corta, reloj=_Reloj(), dormir=lambda s: None)
+    assert len(creados) == 1 and "Costco|fold8|normal-512|PayPal|PP177" in est_p1["promos_avisado"], (creados, est_p1)
+    # C8/P3: PP177 ya visto con $6,000 en un articulo; el 2 dic otro articulo nunca leido trae PP190 con la misma
+    # categoria de $6,000: no hereda la cifra (sin aviso, solo nota)
+    pp190 = COSTCO_648324.replace('"code":"648324"', '"code":"648330"').replace(
+        '"code":"PP177","endDate":"2026-12-02T05:59:59.000Z"', '"code":"PP190","endDate":"2026-12-09T05:59:59.000Z"').replace(
+        '"startDate":"2026-11-23T13:00:00.000Z"}]', '"startDate":"2026-12-02T06:00:00.000Z"}]')
+    est_p3 = {"promos": {"costco_pares": {"648324": ["PP177", 6000.0]}}}
+    of_b = [dict(of_c[0], var="ultra-512", nombre="Fold8 Ultra 512 GB", precio=47999.0,
+                 url="https://www.costco.com.mx/y/p/648330")]
+    creados.clear()
+    av = mejorar(of_b, est_p3, ps_c, dt.datetime(2026, 12, 2, 16, 0, tzinfo=dt.timezone.utc), False,
+                 _pedir_falso({"/648330?": (200, pp190)}), abrir_y_cuenta := (lambda a, c: creados.append(a) or True),
+                 reloj=_Reloj(), dormir=lambda s: None)
+    filas_b = est_p3["promos"]["costco"]["productos"]["648330"]["filas"]
+    assert av == [] and creados == [] and [f["valor"] for f in filas_b if f["codigo"] == "PP190"] == [None], (av, filas_b)
+    assert "648330" not in est_p3["promos"]["costco_pares"], est_p3["promos"]["costco_pares"]
+    # mismo codigo en dos articulos (PP177 en ambos): el segundo si lleva su cifra
+    est_p3b = {"promos": {"costco_pares": {"648324": ["PP177", 6000.0]}}}
+    av = mejorar([dict(of_b[0])], est_p3b, ps_c, t26, False,
+                 _pedir_falso({"/648330?": (200, COSTCO_648324.replace('"code":"648324"', '"code":"648330"'))}),
+                 abrir_y_cuenta, reloj=_Reloj(), dormir=lambda s: None)
+    assert len(av) == 1 and est_p3b["promos"]["costco_pares"]["648330"] == ["PP177", 6000.0], av
+    # C8: producto de Samsung sin "skus" (el iPad Air 11 de la muestra de cola\7_scripts, con Samsung sin skus) junto al
+    # Fold8: ni las tiendas cerradas ni la cosecha de vigia truenan
+    ipad = {"id": "ipad-air", "nombre": "iPad Air 11", "tiendas": {"Samsung": {"cupones": "cupones_samsung.txt"},
+                                                                   "Amazon": {"consultas": ["ipad+air+11"]}}}
+    ps_i = [dict(ps_e[0], nombre="Galaxy Z Fold8"), ipad]
+    assert _skus_cerradas(ps_i) == {sku_e: ["fold8", "ultra-512"]}, _skus_cerradas(ps_i)
+    guardado = v.pedir
+    try:
+        v.pedir = lambda url, *a, **k: (200, DEALS_MSI) if "samsung.com" in url else (200, "")
+        est_i = {"promos": {"cuponeras_leido": _hora(t26)}}   # cuponeras ya leidas: no se piden (sin esperas reales)
+        hall = v.cosechar_cupones(ps_i, est_i, t26)
+    finally:
+        v.pedir = guardado
+    assert "BF1000" in hall and est_i["cupones_ultima_busqueda"]["fuentes_leidas"] >= 1, (hall, est_i)
     silencio.__exit__(None, None, None)
 
     # --- vigia: cupones_candidatos deja fuera los codigos de tienda cerrada (EPP)
