@@ -1834,7 +1834,17 @@ def abrir_issue(titulo, texto):
     req = urllib.request.Request("https://api.github.com/repos/%s/issues" % repo, data=datos, method="POST", headers={
         "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios", "Content-Type": "application/json"})
-    desde = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ahora_utc = dt.datetime.now(dt.timezone.utc)
+    desde = (ahora_utc - dt.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # P2 de la linea B (26 nov): si la corrida anterior abrio este mismo aviso y no alcanzo a guardar su memoria (fallo
+    # el paso "Guardar" o el programa tronó despues), sin esto se repetia cada 15 min. Mismo titulo exacto creado en las
+    # ultimas HORAS_SIN_REPETIR horas = ya avisado (quien llama lo marca). Si la consulta falla, se abre como siempre:
+    # mejor un correo repetido que uno callado.
+    previo = _issue_ya_creado(repo, token, titulo[:250],
+                              (ahora_utc - dt.timedelta(hours=HORAS_SIN_REPETIR)).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    if previo:
+        print("   aviso ya abierto en las ultimas %d h (no se repite):" % HORAS_SIN_REPETIR, previo)
+        return True
     # mismo tope duro que pedir(): un aviso que no sale por tiempo no se marca y sale en la corrida siguiente
     try:
         with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
@@ -1858,6 +1868,7 @@ def abrir_issue(titulo, texto):
 
 CORTE_AMBIGUO = (TimeoutError, ConnectionResetError, ConnectionAbortedError, http.client.RemoteDisconnected,
                  http.client.IncompleteRead)
+HORAS_SIN_REPETIR = 6   # abrir_issue no repite un aviso de titulo identico creado en estas horas
 
 
 def _issue_ya_creado(repo, token, titulo, desde):
@@ -2219,10 +2230,23 @@ def _prueba_corte_ambiguo():
                 assert ex is corte or isinstance(lista, Exception) or lista is not None, ex
             assert r == espera, (corte, lista, r)
             if lista is None:
-                assert pedidas == ["POST"], pedidas          # GitHub dijo que no o no se conecto: ni se busca
+                # GitHub dijo que no o no se conecto: tras el POST ni se busca (el GET es la consulta previa, P2)
+                assert pedidas == ["GET", "POST"], pedidas
         # 2xx con cuerpo cortado: ya se creo
-        urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"')
+        urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"' if req.get_method() == "POST" else b"[]")
         assert abrir_issue(titulo, "cuerpo") is True
+        # P2 (26 nov): el mismo titulo creado hace 2 h (la corrida anterior no guardo su memoria): no se repite, sin POST;
+        # creado hace 7 h, o con otro titulo, si se abre
+        for creado, otro, sale_post in ((2, False, False), (7, False, True), (2, True, True)):
+            pedidas = []
+            hace = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=creado)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            lista = [{"title": titulo + (" (otro)" if otro else ""), "created_at": hace, "html_url": "u/9"}]
+
+            def falso2(req, timeout=None, lista=lista, pedidas=pedidas):
+                pedidas.append(req.get_method())
+                return Resp(b'{"html_url": "u/3"}' if req.get_method() == "POST" else json.dumps(lista).encode("utf-8"))
+            urllib.request.urlopen = falso2
+            assert abrir_issue(titulo, "cuerpo") is True and (pedidas == ["GET", "POST"]) == sale_post, (creado, otro, pedidas)
     finally:
         urllib.request.urlopen = guardados[0]
         for k, v in guardados[1].items():
