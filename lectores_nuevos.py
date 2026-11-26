@@ -109,6 +109,15 @@ def region_de(regla, sku):
     return m.group(1), bool(re.search(regla["vale"], m.group(1), re.I))
 
 
+def region_a_revisar(regla, reg):
+    """Nota si la region `reg` (que no vale) casa el campo opcional `revisar` de la regla: entra con esa nota en vez de
+    quedar fuera. La nota sale de `nota_revisar` ({region} se cambia por la region) o de un texto general."""
+    if not reg or not regla.get("revisar") or not re.search(regla["revisar"], reg, re.I):
+        return ""
+    return (regla.get("nota_revisar") or "clave de modelo {region}: confirma en la ficha que tenga garantía en México"
+            ).replace("{region}", reg)
+
+
 class Cuenta:
     """Lleva la cuenta de lo que paso variante() y el piso y no entro, para distinguir "agotado" de "formato cambiado".
     La cuenta es por variante: el agotado de una variante no disculpa a otra que vino sin vendedor (con la busqueda real
@@ -288,7 +297,10 @@ def registrar(v):
             regla = regla_region(prod, "Cyberpuerta")
             if regla:
                 reg, vale = region_de(regla, a["sku"])
-                if reg and not vale:
+                revisar = region_a_revisar(regla, reg) if reg and not vale else ""
+                if revisar:
+                    nota = "; ".join(x for x in (nota, revisar) if x)
+                elif reg and not vale:
                     importado = True
                     print("   Cyberpuerta: fuera %s $%s: clave de otra region (%s)"
                           % (a["titulo"][:70], "{:,.0f}".format(a["precio"]), a["sku"]))
@@ -325,7 +337,7 @@ def registrar(v):
             regla = regla_region(p, "Cyberpuerta")
             if regla:
                 reg, vale = region_de(regla, sku)
-                otra_region = otra_region or bool(reg and not vale)
+                otra_region = otra_region or bool(reg and not vale and not region_a_revisar(regla, reg))
         return {"titulo": titulo or html.unescape(d.get("name") or "").strip(), "precio": precio,
                 "vendedor": html.unescape(((o.get("seller") or {}).get("name") or "")).strip(),
                 "existencia": existencia_si_no(o.get("availability")) if nuevo else False,
