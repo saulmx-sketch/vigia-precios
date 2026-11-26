@@ -1,0 +1,42 @@
+{
+ "code": "648324",
+ "name": "Samsung Galaxy Z Fold 8 512GB Grafito",
+ "url": "/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
+ "price": {
+  "currencyIso": "MXN",
+  "formattedValue": "$37,999.00",
+  "intValue": 3799900,
+  "priceType": "BUY",
+  "value": 37999.0
+ },
+ "basePrice": {
+  "currencyIso": "MXN",
+  "formattedValue": "$44,999.00",
+  "intValue": 4499900,
+  "priceType": "BUY",
+  "value": 44999.0
+ },
+ "stock": {
+  "contactDay": 0,
+  "deliveryLeadTime": 0,
+  "stockLevel": 1,
+  "stockLevelStatus": "lowStock"
+ },
+ "couponDiscount": {
+  "discountDateMessage": "same_month_year",
+  "discountEndDate": "2026-11-30T05:59:59.999Z",
+  "discountStartDate": "2026-11-23T06:00:00.000Z",
+  "discountType": "default",
+  "discountValue": 7000.0,
+  "discountValueExcVat": 0.0,
+  "formattedDiscountValue": "$7,000.00",
+  "formattedDiscountValueExcVat": "$0.00",
+  "hideDiscountCalculation": false,
+  "localDiscountEndDate": "2026-11-29T23:59:59.999Z",
+  "localDiscountStartDate": "2026-11-23T00:00:00.000Z"
+ },
+ "isExternalVendorProduct": false,
+ "isExternalVendorVariantProduct": false,
+ "isProductAvailable": true,
+ "purchasable": true
+}

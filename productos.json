@@ -60,7 +60,7 @@
    "olvidar": ["Amazon|ps5|disco", "Amazon|ps5|sin-dato", "Liverpool|ps5|disco", "Liverpool|ps5|sin-dato",
                "Gameplanet|ps5|disco", "Gameplanet|ps5|sin-dato", "Costco|ps5|disco", "Costco|ps5|sin-dato",
                "Elektra|ps5|disco", "Elektra|ps5|sin-dato"],
-   "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|\\bssd\\b|nvme|estado\\s+s[oó]lido|disco\\s+duro|wd_?black|seagate|almacenamiento\\s+(interno|externo)|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)",
+   "excluir": "\\bpro\\b|vr\\s*2|visor|\\bportal\\b|port[aá]til|\\bssd\\b|nvme|estado\\s+s[oó]lido|disco\\s+duro|wd_?black|seagate|almacenamiento\\s+(interno|externo)|reproductor\\s+remoto|aud[ií]fonos|headset|auriculares|\\bpulse\\b|cubierta|cover|skin|\\bfunda|soporte|\\bbase\\b|estaci[oó]n\\s+de\\s+(re)?carga|charging|tarjeta|gift\\s*card|^(?!.*(consola|console)).*(dualsense|controller|\\bcontrol(es)?\\b|unidad\\s+de\\s+disco|disc\\s+drive)|ventilador|\\b(para|for)\\s+(la\\s+|las\\s+|el\\s+)?(consolas?\\s+)?(ps\\s*5|play\\s*station)|^(?!.*\\+).*(unidad\\s+de\\s+disco|disc\\s+drive)",
    "piso": 6500,
    "_fracciones": "Calibradas el 2026-11-24 con la grafica Keepa de dos anios del ASIN B0FTP523RH (vende Amazon Mexico): minimo $6,900 (Black Friday 2025; esa ventana fue 6,900-7,900), precio tipico feb-jun 2026 $9,000 (piso Hot Sale ~$8,300), y $10,740 en el Buen Fin 2026, ya con la lista subida a 12,499",
    "fracciones": [0.60, 0.72, 0.864],
@@ -73,7 +73,7 @@
     "vendedor_oficial": {"Amazon": "^\\s*amazon(\\s+m[eé]xico)?\\s*$"}
    },
    "variantes": [
-    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499}
+    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "ninguna": ["\\b2\\s*tb\\b"], "lista": 12499}
    ],
    "tiendas": {
     "Amazon": {"consultas": ["playstation+5+digital"]},

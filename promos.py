@@ -25,6 +25,7 @@ import html
 import io
 import itertools
 import json
+import os
 import re
 import sys
 import time
@@ -1020,8 +1021,12 @@ def _aviso(estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, 
     if seco:
         avisos.append(av)
         return
+    if os.environ.get("SIN_AVISOS_PRECIO", "").lower() in ("1", "true", "yes"):   # vigia: pruebas del nucleo fallaron
+        print("   (SIN_AVISOS_PRECIO=1: se habria mandado este aviso aparte; no se manda ni se marca)")
+        return
     try:
-        abrir_issue(asunto, cuerpo)
+        if abrir_issue(asunto, cuerpo) is False:   # sin credenciales: no salio, no se marca (como en vigia)
+            return
         hechos[clave] = nuevo
         avisos.append(av)
     except Exception as ex:
@@ -1704,6 +1709,18 @@ def selftest():
     # mejorar nunca lanza, aunque le lleguen basuras
     assert mejorar([{"precio": "x"}], {"promos_bancos": 5, "promos": 7}, [{"id": "p"}], ahora, True,
                    _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None) == []
+    # abrir_issue que devuelve False (sin credenciales) y SIN_AVISOS_PRECIO=1: no se marca como mandado
+    est = estado_fresco()
+    av = mejorar(ofertas_falsas(), est, prods, ahora, False, _pedir_falso({}), lambda a, c: False, reloj=_Reloj(),
+                 dormir=lambda s: None)
+    assert av == [] and not est.get("promos_avisado"), (av, est.get("promos_avisado"))
+    os.environ["SIN_AVISOS_PRECIO"] = "1"
+    try:
+        av = mejorar(ofertas_falsas(), est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(),
+                     dormir=lambda s: None)
+    finally:
+        os.environ.pop("SIN_AVISOS_PRECIO", None)
+    assert av == [] and not est.get("promos_avisado") and len(mandados) == 5, (av, mandados)
     # frase del aviso de tienda cerrada: no dice "se ve al pagar"
     av = mejorar(ofertas_falsas(), estado_fresco(), prods, ahora, True, _pedir_falso({}), abrir, reloj=_Reloj(),
                  dormir=lambda s: None)

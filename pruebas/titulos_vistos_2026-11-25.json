@@ -1,0 +1,3278 @@
+{
+ "fecha": "2026-11-25",
+ "como": "pruebas/recoger_titulos.py: cada lector de LECTORES una vez con productos.json; carrito de Samsung sin probar (precio de pagina)",
+ "lecturas": {
+  "Samsung|fold8": "ok, 3 ofertas",
+  "Amazon|fold8": "ok, 4 ofertas",
+  "Amazon|ps5": "ok, 5 ofertas",
+  "Costco|fold8": "ok, 4 ofertas",
+  "Costco|ps5": "ok, 0 ofertas",
+  "Elektra|fold8": "FALLA: Elektra respondio 403",
+  "Elektra|ps5": "FALLA: Elektra respondio 403",
+  "Liverpool|fold8": "ok, 1 ofertas",
+  "Liverpool|ps5": "ok, 0 ofertas",
+  "Gameplanet|ps5": "ok, 3 ofertas"
+ },
+ "titulos": [
+  {
+   "tienda": "Samsung",
+   "producto": "fold8",
+   "titulo": "Fold8 Ultra 512 GB Violeta",
+   "precio": 43999.0,
+   "vendedor": "Samsung",
+   "importado": false,
+   "var_dada": "ultra-512",
+   "resolvio": "variante: ultra-512"
+  },
+  {
+   "tienda": "Samsung",
+   "producto": "fold8",
+   "titulo": "Fold8 Ultra 1 TB Verde",
+   "precio": 63499.0,
+   "vendedor": "Samsung",
+   "importado": false,
+   "var_dada": "ultra-1tb",
+   "resolvio": "variante: ultra-1tb"
+  },
+  {
+   "tienda": "Samsung",
+   "producto": "fold8",
+   "titulo": "Fold8 512 GB Lavanda",
+   "precio": 40799.0,
+   "vendedor": "Samsung",
+   "importado": false,
+   "var_dada": "normal-512",
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold8 Lavanda 512GB",
+   "precio": 34394.83,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold8 Ultra Grafito 512GB",
+   "precio": 38870.93,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: ultra-512"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold8 Grafito 512GB",
+   "precio": 38171.64,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold8 Crema 512GB",
+   "precio": 34394.83,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Consola PlayStation 5 - Edición Digital de 825 GB: Astro Bot y Gran Turismo 7 - Digital Edition",
+   "precio": 12499.0,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Consola Slim Disco Digital + PS5 Digital 825GB con ASTRO BOT y GT7",
+   "precio": 14498.0,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Playstation®5 Digital Edition – Call of Duty®: Black Ops 6 Bundle (model group – slim)",
+   "precio": 18750.0,
+   "vendedor": "Tekno Electronicos (FACTURAMOS TODAS LAS COMPRAS)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: vendedor"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "EA SPORTS FC 26 PS5 + PlayStation 5 Digital 825GB ASTRO BOT y GT7",
+   "precio": 13319.11,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Resident Evil Village Gold Edition PS5 + PlayStation 5 Digital 825GB con ASTRO BOT y Gran Turismo 7",
+   "precio": 12948.0,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Ghost of Yotei PS5 Collector's Edition + PlayStation 5 Digital 825GB con Astro Bot/GT7",
+   "precio": 15238.0,
+   "vendedor": "Amazon México",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold Ultra 8 512GB Grafito",
+   "precio": 41999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: ultra-512"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold 8 512GB Grafito",
+   "precio": 37999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold 8 512GB Lavanda",
+   "precio": 37999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold 8 512GB Crema",
+   "precio": 37999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal-512"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 8 512GB Rosa",
+   "precio": 23999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 8 512GB Grafito",
+   "precio": 23999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "7.0ctw, Pulsera tenis de Diamantes, 17.78cm, Corte Redondo, Oro Blanco 18K",
+   "precio": 199999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "5.15ctw, Pulsera de Diamantes, 18.42cm, Oro Blanco de 14kt",
+   "precio": 189999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Chevron Aceite 10W40 84 cajas",
+   "precio": 97699.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Chevron Aceite 20w50 84 Cajas",
+   "precio": 97699.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Chevron Aceite 10W30 84 cajas",
+   "precio": 97699.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Chevron Aceite 5W30 84 Cajas",
+   "precio": 97699.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Whirlpool Refrigerador 18' y Congelador 18' Sidekicks",
+   "precio": 84999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sauna Infrarrojo Dynamic Versailles Low EMF, 2 Personas",
+   "precio": 59999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "1.45ctw, Arracadas de Diamantes, Corte Redondo Brillante, Oro Blanco de 14kt",
+   "precio": 52999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Thomasville, Sofá Seccional de Tela con Otomano con Almacenamiento",
+   "precio": 42999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sealy, Monteleone, Colchón y Box King Size",
+   "precio": 39999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Thomasville, Sofá Modular de Tela 6 Piezas",
+   "precio": 38999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Thomasville, Tisdale, Sofá Modular de Tela de 6 Piezas con Almacenamiento",
+   "precio": 37999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Thomasville, Sofá Modular de tela de 6 Piezas",
+   "precio": 37999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sealy, Monteleone, Colchón y Box Queen Size",
+   "precio": 36999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sealy, Monteleone, Colchón y Box Matrimonial",
+   "precio": 33999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sealy, Nebraska, Colchón King Size",
+   "precio": 31999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Coaster, seccional reversible y sillón, tela",
+   "precio": 29999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Thomasville, Seccional de Tela de 3 piezas con Otomano con Almacenamiento",
+   "precio": 29999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Costco",
+   "producto": "ps5",
+   "titulo": "Sealy, Ohio, Colchón King Size",
+   "precio": 27999.0,
+   "vendedor": "Costco (pide membresia)",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 de aramida",
+   "precio": 1049.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 de aramida",
+   "precio": 1049.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Fold8 super AMOLED plus 7.6 pulgadas",
+   "precio": 44999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: normal"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 de policarbonato",
+   "precio": 629.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 Ultra de policarbonato",
+   "precio": 629.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Flip8 super AMOLED plus 6.9 pulgadas",
+   "precio": 26999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 Ultra de silicón",
+   "precio": 909.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold8 de TPU",
+   "precio": 599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 de aramida",
+   "precio": 909.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 Ultra de policarbonato",
+   "precio": 699.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Galaxy S26 Dynamic AMOLED 2X 6.2 pulgadas",
+   "precio": 17999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Mica para smartphone compatible con Galaxy Fold8",
+   "precio": 279.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Galaxy Z Flip4",
+   "precio": 139.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Fold8 de policarbonato",
+   "precio": 489.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para galaxy z fold 7 de policarbonato",
+   "precio": 559.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Mica para smartphone compatible con Galaxy Fold8 ultra",
+   "precio": 279.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Galaxy S26FE Dynamic AMOLED 2X 6.7 pulgadas",
+   "precio": 15799.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung TPU",
+   "precio": 650.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold8 de TPU",
+   "precio": 599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para galaxy z flip 7 de policarbonato",
+   "precio": 559.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Flip8 de policarbonato",
+   "precio": 559.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung sin familia de Plástico",
+   "precio": 599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung de plástico",
+   "precio": 599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung",
+   "precio": 399.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "fold8",
+   "titulo": "Funda para Galaxy Z Flip8 de silicón",
+   "precio": 699.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola PS5 de 1 TB edición estándar",
+   "precio": 14699.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola PS5 de 825 GB edición bundle",
+   "precio": 12499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola PS5",
+   "precio": 5999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola PS5 de 825 GB edición limitada Wolverine",
+   "precio": 19999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola fija ps5 de 1 tb edición estándar spider-man",
+   "precio": 21419.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Consola portátil ps5 de 1 tb",
+   "precio": 20339.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "SPORTS FC 27 Ea estándar para ps5",
+   "precio": 1599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Grand Theft Auto V estándar para PS5",
+   "precio": 499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Kit de volante para simulador alámbrico para Play Station 5",
+   "precio": 3899.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Reproductor remoto para consola Portal Midnight Black para 5",
+   "precio": 5999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control DualSense Midnight Black inalámbrico para PS5",
+   "precio": 1499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "God of War Ragnarok bundle para ps5",
+   "precio": 1159.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Sports Fc 25 Ea estándar para ps5",
+   "precio": 305.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Grand Theft Auto V + Marvel's Spider Man Miles Morales Ultimate Edition bundle para ps5",
+   "precio": 1899.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control dualsense inalámbrico para PS5 edición especial",
+   "precio": 1799.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Ghost Of Yotei collectors para PS5",
+   "precio": 5499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Halo: Campaign Evolved estándar para ps5",
+   "precio": 999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Grand Theft Auto V estándar para PS5",
+   "precio": 699.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Marvel’S Spider-Man 2 estándar para ps5",
+   "precio": 1299.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Call Of Duty Black Ops 7 estándar para ps5",
+   "precio": 1139.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Unidad de disco para consola PS5",
+   "precio": 3249.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Ghost of Yotei Complete Edition Complete Edition para PS5",
+   "precio": 1099.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Unidad de disco para consola PS5",
+   "precio": 2789.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Tekken 8 estándar para PS5",
+   "precio": 689.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Marvel's Wolverine estándar para ps5",
+   "precio": 999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Stage Tour Game Kramer Wireless Guitar Controller Bundle para Playstation 5",
+   "precio": 2999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Resident Evil 2 + Resident Evil 3 + Resident Evil 4 bundle para ps5",
+   "precio": 1539.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control inalámbrico para playstation 5",
+   "precio": 1599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Spider-Man 2 + Spider Man Miles Morales Bundle para PS5",
+   "precio": 2489.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control inalámbrico para PS5",
+   "precio": 1499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Call of Duty: Modern Warfare 4 Ps estándar para ps5",
+   "precio": 1179.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Minecraft Bedrock bundle para ps5",
+   "precio": 1199.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Stellar Blade estándar para PS5",
+   "precio": 699.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Cargador para 2 Controles de PS5",
+   "precio": 449.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Red Dead Redemption estándar para ps5",
+   "precio": 649.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Grand Theft Auto V + Death Stranding 2: On The Beach bundle para ps5",
+   "precio": 1829.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Black Myth Wukong estándar para ps5",
+   "precio": 1349.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Minecraft Bedrock estándar para ps5",
+   "precio": 799.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "The Last of Us Parte I + The Last of Us Part II Remastered bundle para PS5",
+   "precio": 2099.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Call Of Duty Black Ops 7 bundle para ps5",
+   "precio": 1139.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Stellar Blade bundle para PS5",
+   "precio": 1819.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Gran turismo 7 bundle para ps5",
+   "precio": 1199.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "EA SPORTS Madden NFL 27 estándar para ps5",
+   "precio": 939.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Gears of War: Reloaded bundle para ps5",
+   "precio": 1229.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control inalámbrico para playstation 5",
+   "precio": 1499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Call of Duty Modern Warfare II estándar para ps5",
+   "precio": 999.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Unidad de disco para consola PS5",
+   "precio": 3849.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Call Of Duty Modern Warfare Iii estándar para ps5",
+   "precio": 1149.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Ghost of Yotei + Elden Ring Bundle para PS5",
+   "precio": 2599.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Control inalámbrica para 5",
+   "precio": 1499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Uncharted Legacy Of Thieves + TLOU Parte I + TTLOU Parte II Remastered + Astro Bot bundle para PS5",
+   "precio": 3949.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Spider-Man 2 bundle para PS5",
+   "precio": 1299.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Clip para control",
+   "precio": 1499.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Alone in the Dark Bundle para PS5",
+   "precio": 829.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Ark survival ascended estándar para ps5",
+   "precio": 939.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Liverpool",
+   "producto": "ps5",
+   "titulo": "Gran Turismo 7 + Astro Botpara bundle para ps5",
+   "precio": 2289.0,
+   "vendedor": "Liverpool",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 DIGITAL EDICION LIMITADA BATTLE YELLOW MARVELS WOLVERINE",
+   "precio": 14999.99,
+   "vendedor": "Gameplanet",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 DIGITAL FORTNITE FLOWERING",
+   "precio": 10999.99,
+   "vendedor": "Gameplanet",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 DIGITAL 30 ANIVERSARIO",
+   "precio": 19999.99,
+   "vendedor": "Gameplanet",
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante: digital"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech Funda Mate para Samsung Galaxy Z Fold 8 Ultra, Negro",
+   "precio": 649.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "memumi Fibra Aramida para Samsung Z Fold 8 Ultra Funda con Frente y Trasera",
+   "precio": 939.64,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Z Fold 8 Ultra con protector de pantalla, soporte para bolígrafo S integrado y lápiz óptico, cubierta protectora de bisagra para Samsung Galaxy Z Fold8 Ultra",
+   "precio": 665.26,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Fold7 JetBlack 512GB",
+   "precio": 27999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip8 Crema 512GB",
+   "precio": 21999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "SUPCASE Funda para Galaxy Z Fold 8 Ultra Case con Mica Cristal y Privacidad",
+   "precio": 1499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TORRAS Funda para Samsung Galaxy Z Fold 8 Ultra, Soporte 360°, PC, Morado",
+   "precio": 1599.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TORRO Funda Compatible con Samsung Galaxy Z Fold8 Ultra 2026 - Funda Tipo Cartera Galaxy Z Fold 8 Ultra de Cuero Premium con función de Soporte y Ranuras para Tarjetas (Negro)",
+   "precio": 649.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TORRAS Funda para Galaxy Z Fold 8 Ultra, Piel Vegana, Soporte 360°, Negro",
+   "precio": 1749.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Fold7 Blue Shadow 512GB",
+   "precio": 29999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Google Pixel 11 Pro Smartphone 512 GB Obsidiana",
+   "precio": 28048.3,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Ringke Mica de Privacidad 360° para Samsung Galaxy Z Fold 8 Ultra",
+   "precio": 469.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "elago Funda Transparente para Samsung Galaxy Z Fold 8 Ultra",
+   "precio": 247.49,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "HUAWEI Pura 90s Pro 12+256GB, Soda Mora",
+   "precio": 17134.41,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Z Fold 8 Ultra con ranura para S Pen y visualización",
+   "precio": 649.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "HUAWEI Pura 90s Pro 12+256GB, Blanco Frapé",
+   "precio": 16496.83,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "para Samsung Galaxy Z Fold 8 Ultra Funda Mate AG con Película Protectora Integrada de 360° de Protección Completa y Ultra Delgada (Verde)",
+   "precio": 354.9,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold 7/8 Ultra (Marrón,Fold 8 Ultra)",
+   "precio": 418.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "memumi Funda de Cuero PU para Samsung Galaxy Z Fold 8 Ultra con Soporte",
+   "precio": 659.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Ibywind Mica para Samsung Galaxy Z Fold8 Ultra 5G,2 Piezas Dureza 9H Cristal Templado y Protector de Lente de Cámara,Fácil de Instalar,Compatible Detector Huellas,Anti Arañazos",
+   "precio": 269.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TAURI Mica de Pantalla para Samsung Galaxy Z Fold 8 Ultra - 2 Unidades",
+   "precio": 249.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "2+2 Mica Para Samsung Galaxy Z Fold 8 Ultra/Z Fold 7 5G Hidrogel",
+   "precio": 219.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TORRO Funda Compatible con Samsung Galaxy Z Fold8 Ultra 2026 - Funda Tipo Cartera Galaxy Z Fold 8 Ultra de Cuero Premium con función de Soporte y Ranuras para Tarjetas (Marrón Oscuro)",
+   "precio": 649.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "ORETECH Funda para Samsung Galaxy Z Fold 8 Ultra con MagSafe, Azul Marino",
+   "precio": 459.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Aulumu Z Fold 8 Ultra Galaxy - Funda magnética de fibra de aramida 1500D",
+   "precio": 1702.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "SUPCASE Funda Magnética para Galaxy Z Fold 8 Ultra con Mica y Soporte,Mate",
+   "precio": 899.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech 9H+ Protector Pantalla Frontal de Privacidad para Galaxy Z Fold 8",
+   "precio": 279.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "USTIYA Funda Mica para Samsung Galaxy Z Fold 8 Ultra Uso Rudo PCKM",
+   "precio": 198.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech Funda Fibra Aramida para Samsung Galaxy Z Fold 8 Ultra, Negro",
+   "precio": 899.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Protector de Pantalla Privacidad para Samsung Galaxy Z Fold 8 Ultra",
+   "precio": 218.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TOCOL Mica Protector de pantalla para Samsung Galaxy Z Fold 8 Ultra",
+   "precio": 249.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech Antirreflejos 9H+ Protector Pantalla para Galaxy Z Fold 8 Ultra",
+   "precio": 419.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Spigen Air Fit Pro MagFit Funda para Galaxy Z Fold 8 Ultra - Abyss Green",
+   "precio": 884.14,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "iPhone 17 Pro MAX 2 TB:Pantalla 6.9 Pulgadas con Promotion,Chip A19 Pro,la Mayor duración de batería Que Existe en un iPhone,Sistema de cámaras Pro Fusion,cámara Frontal Center Stage;Naranja cósmico",
+   "precio": 50999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "for Samsung Galaxy Z Fold 8 Ultra Funda con Ranura Fina para S Pen y lápiz Capacitivo, protección de Lente, Pantalla y bisagra, Cobertura Anti caídas Completa.(Azul Oscuro)",
+   "precio": 650.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "BERFY Funda Z Fold 8 Ultra,Pantalla privacidad integrada,Black Stylus",
+   "precio": 1799.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "QWYJ Funda para Samsung Galaxy Z Fold 8 Ultra 5G Case,Slim Duro a Prueba de Golpes,Plegable Lightweight PC Cover for Samsung Galaxy Z Fold 8 Ultra 5G Funda (Negro)",
+   "precio": 199.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "NINKI - Funda para Samsung Galaxy Z Fold 8 Ultra con lápiz capacitivo, soporte para S Pen y soporte tipo patada, protector de pantalla magnético de privacidad con bisagra",
+   "precio": 579.84,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold 8 Ultra 5G Case, Negro",
+   "precio": 298.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Tongate Funda para Z Fold 8 Ultra, Soporte Magnético Giratorio, Negro",
+   "precio": 1290.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda Magnética para Samsung Galaxy Z Fold 8 Ultra Case",
+   "precio": 399.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "MOBOSI Funda para Samsung Galaxy Z Fold 8 Ultra con Lápiz Stylus, Negro",
+   "precio": 2105.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Ringke Funda para Samsung Galaxy Z Fold 8 Ultra, Alles (Black)",
+   "precio": 789.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech Protector Pantalla Frontal de Hidrogel para Galaxy Z Fold 8 Ultra",
+   "precio": 298.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "memumi Fibra Aramida para Samsung Z Fold 8 Funda con Frente y Trasera",
+   "precio": 949.05,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Spigen Slim Armor Pro mag Fit Funda para Galaxy Z Fold 8 Ultra - Metal Slate",
+   "precio": 759.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "memumi Funda Magnética Fibra Aramida para Samsung Z Fold8 Ultra con Bisagra",
+   "precio": 1039.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "USTIYA Funda para Samsung Galaxy Z Fold 8 Ultra 5G Case Transparente FBK",
+   "precio": 168.9,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "HUAWEI Pura 90s Pro MAX 12+512GB, Naranja Celeste",
+   "precio": 28999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "[3+3] para Samsung Galaxy Z Fold 8 Ultra, protector de pantalla mate antirreflejos EPU+TPU, paquete de 3 para la parte interior + paquete de 3 para la parte frontal, antihuellas",
+   "precio": 457.46,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Protector de pantalla mate para Samsung Galaxy Z Fold 8 Ultra, paquete de 3 + 3 unidades frontales de EPU+TPU, antideslumbrante, antihuellas, autorreparable",
+   "precio": 476.84,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Google Pixel 11 Pro Smartphone 256 GB Niebla",
+   "precio": 22799.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Google Pixel 11 Pro XL Smartphone 256 GB Niebla",
+   "precio": 26290.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Google Pixel 11 Smartphone 512 GB Pistache",
+   "precio": 19991.01,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip8 Rosa 512GB",
+   "precio": 21999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip8 Grafito 512GB",
+   "precio": 21999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy S26 Ultra Negro 512GB (Versión Nacional)",
+   "precio": 22499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold7 512GB Azul Reacondicionado Amazon",
+   "precio": 25899.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech 9H+ Protector Pantalla Frontal para Samsung Galaxy Z Fold 8",
+   "precio": 239.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 6 512GB Blanco Desbloqueado (Reacondicionado), Samsung, CELLULAR_PHONE, 1 Unidades, Samsung",
+   "precio": 10797.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 5 512GB Menta Desbloqueado (Reacondicionado)",
+   "precio": 8487.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 6 512GB Crafted Negro Desbloqueado (Reacondicionado)",
+   "precio": 10597.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold 7 Desbloqueado (Reacondicionado) (Negro, 12, GB, 256, GB)",
+   "precio": 22897.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 6 12GB Desbloqueado (Reacondicionado) (Menta, 12, GB, 512, GB)",
+   "precio": 9999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda Samsung Z Fold 8",
+   "precio": 665.26,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Z Fold 8 con protector de pantalla, soporte para S Pen integrado y lápiz óptico, cubierta protectora de bisagra para Samsung Galaxy Z Fold8, S Pen incluido - Blanco",
+   "precio": 665.26,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Soporte de imán giratorio de 360° para funda Galaxy Fold 8, protección de bisagras, compatible con carga magnética, soporte tipo patada y soporte de anillo, funda para Samsung Galaxy Z Fold8 con lápiz",
+   "precio": 680.91,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "USTIYA Funda Mica para Samsung Galaxy Z Fold 8 Uso Rudo Transparente PCKM",
+   "precio": 188.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold 8 / Fold8 5G Case Uso Rudo Carcasa",
+   "precio": 228.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "2+2 Mica Protector Pantalla Para Samsung Galaxy Z Fold 8 5G",
+   "precio": 239.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold 8 5G Case, Negro",
+   "precio": 298.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "SAMSUNG Galaxy Z Flip5 Lavanda 8GB_256GB (Reacondicionado)",
+   "precio": 7797.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold 6 Desbloqueado (Reacondicionado) (Plata, 12, GB, 256, GB)",
+   "precio": 17247.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Flip7 Jetblack 512GB (Reacondicionado)",
+   "precio": 16097.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "2+2 Piezas Mica Protector de Pantalla para Samsung Galaxy Z Fold 8",
+   "precio": 208.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "2 Piezas Protector de Pantalla Mate para Samsung Galaxy Z Fold 8",
+   "precio": 258.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Flip7 FE Negro 128GB",
+   "precio": 11499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 6 512GB Amarillo - T-mobile (Reacondicionado), Samsung, CELLULAR_PHONE, Vidrio Armor Aluminum",
+   "precio": 10797.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "SAMSUNG Galaxy Z Flip5 Grafito 8GB_256GB (Reacondicionado)",
+   "precio": 7797.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy-Z Fold4 12GB + 512GB Crema (Reacondicionado)",
+   "precio": 26279.76,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "QWYJ Funda para Samsung Galaxy Z Fold 8 5G Case Carcasa Cover, Transparente",
+   "precio": 198.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TOCOL Mica Protector de pantalla para Samsung Galaxy Z Fold 8",
+   "precio": 249.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "JETech Funda Mate para Samsung Galaxy Z Fold 8, Negro",
+   "precio": 759.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "SAMSUNG Galaxy Z Fold 5 Negro 12GB 512GB (Reacondicionado)",
+   "precio": 10699.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip7: At&t Only, Almacenamiento de 256 Gb, Coralred (Reacondicionado)",
+   "precio": 15647.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "ELEPHANTBOAT® [6 en 1 Protector de Pantalla para Samsung Galaxy Z Fold 8,2 Películas para Pantalla Interior,2 Protectores Traseros de Vidrio Templado y Protectores Lente Cámara",
+   "precio": 229.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Fold5 5g 1 TB Icy Blue 12 GB Ram (Reacondicionado)",
+   "precio": 29999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Fold8 Silicone Magnet Case Graphite",
+   "precio": 1005.66,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Note 10+ Aurora Silver (versión nacional)",
+   "precio": 27999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy Z Flip 6 SM-F741U1 Desbloqueado de fábrica 512 GB - Blanco (renovado) (Reacondicionado)",
+   "precio": 9999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "QWYJ Mica Protector de Pantalla para Samsung Galaxy Z Fold 8 5G",
+   "precio": 219.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "QWYJ 3x Protector Lente Cámara para Samsung Galaxy Z Fold 8 5G",
+   "precio": 149.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "TAURI Mica de Pantalla Completa para Samsung Galaxy Z Fold 8-2 Unidades",
+   "precio": 249.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Samsung Galaxy S20 FE 5G | Teléfono celular Android desbloqueado de fabrica | 128 GB | version de EE. UU. | Camara de grado profesional, zoom espacial 30X, modo nocturno | Cloud Navy (Reacondicionado)",
+   "precio": 3747.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "QWYJ Funda para Samsung Galaxy Z Fold 8 5G Case Carcasa, PC Cover, Azul",
+   "precio": 238.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "fold8",
+   "titulo": "Funda para Samsung Galaxy Z Fold8 (Marrón)",
+   "precio": 499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Tales of Arise [PlayStation 5]",
+   "precio": 749.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Vantisan Soporte Vertical para Consola PS5/PS5 Slim (Disco y Digital) con Tornillo,Evita Resbalones, Estación de Refrigeración Estable,Soporte de Repuesto para Consola PS 5 Slim",
+   "precio": 399.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Ventilador ABS para Consola for ps5 Digital Edición Negro Ventilador",
+   "precio": 241.69,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado antes de la ficha: precio bajo el piso o sin precio"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Para Playstation 5 para protector de polvo delgado impermeable funda de nailon para disco edición digital protección de consola",
+   "precio": 242.52,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Consola PlayStation 5 de 1 TB: ASTRO BOT y Gran Turismo 7, Modelo PS5STA-ASTRO - Standard Edition",
+   "precio": 14599.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Unidad de Disco- Consola Slim digital",
+   "precio": 1999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado antes de la ficha: precio bajo el piso o sin precio"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Grand Theft Auto VI - PlayStation 5 - PS5 Edition",
+   "precio": 1695.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Reproductor Remoto Portal Midnight Black",
+   "precio": 5199.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "EA SPORTS FC 27 - PlayStation 5 - FC27 Edition",
+   "precio": 999.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Elden Ring - PlayStation 5",
+   "precio": 502.02,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Disc Drive For PS5 Digital Edition Consoles (Slim)",
+   "precio": 2449.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado antes de la ficha: precio bajo el piso o sin precio"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "MARVEL'S SPIDER-MAN 2 - PS5 Standard Edition",
+   "precio": 944.91,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Sony Interactive Entertainment Marvel's Wolverine - Playstation 5",
+   "precio": 939.98,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "EA SPORTS FC 27 Standard Edition PlayStation5 |Physical Disc I VideoGame |English",
+   "precio": 891.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "BuFan Protector antipolvo para PS5, protector de protección antiarañazos, compatible con consola Playstation 5 Digital Edition & Regular Edition (Gray)",
+   "precio": 179.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Vivo Soporte de Pared de Acero diseñado para Consola de Juegos PS5, Pantalla Vertical para PlayStation 5, diseño Abierto, Negro, MOUNT-PS5B",
+   "precio": 399.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Call of Duty®: Modern Warfare® 4 para PlayStation® 5",
+   "precio": 1119.2,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Logitech G923 TRUEFORCE Volante de Carreras y Pedales hasta 1000Hz Force Feedback, Pedales Personalizables, Embrague Dual, Volante Cubierto de Cuero Auténtico para PS5, PS4, PC y Mac - Negro",
+   "precio": 4479.1,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Logitech G29 Driving Force, Pedales y Volante de Carreras para PS5",
+   "precio": 4589.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Metro 2039 Deluxe Edition PS5",
+   "precio": 2699.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Mcbazel Soporte Horizontal para PS5 estándar, Base Estable para Las ediciones con Disco y Digital de PlayStation 5 de 2020 (Negro): Ajuste Seguro, fácil instalación (no Compatible con PS5 Slim/Pro).",
+   "precio": 271.58,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "OIVO PS5 Stand with Suction Cooling Fan and Dual Controller Charger Station for Playstation 5 PS5 Console, Suction Cooler Fan with Charging Dock Station and 12 Games Storage- 2 IN1 Cable Included",
+   "precio": 565.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation DualSense Edge Wireless Controller",
+   "precio": 4299.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Electronic Arts FC 26 PS5 + PlayStation 5 1TB con ASTRO BOT/Gran Turismo 7",
+   "precio": 15419.11,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Soporte para PS5/PS5 Slim, Soporte de Pared con Ventilador de 3 Velocidades de Refrigeración y Cargador de Mando, Luz RGB y Gancho para Auriculares, Soport de Refrigeración para PS5 Disc y Digital",
+   "precio": 499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Ghost of Yotei - Collector's Edition - PS5",
+   "precio": 2739.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Soporte para PS5/Slim/Pro, Base Enfriadora con Ventilador, Cargador para 2 Mandos PS5, 3 USB + 1 Type-C, Luz LED, Stand de Refrigeración para Consola PlayStation 5",
+   "precio": 459.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Cubierta para Consola Digital - Cosmic Red - Cosmic Red Edition",
+   "precio": 1061.48,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Control Inalámbrico DualSense Techno Red",
+   "precio": 1349.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: no nombra la marca"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Resident Evil 4 PS5",
+   "precio": 509.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Resident Evil Requiem Amazon Exclusive Edition - PlayStation 5",
+   "precio": 945.57,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "OIVO Soporte Horizontal PS5/Slim/Pro para Todas las Consolas PlayStation 5, Base Horizontal con Tornillo, Compatible con Edición Disco y Digital, Color Blanco",
+   "precio": 499.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Cubierta para Consola Digital – Volcanic Red - Volcanic Red Edition",
+   "precio": 1092.79,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "PlayStation 5 Portal Midnight Black + PS5 Digital 825GB Astro Bot/GT7",
+   "precio": 17698.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Ventilador Enfriamiento Compatible con PS5 Accesorios con Luz LED",
+   "precio": 298.0,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Cubierta Antipolvo para PS5 Consola, Cubre Polvo para PS5 Protector Contra el Polvo Impermeable Antiarañazos de Tela Oxford con Puerto de Cable Trasero Funda Antipolvo para PS5 (Gris)",
+   "precio": 129.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Ghost of Tsushima Director's Cut - Special Edition - PlayStation 5",
+   "precio": 940.79,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Mcbazel Hub USB de 4 Puertos Solo para Consola PS5 Slim Digital/Disc Edition, Adaptador de Cargador de concentrador de expansión de Alta Velocidad 2.0 Compatible con PlayStation 5 Slim Disc/Edición",
+   "precio": 249.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Cubiertas de consola PS5 Edición Digital – Cobalt Blue/Grantía en México - Cobalt Blue Edition",
+   "precio": 1204.54,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "WD_Black 4TB SN850X NVMe Unidad Interna de Estado sólido para Juegos con disipador térmico - Funciona con PlayStation 5, Gen4 PCIe, M.2 2280, hasta 7.300 MB/s - WDS400T2XHE",
+   "precio": 16681.77,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Cubierta Antipolvo para Ps5 Consola, Gris",
+   "precio": 128.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Seagate 2TB Disco Duro para PS5 con LED Azul | USB 3.0 (STLV2000100)",
+   "precio": 3736.53,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Mcbazel Hub USB para consola PS5 Slim/PS5 Pro solamente, 4 puertos 2.0 de alta velocidad de expansión Hub cargador convertidor adaptador para PlayStation 5 Slim/Pro Disc y edición digital, negro",
+   "precio": 242.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Monoprice 8K Certified Ultra High Speed HDMI 2.1 Cable - 3 Feet - Black | 48Gbps, Compatible with Sony PlayStation 5, PlayStation 5 Digital Edition, Microsoft Xbox Series X, and Xbox Series S",
+   "precio": 123.67,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado antes de la ficha: precio bajo el piso o sin precio"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Mcbazel PS5 - Soporte de refrigeración delgado estación de carga para Playstation 5 Slim sole Disc/Digital, ventilador de refrigeración de 3 niveles, 6 ranuras de juego, 2 soportes para, MT-050189",
+   "precio": 555.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Amazon",
+   "producto": "ps5",
+   "titulo": "Legacy of Kain Soul Reaver 1&2 Remastered - Playstation 5",
+   "precio": 492.93,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 EDICION LIMITADA ORO GHOST OF YOTEI",
+   "precio": 10999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 MEGAPACK BUNDLE GT7 Y ASTROBOT DIGITAL",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante digital, pero la ficha no trae oferta nueva a la venta (agotado)"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 MEGAPACK BUNDLE GT7 Y ASTROBOT",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 PRO DIGITAL 2TB",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 SLIM MEGAPACK BUNDLE DIGITAL",
+   "precio": 6999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante digital, pero la ficha no trae oferta nueva a la venta (agotado)"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 SLIM MEGAPACK BUNDLE",
+   "precio": 8999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 PORTAL REMOTE",
+   "precio": 6999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 2 SLIM WE9 XMENL",
+   "precio": 990.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 2",
+   "precio": 990.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PSP NEGRO CON WWE 2011",
+   "precio": 2690.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PSP AZUL CON LITTLE BIG PLANET",
+   "precio": 999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PSP NEGRO CON PRO EVOLUTION SOCCER 2010",
+   "precio": 999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 3 NEGRO 80GB CON METAL GEAR SOLID 4 GUNS OF THE PATRIOTS",
+   "precio": 4490.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 SLIM SPIDER MAN 2 BUNDLE",
+   "precio": 14599.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 SLIM",
+   "precio": 11999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE SPIDER MAN 2",
+   "precio": 12499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE EA FC24",
+   "precio": 12499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE EDICION ESPECIAL SPIDER MAN 2",
+   "precio": 15499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 VERSION DIGITAL BUNDLE GOD OF WAR RAGNAROK",
+   "precio": 10499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante digital, pero la ficha no trae oferta nueva a la venta (agotado)"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 EDICION GOD OF WAR",
+   "precio": 4999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE GOD OF WAR RAGNAROK",
+   "precio": 11999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE EDICION FIFA 23",
+   "precio": 11999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 VERSION DIGITAL BUNDLE HORIZON FORBIDDEN WEST",
+   "precio": 10499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante digital, pero la ficha no trae oferta nueva a la venta (agotado)"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 BUNDLE HORIZON FORBIDDEN WEST",
+   "precio": 11999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 18",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5",
+   "precio": 5999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 5 VERSION DIGITAL",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "variante digital, pero la ficha no trae oferta nueva a la venta (agotado)"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 16",
+   "precio": 9299.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 15",
+   "precio": 8499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB CON FIFA 21",
+   "precio": 9299.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 13",
+   "precio": 9699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO 1TB DEATH STRANDING EDICION LIMITADA",
+   "precio": 12999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 7",
+   "precio": 7299.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB MEGAPACK 6",
+   "precio": 8999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB CON FIFA 20",
+   "precio": 7299.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM 1TB DAYS OF PLAY STEEL GRAY EDICION LIMITADA",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO NEGRO 1TB CON HORIZON ZERO DAWN",
+   "precio": 10999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB HITS BUNDLE 5",
+   "precio": 7649.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION CLASSIC",
+   "precio": 2199.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB CON SPIDER MAN",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB CON FIFA 19",
+   "precio": 6999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB HITS BUNDLE 4",
+   "precio": 7499.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO 1TB SPIDER MAN EDICION LIMITADA",
+   "precio": 12999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM 1TB DAYS OF PLAY EDICION LIMITADA",
+   "precio": 9999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB HITS BUNDLE 3",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO 1TB GOD OF WAR EDICION LIMITADA",
+   "precio": 13999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO 1TB STAR WARS BATTLEFRONT II EDICION LIMITADA",
+   "precio": 12999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM 1TB CALL OF DUTY WWII EDICION LIMITADA",
+   "precio": 8999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 500GB HITS BUNDLE 2",
+   "precio": 6699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO 1TB NEGRO",
+   "precio": 10999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 1TB CON FIFA 18",
+   "precio": 6699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 500GB HITS BUNDLE",
+   "precio": 6699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 500GB CON CALL OF DUTY INFINITE WARFARE",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 PRO NEGRO 1TB",
+   "precio": 12999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CARTERA PLAYSTATION CONSOLA PS1",
+   "precio": 399.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 500GB CON FIFA 17",
+   "precio": 6999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 SLIM NEGRO 500GB CON UNCHARTED 4",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 NEGRO 500GB CON UNCHARTED THE NATHAN DRAKE COLLECTION",
+   "precio": 7999.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION 4 500GB UNCHARTED 4 EDICION LIMITADA",
+   "precio": 9199.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION VITA SLIM AQUA BLUE",
+   "precio": 5699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  },
+  {
+   "tienda": "Gameplanet",
+   "producto": "ps5",
+   "titulo": "CONSOLA PLAYSTATION VITA SLIM NEON ORANGE",
+   "precio": 5699.99,
+   "vendedor": null,
+   "importado": false,
+   "var_dada": null,
+   "resolvio": "descartado: titulo"
+  }
+ ]
+}
