@@ -24,8 +24,12 @@ def lee(n):
 class Red:
     """Sustituto de pedir: [(regex de la liga, archivo o (estado, texto))]; lo demas responde 404."""
 
+    v = None   # modulo vigia; cada red nueva vacia la memoria de fichas de Liverpool de "esta corrida"
+
     def __init__(self, mapa):
         self.mapa, self.pedidas = mapa, []
+        if Red.v is not None:
+            Red.v.LIVERPOOL_LEIDAS.clear()
 
     def __call__(self, url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0):
         self.pedidas.append(url)
@@ -58,10 +62,12 @@ def niveles_de(avisos):
 
 def correr(v):
     pedir0, nivel0 = v.pedir, v.nivel
+    Red.v = v
     try:
         _correr(v)
     finally:
         v.pedir, v.nivel = pedir0, nivel0
+        v.LIVERPOOL_LEIDAS.clear()
         if hasattr(v, "razon") and getattr(v.razon, "_de_prueba", False):
             del v.razon
     print("casos_confirmacion OK")
@@ -220,14 +226,14 @@ def _correr(v):
         for av in v.avisos_de_precio({clave: dict(lavanda)}, por_demo, avisado, estado, AHORA):
             v.publicar_aviso(av, avisado, False, False, abrir=lambda a, c: abiertos.append(a), niveles=niveles)
     assert len(abiertos) == 1 and abiertos[0].startswith("GANGA $44,999"), abiertos
-    assert estado["avisado"] == {clave: 44999.0} and estado["avisado_nivel"] == {clave: "GANGA"}, estado
+    assert estado["avisado"] == {clave: 44999.0} and estado["avisado_nivel"] == {clave: ["GANGA", 44999.0]}, estado
     assert all(isinstance(x, (int, float)) for x in estado["avisado"].values()), estado
     # lo que haya quedado escrito con el formato de diccionario de la primera version se pasa a numeros
     viejo = {"avisado": {clave: {"precio": 44999.0, "nivel": "SIN CONFIRMAR"}, "Amazon|ps5|digital": 9000.0},
              "avisado_nivel": {"Costco|ps5|digital": "GANGA"}}
     v.normalizar_avisado(viejo)
     assert viejo == {"avisado": {clave: 44999.0, "Amazon|ps5|digital": 9000.0},
-                     "avisado_nivel": {clave: "SIN CONFIRMAR"}}, viejo
+                     "avisado_nivel": {clave: ["SIN CONFIRMAR", 44999.0]}}, viejo
     # y avisos_de_precio tambien lee el diccionario si llegara sin normalizar
     v.pedir = Red(LIV_OK)
     avs = v.avisos_de_precio({clave: dict(lavanda)}, por_demo, {clave: {"precio": 44999.0, "nivel": "SIN CONFIRMAR"}}, {}, AHORA)

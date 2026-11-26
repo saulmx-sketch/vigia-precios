@@ -15,8 +15,16 @@ def resolver(v):
     with open(os.path.join(AQUI, "casos_titulos.json"), encoding="utf-8") as f:
         casos = json.load(f)
     filas = []
+    # Casos con tienda "sin dato" solo prueban el titulo (venian de variante() en el selftest viejo). Desde el 25 nov
+    # 2026 una tienda sin regla de vendedor no es oficial (revisor R1-F3): para ellos no se exige vendedor oficial.
+    solo_titulo = {}
+    for pid, p in prods.items():
+        q = json.loads(json.dumps(p))
+        q["requisitos"]["solo_vendedor_oficial"] = False
+        solo_titulo[pid] = q
     for c in casos:
-        o = v.oferta(prods[c["producto"]], c["tienda"], c["titulo"], c["precio"], "u", c["vendedor"],
+        prod = solo_titulo[c["producto"]] if c["tienda"] == "sin dato" else prods[c["producto"]]
+        o = v.oferta(prod, c["tienda"], c["titulo"], c["precio"], "u", c["vendedor"],
                      importado=c.get("importado", False))
         filas.append((c, o["var"] if o else None, o))
     return prods, filas
