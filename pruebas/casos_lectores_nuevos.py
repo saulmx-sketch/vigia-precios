@@ -90,9 +90,9 @@ def correr(v):
         FICHA_PS5: (200, f_ps5),
         FICHA_UNIDAD: (200, _leer("soriana_ficha_unidad_disco.html")),
     }
-    # "Unidad de Disco para Consolas PS5 Digital" pasa la regla de titulos (dice "Consolas" y "Digital"): la ficha
-    # se abre y la deja fuera solo el piso ($5,190 < $6,500). Hallazgo del 25 nov, anotado en H7_lectores.md.
-    abre = {"playstation 5 digital": [FICHA_PS5, FICHA_UNIDAD], "consola playstation 5": [FICHA_PS5]}
+    # "Unidad de Disco para Consolas PS5 Digital": con la regla de excluir de linea-C ya no pasa el titulo, asi que su
+    # ficha no se abre (antes la dejaba fuera solo el piso; hallazgo del 25 nov en H7_lectores.md).
+    abre = {"playstation 5 digital": [FICHA_PS5], "consola playstation 5": [FICHA_PS5]}
     guardado = v.pedir
     try:
         v.pedir = srv = Servidor(tabla)
@@ -152,9 +152,8 @@ def correr(v):
     finally:
         v.pedir = guardado
     # (e) titulos de Soriana fuera: accesorios y la PS5 con lector
-    # (a precio de consola, para que el titulo sea lo que decide; la unidad de disco va a su precio real: a $11,990
-    # pasaria, ver el hallazgo de arriba)
-    for titulo, precio in (("Unidad de Disco para Consolas PS5 Digital", 5190),
+    # (a precio de consola, para que el titulo sea lo que decide)
+    for titulo, precio in (("Unidad de Disco para Consolas PS5 Digital", 11990),
                            ("Auriculares Inalámbricos Pulse Explore para PS5", 11990),
                            ("Control DualSense PlayStation 5 Gray Camo", 11990),
                            ("Spider Man 2 Standard Edition para PS5", 11990),

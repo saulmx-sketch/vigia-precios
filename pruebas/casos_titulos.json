@@ -3184,7 +3184,7 @@
   "precio": 5190.0,
   "vendedor": "Soriana",
   "espera": null,
-  "origen": "Soriana, ficha 11864204 del 25-nov-2026 (ld+json Product: price 5190.00, seller Soriana, InStock). Ojo: queda fuera solo por el piso; la regla de titulos la deja pasar (dice Consolas y Digital)"
+  "origen": "Soriana, ficha 11864204 del 25-nov-2026 (ld+json Product: price 5190.00, seller Soriana, InStock). Antes de la regla de excluir de linea-C la dejaba fuera solo el piso (dice Consolas y Digital)"
  },
  {
   "tienda": "Soriana",
