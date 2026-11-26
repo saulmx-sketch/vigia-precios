@@ -553,7 +553,9 @@ def e9_ficha_basura(v):
 
 
 def e10_estado_viejo(v):
-    with open(os.path.join(RAIZ, "visto.json"), encoding="utf-8") as f:
+    # copia congelada del visto.json de la version d295f51 (nunca el vivo del repositorio: la nube lo reescribe cada
+    # 15 min y sus contadores de ausencia hacian salir un "Agotado" que esta escena no espera)
+    with open(os.path.join(RESP, "visto_viejo_2026-11-25.json"), encoding="utf-8-sig") as f:
         viejo = json.load(f)
     b = Banco(v, visto=viejo)
     try:
@@ -678,9 +680,20 @@ def correr(v):
     del PENDIENTES[:]
     antes = foto_repo()
     t0 = time.perf_counter()
-    for nombre, fn in ESCENAS:
-        detalle = fn(v)
-        print("casos_corrida escena %-24s OK: %s" % (nombre, detalle))
+    # topes por fracciones de productos.json, como en selftest(): prospectiva.json (linea A) cambia con el historial
+    # y vence con la fecha; se vacia mientras corren las escenas y se repone al salir
+    prosp = getattr(v, "PROSPECTIVA", None)
+    prosp_antes = dict(prosp) if isinstance(prosp, dict) else None
+    try:
+        if prosp_antes is not None:
+            prosp.clear()
+        for nombre, fn in ESCENAS:
+            detalle = fn(v)
+            print("casos_corrida escena %-24s OK: %s" % (nombre, detalle))
+    finally:
+        if prosp_antes is not None:
+            prosp.clear()
+            prosp.update(prosp_antes)
     afirma(foto_repo() == antes, ("se escribio en la carpeta del repositorio", antes, foto_repo()))
     for esc, esperado, paso in PENDIENTES:
         print("casos_corrida PENDIENTE (falla del programa) escena %s: se esperaba %s; paso %s" % (esc, esperado, paso))
