@@ -1042,7 +1042,7 @@ def _skus_cerradas(prods):
     """Un SKU por producto y variante de Samsung: {sku: [prod, variante]}."""
     out, vistos = {}, set()
     for p in prods or []:
-        for sku, info in ((p.get("tiendas") or {}).get("Samsung") or {}).get("skus", {}).items():
+        for sku, info in ((((p.get("tiendas") or {}).get("Samsung") or {}).get("skus")) or {}).items():   # pendiente 7
             if (p["id"], info[0]) not in vistos:
                 vistos.add((p["id"], info[0]))
                 out[sku] = [p["id"], info[0]]
@@ -1180,6 +1180,26 @@ def _sin_reintento(pedir):
     return pedir
 
 
+def _cifra_de_otra(pares, cod, f, ahora):
+    """Codigo de la promocion anterior de la que la cifra PayPal de `f` (articulo `cod`) puede ser resto, o ''.
+    Costco pone la cifra en una categoria (ahorrosPaypalNNNN) que puede quedarse cuando cambia la promocion.
+    - Mismo articulo, otra promocion con la misma cifra: sospechosa (regla publicada el 25 nov).
+    - Otro articulo cuya promocion con la misma cifra ya vencio (pendiente 1, 26 nov 2026): sospechosa. Asi un
+      articulo leido por primera vez tras vencer PP177 no hereda los $6,000.
+    - Otro articulo con promocion viva de la misma cifra y otro codigo (PP177 y PP178 a la vez): no; son dos
+      promociones reales (caso del revisor de la junta 3). Un par viejo de otro articulo sin fecha guardada tampoco."""
+    for art, par in (pares or {}).items():
+        if not isinstance(par, list) or len(par) < 2 or par[1] != f.get("valor") or par[0] == f.get("codigo"):
+            continue
+        if art == cod:
+            return par[0]
+        if len(par) >= 3 and par[2]:
+            _, fin = rango(par[2], ahora)
+            if fin is not None and fin < ahora.astimezone(MX).date():   # ya vencio (no: "aun no empieza")
+                return par[0]
+    return ""
+
+
 def _olvidar_avisados(estado, ahora):
     """E6/M10: un aviso aparte de mas de 7 dias se olvida (y la lista no crece sin limite)."""
     hechos = estado.get("promos_avisado")
@@ -1240,12 +1260,12 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             for f in v.get("filas") or []:
                 # E13 (C6/C1): la misma cifra con otra promocion PayPal = la categoria puede ser de la anterior: sin cifra
                 if f.get("banco") == "PayPal" and f.get("valor") is not None:
-                    antes = pares.get(cod)
-                    if isinstance(antes, list) and len(antes) == 2 and antes[1] == f["valor"] and antes[0] != f.get("codigo"):
+                    previa = _cifra_de_otra(pares, cod, f, ahora)
+                    if previa:
                         f["valor"], f["unidad"] = None, None
-                        f["beneficio"] = (f.get("beneficio") or "") + " (cifra quizá de %s, la anterior)" % antes[0]
+                        f["beneficio"] = (f.get("beneficio") or "") + " (cifra quizá de %s, la anterior)" % previa
                     else:
-                        pares[cod] = [f.get("codigo"), f["valor"]]
+                        pares[cod] = [f.get("codigo"), f["valor"], f.get("vigencia") or ""]
         caja["costco_pares"] = pares
         productos.update(leidos)   # un articulo que fallo conserva sus filas anteriores (con su hora vieja: solo nota)
         caja["costco"] = {"leido": previo.get("leido", "") if incompleto else _hora(ahora), "productos": productos,
@@ -2251,6 +2271,44 @@ def selftest():
                  _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp190]))}), abrir, reloj=_Reloj(),
                  dormir=lambda s: None)
     assert av == [] and "Costco anuncia otra promoción al pagar (PP190)" in of[0]["nota"], (av, of[0]["nota"])
+    # 26 nov (pendiente 1): tras vencer PP177, un articulo NUNCA leido con PP190 y la misma categoria no hereda la cifra
+    url_b = "https://www.costco.com.mx/y/p/648330"
+    of_b = lambda: [{"prod": "fold8", "var": "ultra-512", "nombre": "Fold8 Ultra 512 GB", "tienda": "Costco",  # noqa: E731
+                     "precio": 47999.0, "url": url_b, "vendedor": "Costco", "nota": "", "titulo": "t"}]
+    ficha_b = lambda proms: ficha_cc(["ahorrosPaypal6000"], proms).replace('"code": "648324"', '"code": "648330"')  # noqa: E731
+    est_v = {}
+    mejorar(of_e(), est_v, pc_e, a29, True, _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp177]))}),
+            abrir, reloj=_Reloj(), dormir=lambda s: None)
+    assert est_v["promos"]["costco_pares"]["648324"] == ["PP177", 6000.0, "2026-11-23 a 2026-12-01"], est_v["promos"]
+    d2 = dt.datetime(2026, 12, 2, 16, 0, tzinfo=dt.timezone.utc)
+    pp190b = pp("PP190", "2026-12-02T06:00:00.000Z", "2026-12-10T05:59:59.000Z")
+    of = of_b()
+    av = mejorar(of, est_v, pc_e, d2, True, _pedir_falso({"/648330?": (200, ficha_b([pp190b]))}), abrir,
+                 reloj=_Reloj(), dormir=lambda s: None)
+    assert av == [] and "quedaría" not in of[0]["nota"], (av, of[0]["nota"])
+    # revisor de la junta 3: dos articulos con promociones vivas propias (PP177 y PP178) de la misma cifra: dos avisos,
+    # en cualquier orden de lectura y tambien en la corrida siguiente
+    pp178 = pp("PP178", "2026-11-23T13:00:00.000Z", "2026-12-02T05:59:59.000Z")
+    for orden in ((("/648324?", [pp177]), ("/648330?", [pp178])), (("/648330?", [pp178]), ("/648324?", [pp177]))):
+        est_d = {}
+        for corrida in range(2):
+            ofs = of_e() + of_b()
+            pag = {k: (200, (ficha_cc(["ahorrosPaypal6000"], pr) if k == "/648324?" else ficha_b(pr))) for k, pr in orden}
+            av = mejorar(ofs, est_d, pc_e, a29 + dt.timedelta(minutes=61 * corrida), True, _pedir_falso(pag), abrir,
+                         reloj=_Reloj(), dormir=lambda s: None)
+            assert sorted(a["clave"] for a in av) == ["Costco|fold8|normal-512|PayPal|PP177",
+                                                      "Costco|fold8|ultra-512|PayPal|PP178"], (orden, corrida, av)
+    # par viejo de dos campos (estado publicado del 25 nov) de OTRO articulo: no anula; del mismo articulo: si
+    est_l = {"promos": {"costco_pares": {"648324": ["PP177", 6000.0]}}}
+    of = of_b()
+    av = mejorar(of, est_l, pc_e, a29, True, _pedir_falso({"/648330?": (200, ficha_b([pp178]))}), abrir,
+                 reloj=_Reloj(), dormir=lambda s: None)
+    assert [a["clave"] for a in av] == ["Costco|fold8|ultra-512|PayPal|PP178"], av
+    est_l = {"promos": {"costco_pares": {"648324": ["PP177", 6000.0]}}}
+    of = of_e()
+    av = mejorar(of, est_l, pc_e, a29, True, _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp190]))}),
+                 abrir, reloj=_Reloj(), dormir=lambda s: None)
+    assert av == [], av
     # el articulo no se pudo releer y su lectura tiene mas de 60 min: solo nota
     est_e, of = {}, of_e()
     mejorar(of, est_e, pc_e, a29, True, _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp177]))}),

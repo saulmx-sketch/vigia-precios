@@ -15,6 +15,7 @@ import datetime as dt
 import email.utils
 import gzip
 import html
+import http.client
 import http.cookiejar
 import json
 import os
@@ -395,7 +396,7 @@ def cosechar_cupones(prods, estado, ahora):
         sam = p["tiendas"].get("Samsung")
         if not sam:
             continue
-        for info in sam["skus"].values():
+        for info in (sam.get("skus") or {}).values():   # 26 nov (pendiente 7): Samsung sin skus no tumba la cosecha
             if len(info) > 2 and info[2] not in paginas:
                 paginas.append(info[2])
         for b in sam.get("cupones_foro", [p["nombre"]]):
@@ -1805,10 +1806,48 @@ def abrir_issue(titulo, texto):
     req = urllib.request.Request("https://api.github.com/repos/%s/issues" % repo, data=datos, method="POST", headers={
         "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios", "Content-Type": "application/json"})
+    desde = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
     # mismo tope duro que pedir(): un aviso que no sale por tiempo no se marca y sale en la corrida siguiente
-    with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
-        print("   aviso abierto:", json.loads(r.read()).get("html_url"))
-    return True
+    try:
+        with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
+            try:   # ya llego la respuesta 2xx: el issue existe aunque el cuerpo se corte o no se entienda
+                liga = json.loads(r.read()).get("html_url")
+            except Exception as ex:
+                liga = "(respuesta 2xx sin cuerpo legible: %s)" % str(ex)[:80]
+            print("   aviso abierto:", liga)
+        return True
+    except CORTE_AMBIGUO as ex:
+        # 26 nov 2026 (pendiente 2): la peticion salio y la respuesta no llego; GitHub pudo haberlo creado. Se busca el
+        # issue por titulo exacto entre los recien creados: si esta, cuenta como abierto (quien llama lo marca y no se
+        # repite cada 15 min); si no esta o la busqueda falla, sigue el error de siempre (no se marca, sale despues).
+        # Un HTTPError (GitHub dijo que no) o un corte antes de conectar no entran aqui: nunca se marcan.
+        liga = _issue_ya_creado(repo, token, titulo[:250], desde)
+        if liga:
+            print("   aviso abierto (la respuesta no llego; confirmado en la lista de GitHub):", liga)
+            return True
+        raise ex
+
+
+CORTE_AMBIGUO = (TimeoutError, ConnectionResetError, ConnectionAbortedError, http.client.RemoteDisconnected,
+                 http.client.IncompleteRead)
+
+
+def _issue_ya_creado(repo, token, titulo, desde):
+    """html_url del issue con ese titulo exacto creado desde `desde` (ISO UTC), o None; una consulta, sin reintento."""
+    req = urllib.request.Request(
+        "https://api.github.com/repos/%s/issues?state=all&sort=created&direction=desc&per_page=30" % repo, headers={
+            "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios"})
+    try:
+        with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
+            lista = json.loads(r.read())
+    except Exception as ex:
+        print("   no se pudo comprobar si el aviso quedo creado:", str(ex)[:120])
+        return None
+    for i in lista if isinstance(lista, list) else []:
+        if isinstance(i, dict) and i.get("title") == titulo and (i.get("created_at") or "") >= desde:
+            return i.get("html_url") or "creado"
+    return None
 
 
 def tabla(mejores):
@@ -2094,6 +2133,66 @@ def cobertura(prods=None):
     return 0
 
 
+def _prueba_corte_ambiguo():
+    """Pendiente 2 (26 nov 2026), sin red: abrir_issue con la respuesta cortada. Si el issue aparece en la lista de
+    GitHub cuenta como abierto (quien llama lo marca: no se repite); si no aparece, o GitHub dijo que no (HTTPError), o
+    el corte fue antes de enviar (URLError), lanza como siempre (no se marca: sale despues)."""
+    class Resp:
+        def __init__(self, cuerpo):
+            self.cuerpo = cuerpo
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return self.cuerpo
+    titulo = "Otra forma de pago: producto X a $31,999 en una tienda con PayPal"
+    reciente = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    guardados = (urllib.request.urlopen, {k: os.environ.get(k) for k in ("GITHUB_REPOSITORY", "GITHUB_TOKEN",
+                                                                          "GITHUB_REPOSITORY_OWNER")})
+    try:
+        os.environ.update({"GITHUB_REPOSITORY": "x/y", "GITHUB_TOKEN": "t", "GITHUB_REPOSITORY_OWNER": ""})
+        for corte, lista, espera in (
+                (TimeoutError("read timed out"), [{"title": titulo, "created_at": reciente, "html_url": "u/1"}], True),
+                (http.client.RemoteDisconnected("cerro"), [{"title": titulo, "created_at": reciente, "html_url": "u/1"}], True),
+                (TimeoutError("read timed out"), [{"title": titulo, "created_at": "2026-01-01T00:00:00Z"}], "lanza"),
+                (TimeoutError("read timed out"), [{"title": "otro", "created_at": reciente}], "lanza"),
+                (TimeoutError("read timed out"), RuntimeError("lista caida"), "lanza"),
+                (urllib.error.HTTPError("u", 500, "x", {}, None), None, "lanza"),
+                (urllib.error.URLError("getaddrinfo failed"), None, "lanza")):
+            pedidas = []
+
+            def falso(req, timeout=None, corte=corte, lista=lista, pedidas=pedidas):
+                pedidas.append(req.get_method())
+                if req.get_method() == "POST":
+                    raise corte
+                if isinstance(lista, Exception):
+                    raise lista
+                return Resp(json.dumps(lista).encode("utf-8"))
+            urllib.request.urlopen = falso
+            try:
+                r = abrir_issue(titulo, "cuerpo")
+            except Exception as ex:
+                r = "lanza"
+                assert ex is corte or isinstance(lista, Exception) or lista is not None, ex
+            assert r == espera, (corte, lista, r)
+            if lista is None:
+                assert pedidas == ["POST"], pedidas          # GitHub dijo que no o no se conecto: ni se busca
+        # 2xx con cuerpo cortado: ya se creo
+        urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"')
+        assert abrir_issue(titulo, "cuerpo") is True
+    finally:
+        urllib.request.urlopen = guardados[0]
+        for k, v in guardados[1].items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
 def selftest():
     prods = cargar_config()
     p = prods[0]
@@ -2350,6 +2449,8 @@ def selftest():
             corridos.append("casos_titulos.py sin lectores nuevos")
     finally:
         yo.pedir, urllib.request.urlopen, time.sleep = guardados
+    _prueba_corte_ambiguo()
+    corridos.append("aviso con respuesta cortada")
     # modulos de las lineas A y B (si existen junto a vigia.py), cada uno en su propio proceso
     if os.environ.get("SELFTEST_SOLO_NUCLEO") != "1":
         for mod in ("prospectiva.py", "promos.py"):
