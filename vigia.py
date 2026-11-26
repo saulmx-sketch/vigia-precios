@@ -34,6 +34,11 @@ HISTORIAL = os.path.join(AQUI, "historial_precios.csv")
 # (main se niega a lo demas: un archivo de muestra no escribe estado ni avisa).
 CONFIG_PRINCIPAL = os.path.join(AQUI, "productos.json")
 CONFIG = os.environ.get("VIGIA_CONFIG") or CONFIG_PRINCIPAL
+
+
+def es_principal(ruta):
+    """Si `ruta` es productos.json, escrita como sea (relativa, otras mayusculas en Windows; revisor R4-H4)."""
+    return os.path.normcase(os.path.abspath(ruta)) == os.path.normcase(os.path.abspath(CONFIG_PRINCIPAL))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/130.0.0.0 Safari/537.36")
 MX = dt.timezone(dt.timedelta(hours=-6))
@@ -164,8 +169,17 @@ def cargar_config(ruta=None):
         try:
             for rx in [p["patron"], p.get("excluir") or ""] + [x for v in p["variantes"] for x in v.get("todas", []) + v.get("ninguna", [])]:
                 re.compile(rx)
-            for tienda, reglas in (p.get("ficha_atributos") or {}).items():
+            fa = p.get("ficha_atributos")
+            if fa is not None and not isinstance(fa, dict):
+                raise SystemExit("%s: en %s, ficha_atributos debe ser un objeto {tienda: [reglas]}" % (nombre, p["id"]))
+            for tienda, reglas in (fa or {}).items():
+                if not isinstance(reglas, list):
+                    raise SystemExit("%s: en %s, ficha_atributos.%s debe ser una lista de reglas" % (nombre, p["id"], tienda))
                 for r in reglas:
+                    # una regla sin "si" casaria con todo titulo de la tienda (revisor R4-H3); sin "agrega" no hace nada
+                    if not isinstance(r, dict) or not isinstance(r.get("si"), dict) or not r["si"] or not r.get("agrega"):
+                        raise SystemExit("%s: en %s, cada regla de ficha_atributos.%s necesita \"si\" (atributos que deben "
+                                         "casar, no vacio) y \"agrega\": %s" % (nombre, p["id"], tienda, r))
                     for rx in list((r.get("si") or {}).values()) + [r.get("no_si") or "", r.get("no_si_atributos") or ""]:
                         re.compile(rx)
         except re.error as ex:
@@ -1333,7 +1347,7 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
                 if not (niv_ant == "SIN CONFIRMAR" and resultado == "confirmada" and niv_f != "SIN CONFIRMAR"):
                     continue
             hechos.append({"clave": clave, "o": final, "prod": prod, "var": var, "nivel": niv_f, "listado": niv,
-                           "resultado": resultado, "razon": razon_f, "relectura": relee})
+                           "resultado": resultado, "razon": razon_f, "relectura": relee, "ant": ant})
     finally:
         estado.pop("_confirmaciones", None)
         estado.pop("_arranque", None)
@@ -1344,7 +1358,11 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
             a["asunto"], a["cuerpo"] = texto_aviso(a["o"], a["prod"], a["var"], a["nivel"], a["resultado"], a["razon"],
                                                    mejores, hora, a["listado"])
             if a.get("relectura"):
+                mismo = a.get("ant") is None or numero(a["o"]["precio"]) == numero(a["ant"])
                 previo = ("Confirmación del aviso anterior, que salió sin releer la ficha: ahora se releyó y coincide."
+                          if a["resultado"] == "confirmada" and mismo else
+                          "Se releyó la ficha: el precio ya es %s (el aviso anterior decía %s)." % (
+                              pesos(numero(a["o"]["precio"])), pesos(numero(a["ant"])))
                           if a["resultado"] == "confirmada" else
                           "Corrección del aviso anterior, que salió sin releer la ficha: ahora se releyó y no coincide.")
                 a["cuerpo"] = previo + "\n\n" + a["cuerpo"]
@@ -1368,7 +1386,9 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
             return False
         avisado[av["clave"]] = av["precio"]
         if niveles is not None:
-            marca = HECHO if av.get("relectura") else \
+            # solo la confirmacion de una relectura la cierra; la correccion SIN CONFIRMAR sigue el camino de todo
+            # SIN CONFIRMAR (se relee; sale un correo mas solo si luego confirma; revisor R4-H1)
+            marca = HECHO if av.get("relectura") and av.get("resultado") == "confirmada" else \
                 RELEER if av.get("resultado") == "sin_releer" and av.get("nivel") in ("GANGA", "COMPRAR") else None
             niveles[av["clave"]] = [av["nivel"], av["precio"]] + ([marca] if marca else [])
         return True
@@ -2077,7 +2097,7 @@ def main():
     if "--cobertura" in sys.argv:
         return cobertura()
     seco = "--seco" in sys.argv
-    if CONFIG != CONFIG_PRINCIPAL and not seco:
+    if not es_principal(CONFIG) and not seco:
         print("VIGIA_CONFIG=%s: con otro archivo de productos solo se corre --seco o --cobertura (no se escribe estado "
               "ni se avisa). Quita la variable para la corrida normal." % CONFIG)
         return 3
@@ -2092,7 +2112,7 @@ def main():
             estado = json.load(f)
     except Exception:
         estado = {}
-    if CONFIG != CONFIG_PRINCIPAL:   # archivo de muestra: no se mezcla con la memoria de los productos vigilados
+    if not es_principal(CONFIG):   # archivo de muestra: no se mezcla con la memoria de los productos vigilados
         estado = {}
     antes = json.dumps(estado, sort_keys=True)
     fallos = estado.setdefault("fallos_fuente", {})
