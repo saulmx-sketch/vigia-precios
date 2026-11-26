@@ -11,25 +11,31 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-26 17:03"
+   "visto": "2026-11-26 17:17"
+  },
+  "Cyberpuerta|ps5|digital": {
+   "precio": 13389.0,
+   "producto": "PS5 Digital (sin lector)",
+   "url": "https://www.cyberpuerta.mx/Audio-y-Video/Consolas-y-Juegos/PlayStation-5-PS5/Consolas-PlayStation-5/Sony-PlayStation-5-Slim-Digital-Bundle-Astro-Bot-y-Gran-Turismo-7-1TB-Wi-Fi-Negro-Blanco.html",
+   "visto": "2026-11-26 17:17"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-26 17:03"
+   "visto": "2026-11-26 17:17"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-26 17:03"
+   "visto": "2026-11-26 17:17"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-26 17:03"
+   "visto": "2026-11-26 17:17"
   }
  },
  "cupones_cosechados": {
@@ -214,7 +220,6 @@
   }
  },
  "diag_amazon": [
-  "11-26 07:07 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 07:07 busqueda ok",
   "11-26 07:23 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 07:25 busqueda 503 de 1669 bytes, reintento 200 de 2288 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
@@ -273,7 +278,8 @@
   "11-26 16:21 busqueda ok",
   "11-26 16:35 busqueda 503 de 1669 bytes, reintento ok",
   "11-26 16:49 busqueda ok",
-  "11-26 17:03 busqueda ok; ficha B0FTP523RH ok; ficha B09SYJ9NNX ok; ficha B0G76YF472 ok"
+  "11-26 17:03 busqueda ok; ficha B0FTP523RH ok; ficha B09SYJ9NNX ok; ficha B0G76YF472 ok",
+  "11-26 17:17 busqueda ok; ficha B0F6968Y5G ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -632,7 +638,7 @@
    "Amazon": {
     "error": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins respondio 503 de 1669 bytes",
     "filas": [],
-    "leido": "2026-11-26 11:12"
+    "leido": "2026-11-26 17:17"
    },
    "BBVA": {
     "error": "",
@@ -1438,12 +1444,12 @@
       "vigente": false
      }
     ],
-    "leido": "2026-11-26 11:12"
+    "leido": "2026-11-26 17:17"
    },
    "Liverpool": {
     "error": "",
     "filas": [],
-    "leido": "2026-11-26 11:12"
+    "leido": "2026-11-26 17:17"
    },
    "Samsung": {
     "error": "",
@@ -1553,7 +1559,7 @@
    false,
    "ps5",
    18750.0,
-   1795729976
+   1795735043
   ],
   "B0FTNL3B9F": [
    14697.86,
@@ -1593,7 +1599,7 @@
    false,
    "ps5",
    12948.0,
-   1795729976
+   1795735043
   ],
   "B0G76569Q9": [
    13319.11,
@@ -1601,7 +1607,7 @@
    false,
    "ps5",
    13319.11,
-   1795729976
+   1795735043
   ],
   "B0G76PM4FZ": [
    17998.0,
