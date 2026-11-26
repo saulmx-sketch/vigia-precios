@@ -3158,5 +3158,239 @@
   "vendedor": "Gameplanet",
   "espera": null,
   "origen": "pruebas/titulos_vistos_2026-11-25.json #325 (descartado: titulo); vendedor supuesto para la prueba (no se leyo: el titulo no llego a la ficha)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 7.6 Pulgadas 512GB Lavanda Desbloqueado",
+  "precio": 36990.0,
+  "vendedor": "Soriana",
+  "espera": "normal-512",
+  "origen": "Soriana, ficha 11944979 del 25-nov-2026 (ld+json Product: price 36990.00, seller Soriana, InStock); en la tarjeta del listado aparece $45,990"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Consola PlayStation 5 Digital Slim + Astro Bot y Gran Turismo 7 825GB",
+  "precio": 11990.0,
+  "vendedor": "Soriana",
+  "espera": "digital",
+  "origen": "Soriana, ficha 11912222 del 25-nov-2026 (ld+json Product: price 11990.00, seller Soriana, InStock); en la tarjeta del listado aparece $12,490"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Unidad de Disco para Consolas PS5 Digital",
+  "precio": 5190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, ficha 11864204 del 25-nov-2026 (ld+json Product: price 5190.00, seller Soriana, InStock). Ojo: queda fuera solo por el piso; la regla de titulos la deja pasar (dice Consolas y Digital)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Spider Man 2 Standard Edition para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Grand Theft Auto V para PS5",
+  "precio": 790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "God of War Ragnarok para PS5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "The Last of Us Part I Latam para PS5",
+  "precio": 1390.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "The Last of Us Part II Remastered para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Spider-Man Miles Morales LATAM para PS5",
+  "precio": 790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Astro Bot Playstation 5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Gran Turismo 7 para PS5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Monster Hunter Stories 3: Twisted Reflection PlayStation 5",
+  "precio": 1690.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "La Ascension Del Ronin para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Dead Space Remake Playstation 5",
+  "precio": 1390.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Death Stranding 2 On The Beach Playstation 5",
+  "precio": 1490.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Resident Evil Requiem PlayStation 5",
+  "precio": 1690.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "007 First Light Playstation 5",
+  "precio": 1990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Dragon Quest III HD Remake PlayStation 5",
+  "precio": 1790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "MARVEL'S SPIDER-MAN: MILES MORALES PS5",
+  "precio": 1799.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "FC 24 EA Sports PS5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Stellar Blade para PS5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Starfield PlayStation 5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Red Dead Redemption PlayStation 5",
+  "precio": 990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "PGA Tour 2K25 Playstation 5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Auriculares Inalámbricos Pulse Explore para PS5",
+  "precio": 2990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Control DualSense PlayStation 5 Gray Camo",
+  "precio": 1490.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
  }
 ]
