@@ -708,7 +708,9 @@ def e12_lectores_apagados(v):
             for k in suyas:
                 afirma(k not in est.get("agotados", {}) and k not in est.get("ausente", {}), ("12: ausencia", k), b)
                 afirma(tabla.get(k) == tabla0.get(k), ("12: la tabla perdio", k), b)
-            afirma(not any(re.search(r"soriana|cyberpuerta|chedraui", u) for u in srv.pedidas), "12: pidio a una apagada", b)
+            # (la lista de cupones de Cyberpuerta, /api/v0.1/vouchers/cms, es de la cosecha de cuponeras, no de su lector)
+            afirma(not any(re.search(r"soriana|cyberpuerta\.mx/(?!api/v0\.1/vouchers)|chedraui", u) for u in srv.pedidas),
+                   ("12: pidio a una apagada", [u for u in srv.pedidas if re.search("soriana|cyberpuerta|chedraui", u)]), b)
         return ("lectores nuevos apagados (prueba que falla): %d corridas sin avisos, %s como 'lector no cargado', "
                 "sin 'Agotado' ni ausencias de sus %d articulos y con su precio en la tabla" % (
                     v.AUSENCIAS_AGOTADO + 1, ", ".join(nuevas), len(suyas)))

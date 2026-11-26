@@ -729,6 +729,12 @@ FUENTES_EXTRA = [   # (nombre, url, tienda); intercaladas por sitio para que la 
     ("cupondescuento_liverpool", "https://www.cupondescuento.com.mx/liverpool.com.mx", "Liverpool"),
     ("eluniversal_cs_liverpool", CS % 122, "Liverpool"),
     ("cupondescuento_costco", "https://www.cupondescuento.com.mx/costco.com.mx", "Costco"),
+    # Pendiente 9 (26 nov): fuentes medidas el 25 nov por la linea B (medicion\fuentes2a, 2b y 3a), al final para que
+    # el tope de tiempo les toque a ellas y no a las de antes. Cada una con su lector propio (EXTRACTORES).
+    ("telegram_multitienda_samsung", "https://t.me/s/ofertasdemexicomultitienda?q=samsung", "Samsung"),
+    ("cuponesmexico_costco", "https://www.cuponesmexico.com.mx/tienda/costco-mexico/", "Costco"),
+    ("cupondescuento_elektra", "https://www.cupondescuento.com.mx/elektra.mx", "Elektra"),
+    ("cyberpuerta_cupones", "https://www.cyberpuerta.mx/api/v0.1/vouchers/cms", "Cyberpuerta"),
 ]
 NO_ES_EXTRA = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|CUPON|CODIGO|"
                          r"DESCUENTO|GRATIS|ENVIO|SHEIN|AMAZON|LIVERPOOL|COSTCO|HERRAMIENTAS|"
@@ -759,6 +765,80 @@ def codigos_en(texto):
                 and not NO_ES_EXTRA.match(c) and c.upper() not in [s.upper() for s in salida]):
             salida.append(c)
     return salida
+
+
+_TG_MSG = re.compile(r'<div class="tgme_widget_message_wrap(.*?)(?=<div class="tgme_widget_message_wrap|\Z)', re.S)
+_TG_TXT = re.compile(r'tgme_widget_message_text[^>]*>(.*?)</div>', re.S)
+_TG_FEC = re.compile(r'datetime="(\d{4}-\d{2}-\d{2})')
+_TG_COD = re.compile(r'\U0001F39F\ufe0f?\s*(?:Cup[oó]n:\s*)?([A-Z0-9][A-Z0-9_\-]{3,24})\b')   # el canal marca cada codigo con 🎟
+DIAS_TELEGRAM = 14   # un mensaje mas viejo que esto no da codigos
+
+
+def codigos_telegram(texto, hoy=None):
+    """Codigos de la vista web publica de un canal de Telegram (t.me/s/<canal>?q=...): los que el mensaje marca con el
+    boleto 🎟, de mensajes de los ultimos DIAS_TELEGRAM dias; fuera los de mensajes que dicen "Tienda Estudiantes"
+    (esa tienda pide sesion: el carrito normal los rechaza siempre). Formato medido el 25 nov 2026."""
+    hoy = hoy or dt.date.today()
+    salida = []
+    for m in _TG_MSG.finditer(texto or ""):
+        t = _TG_TXT.search(m.group(1))
+        if not t:
+            continue
+        txt = html.unescape(re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " / ", t.group(1))))
+        f = _TG_FEC.search(m.group(1))
+        try:
+            if f and (hoy - dt.date.fromisoformat(f.group(1))).days > DIAS_TELEGRAM:
+                continue
+        except ValueError:
+            pass
+        if re.search(r"Tienda Estudiantes", txt, re.I):
+            continue
+        for c in _TG_COD.findall(txt):
+            if re.search(r"[A-Z]", c) and not NO_ES_EXTRA.match(c) and c not in salida:
+                salida.append(c)
+    return salida
+
+
+def codigos_vivos_cuponera(texto, hoy=None):
+    """Solo lo vigente de cuponesmexico (fecha "Vencido el dd/mm/aaaa" de cada tarjeta) y de cupondescuento (lo que va
+    antes del rotulo "recientemente expirados"). Medido el 25 nov 2026 (medicion\fuentes2b)."""
+    hoy = hoy or dt.date.today()
+    vivos = []
+    if "data-code=" in (texto or ""):   # cuponesmexico
+        for m in DATA_CODE.finditer(texto):
+            antes = texto[max(0, m.start() - 900): m.start()]
+            f = re.findall(r'coupon-expiry">([^<]+)<', antes)
+            marca = f[-1].strip() if f else ""
+            d = re.search(r"(\d{2})/(\d{2})/(\d{4})", marca)
+            try:
+                vencido = "Vencido" in marca or bool(d and dt.date(int(d[3]), int(d[2]), int(d[1])) < hoy)
+            except ValueError:
+                vencido = True
+            if not vencido and m.group(1) not in vivos:
+                vivos.append(m.group(1))
+        return vivos
+    plano = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", re.sub(r"<script.*?</script>", " ", texto or "",
+                                                                                flags=re.S))))
+    corte = plano.find("recientemente expirados")
+    for m in re.finditer(r"(" + _COD + r") \1 Copiar el c[oó]digo", plano[:corte] if corte > 0 else plano):
+        if not NO_ES_EXTRA.match(m.group(1)) and m.group(1) not in vivos:
+            vivos.append(m.group(1))
+    return vivos
+
+
+def codigos_cyberpuerta(texto):
+    """Codigos del JSON publico de cupones de Cyberpuerta (/api/v0.1/vouchers/cms, medido el 25 nov 2026)."""
+    try:
+        d = json.loads(texto)
+    except ValueError:
+        return []
+    return [a["coupon_code"] for a in ((v or {}).get("attributes") or {} for v in (d.get("data") or []))
+            if a.get("coupon_code")]
+
+
+EXTRACTORES = {"telegram_multitienda_samsung": codigos_telegram, "cuponesmexico_costco": codigos_vivos_cuponera,
+               "cupondescuento_elektra": codigos_vivos_cuponera, "cyberpuerta_cupones": codigos_cyberpuerta}
+MINIMO_POR_FUENTE = {"cyberpuerta_cupones": 50}   # su JSON es chico (1 KB el 25 nov); las demas, MINIMO_CUPONERA
 
 
 def cosechar_extra(pedir, tope_s=TOPE_CUPONERAS, dormir=time.sleep, hay_tiempo=None, reloj=time.monotonic):
@@ -796,9 +876,9 @@ def cosechar_extra(pedir, tope_s=TOPE_CUPONERAS, dormir=time.sleep, hay_tiempo=N
         try:
             e, t = pedir(url)
             ultimo[sitio] = reloj()
-            if e != 200 or len(t or "") < MINIMO_CUPONERA:
+            if e != 200 or len(t or "") < MINIMO_POR_FUENTE.get(nombre, MINIMO_CUPONERA):
                 raise RuntimeError("%s de %d bytes" % (e, len(t or "")))
-            cods = codigos_en(t)
+            cods = EXTRACTORES.get(nombre, codigos_en)(t)
             for c in cods:
                 salida.setdefault(tienda, {}).setdefault(c, url)
             fuentes[nombre] = len(cods)
@@ -1945,7 +2025,7 @@ def selftest():
     llamadas, esperas = [], []
     ex = cosechar_extra(_pedir_falso(pag_cup, llamadas=llamadas), dormir=esperas.append, reloj=quieto)
     assert {"FOLD8_25CLUB", "ECO_20", "BFPLUS45", "GALAXYMP"} <= set(ex["Samsung"]), ex
-    assert list(ex["Amazon"]) == ["PRIMERA1126"] and "Liverpool" not in ex and len(llamadas) == 9, (ex, llamadas)
+    assert list(ex["Amazon"]) == ["PRIMERA1126"] and "Liverpool" not in ex and len(llamadas) == 13, (ex, llamadas)   # 9 + 4 fuentes del 26 nov (aqui 404)
     assert "auth=0123456789abcdef0123456789abcdef" in llamadas[2] and llamadas[1] == EU_PAGINA, llamadas   # llave leida
     assert ULTIMA_COSECHA["leidas"] == 4 and "falla" in str(ULTIMA_COSECHA["fuentes"]["eluniversal_cs_amazon"])
     assert esperas and all(0 < s <= PAUSA for s in esperas)                   # 1 s entre peticiones a un mismo sitio
@@ -1959,12 +2039,30 @@ def selftest():
     est_k, llamadas = {}, []
     cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora, dormir=lambda s: None, reloj=quieto)
     n1 = len(llamadas)
-    assert est_k["promos"]["cuponeras_leido"] == "2026-11-27 12:00" and n1 == 9, (est_k, n1)
+    assert est_k["promos"]["cuponeras_leido"] == "2026-11-27 12:00" and n1 == 13, (est_k, n1)
     assert cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora + dt.timedelta(hours=1)) == {}
     assert len(llamadas) == n1 and ULTIMA_COSECHA["leidas"] == 0
     cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora + dt.timedelta(hours=2),
                            dormir=lambda s: None, reloj=quieto)
     assert len(llamadas) == 2 * n1
+    # pendiente 9 (26 nov): lectores de las cuatro fuentes nuevas, con el formato medido el 25 nov
+    boleto = '<i class="emoji"><b>\U0001F39F️</b></i> <code>%s</code><br/>'
+    tg = "".join('<div class="tgme_widget_message_wrap"><div class="tgme_widget_message_text js-message_text">%s</div>'
+                 '<time datetime="%sT10:00:00+00:00"></time></div>' % (txt, f) for txt, f in (
+                     ("Galaxy Z Flip8 $20,932<br/>2.- Aplica estos cupones<br/>" + boleto % "MEMBER_NOV15" + boleto % "BF1000",
+                      "2026-11-24"),
+                     ("En Tienda Estudiantes<br/>" + boleto % "EPPLIVESEM", "2026-11-24"),     # pide sesion: fuera
+                     ("Fold viejo<br/>" + boleto % "VIEJO_SEP", "2026-09-01")))                  # mas de 14 dias: fuera
+    assert codigos_telegram(tg, dt.date(2026, 11, 26)) == ["MEMBER_NOV15", "BF1000"], codigos_telegram(tg, dt.date(2026, 11, 26))
+    cm = ('<span class="coupon-expiry">Vencido el 22/11/2026</span><a data-code="MSF1A"></a>'
+          '<span class="coupon-expiry">Vence el 30/11/2026</span><a data-code="PP177"></a>'
+          '<span class="coupon-expiry">Vence el 20/11/2026</span><a data-code="VIEJO1"></a>')
+    assert codigos_vivos_cuponera(cm, dt.date(2026, 11, 26)) == ["PP177"], codigos_vivos_cuponera(cm, dt.date(2026, 11, 26))
+    cd = ("<p>Añadido hace 2 días</p><b>HKPRO500</b> <b>HKPRO500</b> <span>Copiar el código</span>"
+          "<h2>Cupones recientemente expirados</h2><b>LB10</b> <b>LB10</b> <span>Copiar el código</span>")
+    assert codigos_vivos_cuponera(cd) == ["HKPRO500"], codigos_vivos_cuponera(cd)
+    assert codigos_cyberpuerta('{"data": [{"attributes": {"coupon_code": "CyberpowerOFER", "discount": 150}}, {}]}') == \
+        ["CyberpowerOFER"] and codigos_cyberpuerta("no es json") == []
     # palabras comunes tras "cupon/codigo" no son codigos (E6/M5)
     assert codigos_en("<h3>CUPÓN EXCLUSIVO</h3><p>Código VERIFICADO</p><span>Cupones NUEVOS</span><b>Código ACTIVO</b>"
                       "<i>cupón HONOR</i> data-code=\"REDMAGIC\"") == [], codigos_en("CUPÓN EXCLUSIVO")
