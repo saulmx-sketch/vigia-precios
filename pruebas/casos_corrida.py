@@ -949,13 +949,51 @@ def e15_producto_caido(v):
         b.borrar()
 
 
+def e16_cuelgue_y_vuelta_parcial(v):
+    """Revisor F (H2, H3), 26 nov: (a) la busqueda del Fold8 en Liverpool se cuelga: no se pide la de la PS5 en esa
+    corrida (una sola espera, como antes) y Liverpool cae entera; (b) tras 3 h caida, vuelve solo el Fold8: el aviso
+    dice "volvio a leer Liverpool salvo ps5", no sale un "no puede leer Liverpool (ps5)" aparte (ya se aviso con la
+    tienda) y, cuando la PS5 vuelve, "volvio a leer Liverpool (ps5)"."""
+    def colgada(url):
+        raise RuntimeError("sin respuesta: www.liverpool.com.mx: timed out")
+    b = Banco(v)
+    try:
+        b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        todo = dict(mundo_base())
+        todo[r"liverpool\.com\.mx/tienda\?s=galaxy"] = colgada
+        todo[r"liverpool\.com\.mx/tienda\?s=playstation"] = colgada
+        avisos = []
+        for i in range(3):
+            c, avs, srv, _ = b.correr(todo, avanza=_dt.timedelta(hours=1))
+            avisos.append(asuntos(avs))
+            afirma(srv.cuantas(r"liverpool\.com\.mx/tienda\?s=playstation") == 0,
+                   ("16a: con el Fold8 colgado se pidio la PS5", i), b)
+        afirma(avisos == [[], [], ["El vigia no puede leer Liverpool desde hace 2 horas"]], ("16a: avisos", avisos), b)
+        parcial = dict(mundo_base())
+        parcial[r"liverpool\.com\.mx/tienda\?s=playstation"] = (503, "<html>Service Unavailable</html>")
+        c, avs, srv, _ = b.correr(parcial, avanza=_dt.timedelta(hours=1))
+        afirma(asuntos(avs) == ["El vigia volvio a leer Liverpool salvo ps5"], ("16b", asuntos(avs)), b)
+        est = b.json()
+        afirma("Liverpool (ps5)" in est["caida_avisada"] and est["caida_desde"].get("Liverpool (ps5)"),
+               ("16b: la PS5 no quedo como caida avisada", est.get("caida_avisada"), est.get("caida_desde")), b)
+        c, avs, srv, _ = b.correr(parcial, avanza=_dt.timedelta(hours=1))
+        afirma(asuntos(avs) == [], ("16c: aviso de mas con la PS5 caida", asuntos(avs)), b)
+        c, avs, srv, _ = b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        afirma(asuntos(avs) == ["El vigia volvio a leer Liverpool (ps5)"], ("16d", asuntos(avs)), b)
+        return ("Fold8 colgado: 0 peticiones de la PS5 en 3 corridas y 'no puede leer Liverpool' a las 2 h; vuelta "
+                "parcial: 'volvio a leer Liverpool salvo ps5', sin aviso aparte; al volver la PS5, 'volvio a leer Liverpool (ps5)'")
+    finally:
+        b.borrar()
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
            ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
            ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
            ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento),
-           ("14 promos encendido", e14_promos), ("15 producto caido", e15_producto_caido)]
+           ("14 promos encendido", e14_promos), ("15 producto caido", e15_producto_caido),
+           ("16 cuelgue y vuelta parcial", e16_cuelgue_y_vuelta_parcial)]
 
 
 def foto_repo():

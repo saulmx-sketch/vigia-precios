@@ -1840,8 +1840,10 @@ def abrir_issue(titulo, texto):
     # el paso "Guardar" o el programa tronó despues), sin esto se repetia cada 15 min. Mismo titulo exacto creado en las
     # ultimas HORAS_SIN_REPETIR horas = ya avisado (quien llama lo marca). Si la consulta falla, se abre como siempre:
     # mejor un correo repetido que uno callado.
-    previo = _issue_ya_creado(repo, token, titulo[:250],
-                              (ahora_utc - dt.timedelta(hours=HORAS_SIN_REPETIR)).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    # Revisor F (H1): ventana de 1 h, no de 6 (con 6, un "Agotado" que vuelve tras un "Volvio a la venta" se callaba);
+    # el aviso de PRUEBA nunca se consulta (existe justo para ver si el correo llega).
+    previo = None if titulo.startswith("PRUEBA") else _issue_ya_creado(
+        repo, token, titulo[:250], (ahora_utc - dt.timedelta(hours=HORAS_SIN_REPETIR)).strftime("%Y-%m-%dT%H:%M:%SZ"))
     if previo:
         print("   aviso ya abierto en las ultimas %d h (no se repite):" % HORAS_SIN_REPETIR, previo)
         return True
@@ -1868,7 +1870,8 @@ def abrir_issue(titulo, texto):
 
 CORTE_AMBIGUO = (TimeoutError, ConnectionResetError, ConnectionAbortedError, http.client.RemoteDisconnected,
                  http.client.IncompleteRead)
-HORAS_SIN_REPETIR = 6   # abrir_issue no repite un aviso de titulo identico creado en estas horas
+HORAS_SIN_REPETIR = 1   # abrir_issue no repite un aviso de titulo identico creado en estas horas (cubre la corrida
+#                         anterior que no guardo; un "Agotado" pide 4 ausencias, mas de 1 h, y "no puede leer", 2 h)
 
 
 def _issue_ya_creado(repo, token, titulo, desde):
@@ -1936,6 +1939,12 @@ def sembrar_conocidos(estado, prods, mejores, leidas, ruta=None):
 
 def _relanzar(ex):
     raise ex
+
+
+def es_cuelgue(ex):
+    """La tienda no respondio (corte de red o tope de tiempo de pedir), a diferencia de una respuesta con error."""
+    t = str(ex)
+    return t.startswith("sin respuesta:") or "se acabo el tiempo de la corrida" in t
 
 
 def leida(c, leidas):
@@ -2235,9 +2244,9 @@ def _prueba_corte_ambiguo():
         # 2xx con cuerpo cortado: ya se creo
         urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"' if req.get_method() == "POST" else b"[]")
         assert abrir_issue(titulo, "cuerpo") is True
-        # P2 (26 nov): el mismo titulo creado hace 2 h (la corrida anterior no guardo su memoria): no se repite, sin POST;
-        # creado hace 7 h, o con otro titulo, si se abre
-        for creado, otro, sale_post in ((2, False, False), (7, False, True), (2, True, True)):
+        # P2 (26 nov): el mismo titulo creado hace 20 min (la corrida anterior no guardo su memoria): no se repite, sin
+        # POST; creado hace 2 h (revisor F, H1: ventana de 1 h), o con otro titulo, si se abre
+        for creado, otro, sale_post in ((1 / 3, False, False), (2, False, True), (1 / 3, True, True)):
             pedidas = []
             hace = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=creado)).strftime("%Y-%m-%dT%H:%M:%SZ")
             lista = [{"title": titulo + (" (otro)" if otro else ""), "created_at": hace, "html_url": "u/9"}]
@@ -2247,6 +2256,10 @@ def _prueba_corte_ambiguo():
                 return Resp(b'{"html_url": "u/3"}' if req.get_method() == "POST" else json.dumps(lista).encode("utf-8"))
             urllib.request.urlopen = falso2
             assert abrir_issue(titulo, "cuerpo") is True and (pedidas == ["GET", "POST"]) == sale_post, (creado, otro, pedidas)
+        # el aviso de PRUEBA no consulta: sale siempre
+        pedidas = []
+        urllib.request.urlopen = lambda req, timeout=None: pedidas.append(req.get_method()) or Resp(b'{"html_url": "u/4"}')
+        assert abrir_issue("PRUEBA del vigia: x", "cuerpo") is True and pedidas == ["POST"], pedidas
     finally:
         urllib.request.urlopen = guardados[0]
         for k, v in guardados[1].items():
@@ -2590,13 +2603,19 @@ def _main():
 
     caidas, avisadas = estado.setdefault("caida_desde", {}), estado.setdefault("caida_avisada", [])
 
-    def fuente(nombre, funcion):
+    def fuente(nombre, funcion, salvo=None):
         try:
             r = funcion()
             if nombre in avisadas and not seco:
+                # revisor F (H3): si la tienda vuelve solo para algunos productos, el aviso lo dice
+                faltan = [pid for pid, _ in (salvo or [])]
+                resto = (" salvo %s" % ", ".join(faltan)) if faltan else ""
                 try:
-                    abrir_issue("El vigia volvio a leer %s" % nombre, "La fuente %s responde de nuevo (sin leerse desde %s UTC)."
-                                % (nombre, caidas.get(nombre, "?")))
+                    abrir_issue("El vigia volvio a leer %s%s" % (nombre, resto),
+                                "La fuente %s responde de nuevo (sin leerse desde %s UTC).%s"
+                                % (nombre, caidas.get(nombre, "?"),
+                                   (" Todavia no se puede leer ahi: %s; cuando vuelva, te aviso aparte." % ", ".join(faltan))
+                                   if faltan else ""))
                     avisadas.remove(nombre)
                 except Exception as ex2:
                     print("   no se pudo abrir el aviso:", ex2)
@@ -2639,13 +2658,20 @@ def _main():
         # Cada producto se lee aparte (pendiente 4 del 26 nov): si falla la busqueda de uno, los demas de esa tienda
         # se leen igual. La tienda cuenta como fuente caida solo si fallan todos; si falla uno solo, cae la fuente
         # "tienda (producto)", con su propio aviso a las horas. leidas guarda "tienda|producto" de lo que si se leyo.
+        # Revisor F (H2): si un producto falla por cuelgue o red ("sin respuesta", tope de tiempo), los demas de esa
+        # tienda no se piden en esta corrida (como antes, una tienda colgada cuesta una sola espera); y desde el segundo
+        # producto se mira el reloj de la corrida antes de cada uno. Lo no pedido cuenta como "no leido esta corrida".
         hechos, fallas = [], []
+        desde_tienda, tienda_avisada = caidas.get(tienda), tienda in avisadas
 
         def todas(lector=lector, usan=usan, tienda=tienda, hechos=hechos, fallas=fallas):
             r = []
-            for p in usan:
-                if hechos and reloj_vencido(arranque):
+            for i, p in enumerate(usan):
+                if i and reloj_vencido(arranque):
                     print("producto saltado %s en %s: se acabo el tiempo de la corrida" % (p["id"], tienda))
+                    continue
+                if fallas and es_cuelgue(fallas[-1][1]):
+                    print("producto saltado %s en %s: la tienda no respondio en esta corrida" % (p["id"], tienda))
                     continue
                 try:
                     r += lector(p, p["tiendas"][tienda], estado)
@@ -2655,15 +2681,20 @@ def _main():
             if fallas and not hechos:
                 raise fallas[0][1]
             return r
-        res = fuente(tienda, todas)
+        res = fuente(tienda, todas, salvo=fallas)
         if res is not None:
             leidas.update("%s|%s" % (tienda, pid) for pid in hechos)
             ofertas += res
             for pid, ex in fallas:   # la tienda respondio, pero no para este producto
-                fuente("%s (%s)" % (tienda, pid), lambda ex=ex: _relanzar(ex))
+                nombre = "%s (%s)" % (tienda, pid)
+                if desde_tienda:     # revisor F (H3): su reloj arranca cuando cayo la tienda entera, no ahora
+                    caidas.setdefault(nombre, desde_tienda)
+                    if tienda_avisada and nombre not in avisadas:
+                        avisadas.append(nombre)   # ya se aviso con la tienda; al volver saldra "volvio a leer T (p)"
+                fuente(nombre, lambda ex=ex: _relanzar(ex))
             for pid in hechos:       # producto que ya se lee: se limpia su caida aparte, si la hubo
                 nombre = "%s (%s)" % (tienda, pid)
-                if nombre in fallos or nombre in caidas or nombre in avisadas:
+                if fallos.get(nombre) or nombre in caidas or nombre in avisadas:
                     fuente(nombre, lambda: [])
     for tienda in tiendas_sin_lector(prods):   # configurada y sin lector: falla visible, con su aviso a las horas
 
