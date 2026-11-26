@@ -395,7 +395,7 @@ def cosechar_cupones(prods, estado, ahora):
         sam = p["tiendas"].get("Samsung")
         if not sam:
             continue
-        for info in (sam.get("skus") or {}).values():   # C8: un producto de Samsung sin skus no tumba la cosecha
+        for info in sam["skus"].values():
             if len(info) > 2 and info[2] not in paginas:
                 paginas.append(info[2])
         for b in sam.get("cupones_foro", [p["nombre"]]):
