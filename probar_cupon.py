@@ -10,8 +10,7 @@ import os
 import sys
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
-# junto a vigia.py se usa ese; si se corre desde otra carpeta, la copia de trabajo de la linea B
-sys.path.insert(0, AQUI if os.path.exists(os.path.join(AQUI, "vigia.py")) else r"C:\Users\searm\vigia-lineas\B")
+sys.path.insert(0, AQUI)   # busca vigia.py solo junto a este archivo
 import vigia  # noqa: E402
 
 if __name__ == "__main__":

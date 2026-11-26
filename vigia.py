@@ -97,7 +97,8 @@ TOPE_CUPONES = 30        # codigos probados por corrida y producto (los recien h
 SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
 # Codigos de tienda cerrada (empleados o estudiantes: llevan "EPP"). En el carrito normal se rechazaron 24 de 24 el
 # 25 nov 2026 (8 codigos x 3 modelos). Se siguen cosechando (quedan en visto.json), pero no se prueban en el carrito.
-MARCA_TIENDA_CERRADA = "EPP"
+# Expresion acotada: "EPP" como pieza del codigo (CART5_EPP, EPP10_NOV, EPPLIVESEM), no dentro de una palabra (PEPPER10).
+MARCA_TIENDA_CERRADA = re.compile(r"(^|_)EPP|EPP($|_|\d)")
 NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|"
                          r"CUPON|CODIGO|ASESOR|EPROMOTER|DESCUENTO|GRATIS|ENVIO)$")
 
@@ -355,7 +356,7 @@ def cosechar_cupones(prods, estado, ahora):
                 hallados.setdefault(c, "foro")
     if promos:
         try:   # cuponeras medidas el 25 nov 2026 (promos.FUENTES_EXTRA); si fallan enteras, la cosecha queda como antes
-            extra = promos.cosechar_extra(pedir)
+            extra = promos.cosechar_extra_si_toca(pedir, estado, ahora)   # cada 2 h; entre lecturas no pide nada
             for crudo in extra.get("Samsung") or {}:
                 for c in codigos_de(crudo):
                     hallados.setdefault(c, "cuponera")
@@ -371,14 +372,21 @@ def cosechar_cupones(prods, estado, ahora):
         cosecha[c] = hoy
     limite = (ahora.astimezone(MX) - dt.timedelta(days=DIAS_CUPON)).strftime("%Y-%m-%d")
     estado["cupones_cosechados"] = {c: f for c, f in cosecha.items() if f >= limite}
+    # origen duradero de cada codigo (Samsung, foro o cuponera): lo de Samsung o del foro no se rebaja a cuponera
+    origen = estado.get("cupones_origen") if isinstance(estado.get("cupones_origen"), dict) else {}
+    for c, o in hallados.items():
+        if not (o == "cuponera" and origen.get(c) in ("Samsung", "foro")):
+            origen[c] = o
+    estado["cupones_origen"] = {c: o for c, o in origen.items() if c in estado["cupones_cosechados"]}
     estado["cupones_ultima_busqueda"] = {"cuando": ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
                                          "fuentes_leidas": leidas, "hallados": hallados}
     return sorted(hallados)
 
 
 def cupones_candidatos(prod, estado):
-    """Primero lo recien hallado en Samsung y en el foro (lo mas fresco), luego la lista fija y al final lo que solo
-    publica una cuponera; fuera los reprobados de las ultimas horas. Asi el tope nunca deja fuera a la lista fija."""
+    """Primero la lista fija, luego lo recien hallado en Samsung y en el foro y al final lo que solo publica una
+    cuponera (origen duradero en estado['cupones_origen']; la ultima busqueda, de respaldo); fuera los reprobados de las
+    ultimas horas. Asi el tope nunca deja fuera a la lista fija."""
     lista = []
     try:
         with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
@@ -389,15 +397,16 @@ def cupones_candidatos(prod, estado):
     if not isinstance(cosecha, dict):
         cosecha = {c: "" for c in cosecha}
     reprobados = estado.get("cupones_reprobados", {})
-    origen = (estado.get("cupones_ultima_busqueda") or {}).get("hallados") or {}
-    if not isinstance(origen, dict):
-        origen = {}
+    ultima = (estado.get("cupones_ultima_busqueda") or {}).get("hallados") or {}
+    ultima = ultima if isinstance(ultima, dict) else {}
+    duradero = estado.get("cupones_origen") if isinstance(estado.get("cupones_origen"), dict) else {}
     frescos = sorted(cosecha, key=lambda k: cosecha[k], reverse=True)
-    de_cuponera = [c for c in frescos if origen.get(c) == "cuponera" and c not in lista]
+    de_cuponera = [c for c in frescos if (duradero.get(c) or ultima.get(c)) == "cuponera" and c not in lista]
     salida = []
-    for c in [c for c in frescos if c not in de_cuponera] + lista + de_cuponera:
+    # orden: lista fija primero, luego lo fresco de Samsung y del foro, al final lo de cuponera
+    for c in lista + [c for c in frescos if c not in de_cuponera] + de_cuponera:
         horas = HORAS_REPROBADO_CUPONERA if c in de_cuponera else HORAS_REPROBADO
-        if c in salida or MARCA_TIENDA_CERRADA in c.upper() or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < horas * 3600:
+        if c in salida or MARCA_TIENDA_CERRADA.search(c.upper()) or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < horas * 3600:
             continue
         salida.append(c)
     return salida[:TOPE_CUPONES]
@@ -547,7 +556,14 @@ def ficha_amazon(t):
         if r:
             raise RuntimeError("Amazon respondio %s en la ficha" % r)
         titulo, precio, vend, imp = _ficha_amazon(p)
-        agotado = re.search(r"No disponible por el momento|Actualmente no disponible", p)
+        if promos and precio is not None:   # linea B: el mismo cupon de ficha que resta _leer_amazon, con su candado
+            try:
+                f2, _ = promos.amazon_precio(precio, promos.amazon_ficha(p))
+                if f2 is not None and precio * 0.5 <= f2 <= precio:
+                    precio = f2
+            except Exception:
+                pass
+        agotado =re.search(r"No disponible por el momento|Actualmente no disponible", p)
         return {"titulo": titulo, "precio": precio, "vendedor": vend, "importado": imp, "url": url,
                 "existencia": True if precio is not None else False if agotado else None}
     return _ficha_amazon(t)
@@ -1953,7 +1969,7 @@ def selftest():
     est_c = {"cupones_cosechados": {"NUEVO10": "2026-11-25", "VIEJO5": "2026-11-10"},
              "cupones_reprobados": {"fold8|VIEJO5": int(time.time())}}
     cand = cupones_candidatos(prods[0], est_c)
-    assert cand[0] == "NUEVO10" and "VIEJO5" not in cand, cand
+    assert "NUEVO10" in cand and "VIEJO5" not in cand, cand   # linea B (E6): la lista fija va primero; lo nuevo, detras
     # --- robustez (25 nov 2026)
     import io
     import contextlib
