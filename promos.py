@@ -1201,7 +1201,7 @@ def _cifra_de_otra(pares, cod, f, ahora):
             # vencida Y sin haber convivido con la de `f` (la de `f` empezo cuando la otra ya acababa). Revisor E, 26
             # nov: con solo "vencida", PP178 viva callaba en cuanto vencia PP177 de otro articulo.
             # y vencida hace 14 dias o menos: despues ya no se le atribuye la cifra (revisor E, H2: PP300 real en enero)
-            if fin is not None and fin < hoy and (hoy - fin).days <= 14 and (ini_f is None or ini_f >= fin):
+            if fin is not None and fin < hoy and (ini_f is None or 0 <= (ini_f - fin).days <= 14):   # ventana desde el inicio de la nueva (revisor E, H12)
                 return par[0]
     return ""
 
