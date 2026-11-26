@@ -383,7 +383,7 @@ def _fila_promo(banco, lit, url, vigencia="", solo=True):
                  minimo=_num(mini.group(1)) if mini else None, vigencia=_vigencia(lit) or vigencia)
 
 
-MSI_AMAZON = (r"(?:[Hh]asta )?((?:\d{1,2}(?: y |, )?)+) meses sin intereses (?:exclusivos )?con ([^,.]+?)"
+MSI_AMAZON = (r"(?:[Hh]asta )?(\d{1,2}(?:(?: y |, )\d{1,2})*) meses sin intereses (?:exclusivos )?con ([^,.]+?)"
               r"(?=,| y hasta| en compras|\.|$)")
 MSI_SAMSUNG = r"\b(?:hasta|a)\s+(\d{1,2})\s+(?:MSI|meses sin intereses)\b[^.!?|*•]{0,140}"
 
@@ -447,7 +447,7 @@ def lector_bancos_amazon(pedir, hay_tiempo=None, dormir=time.sleep):
 
 def lector_bancos_samsung(pedir, hay_tiempo=None, dormir=time.sleep):
     t = _pagina(pedir, SAMSUNG_DEALS, 2000, hay_tiempo, dormir, primera=True)
-    if not re.search(r"MSI|meses sin intereses", t, re.I):   # E6/M11: un reto antirrobots no borra las filas buenas
+    if not re.search(r"\bMSI\b|(?i:meses sin intereses)", t):   # E6/M11 (E11: "MSIE" de un reto ya no pasa): un reto antirrobots no borra las filas buenas
         raise RuntimeError("Samsung /offer/deals/ sin MSI ni meses sin intereses (%d bytes)" % len(t))
     return filas_msi_samsung(t) + filas_promo_banco(t, SAMSUNG_DEALS)
 
@@ -484,6 +484,8 @@ def leer_bancos(pedir, estado, ahora, hay_tiempo=None, dormir=time.sleep, tienda
             continue
         try:
             filas = lector(pedir, hay_tiempo, dormir)
+            if not filas and previo.get("filas"):   # E11: 200 con 0 filas (reto antirrobots grande) no borra lo bueno
+                raise RuntimeError("respondio sin filas (antes %d): se conservan las anteriores" % len(previo["filas"]))
             for f in filas:
                 f["vigente"] = vigente(f, ahora)
             por[tienda] = {"leido": _hora(ahora), "filas": filas, "error": ""}
@@ -675,11 +677,15 @@ def rango(texto, ahora):
 
 
 def vigente(fila, ahora):
-    """True si la fecha de fin se lee y no ha pasado; False si ya paso; None si no se lee."""
-    _, fin = rango((fila or {}).get("vigencia"), ahora)
+    """True si la fecha de fin se lee y no ha pasado; False si ya paso o si su inicio legible aun no llega (E11);
+    None si no se lee."""
+    ini, fin = rango((fila or {}).get("vigencia"), ahora)
     if fin is None:
         return None
-    return fin >= ahora.astimezone(MX).date()
+    hoy = ahora.astimezone(MX).date()
+    if ini is not None and ini > hoy:
+        return False
+    return fin >= hoy
 
 
 # ------------------------------------------------------------------------------- cuponeras (cosecha ampliada)
@@ -1027,14 +1033,18 @@ def _skus_cerradas(prods):
 
 
 # ------------------------------------------------------------------------------- mejorar (llamada unica de vigia)
-PRESUPUESTO = 90.0        # segundos para todo mejorar() (E6/M3: era 150)
+# E11: dos revisiones hallaron redacciones comunes que daban avisos aparte falsos desde texto libre de bancos. En False,
+# las filas de banco de texto (Amazon /blackfriday, PDF de Liverpool, paginas de BBVA) solo dan una nota con su literal;
+# la ficha de Costco (dato estructurado) y la tienda de estudiantes siguen dando aviso. El modo estricto queda detras.
+AVISOS_DE_BANCO_POR_TEXTO = False
+PRESUPUESTO = 90.0       # segundos para todo mejorar() (E6/M3: era 150)
 DIAS_AVISADO = 7          # un aviso aparte de hace mas de esto se olvida y puede volver a salir (E6/M10)
 HORAS_CERRADA_AVISO = 2   # precio de tienda cerrada mas viejo que esto: solo nota "visto el ...", nunca aviso (E6/A6)
 MARGEN_PETICION = 30.0    # una peticion nueva solo arranca si le quedan estos segundos (es el timeout de vigia.pedir)
 AHORRO_APARTE = 3000      # con otro banco o con la tienda cerrada: aviso aparte desde esta rebaja
 AHORRO_PROPIO = 500       # con un banco o medio propio: aviso aparte desde esta rebaja; por debajo, solo la nota
 BAJA_APARTE = 300         # un aviso aparte ya mandado vuelve a salir solo si baja esto mas
-NOTA_MAX = 160            # nota mas larga que esto tras los anadidos: se omiten primero los de meses (E6b: era 220)
+NOTA_MAX = 200            # nota mas larga que esto tras los anadidos: se omiten primero los de meses (E11: 160 -> 200)
 # Membresia Dorada de Costco, leido el 25 nov 2026 en https://www.costco.com.mx/membresias ("Individual Dorada $600")
 COSTCO_MEMBRESIA = 600
 # Textos de los avisos aparte (E6b, cola\2_lector_lego.md). Los avisos son issues publicos: no nombran los bancos de
@@ -1105,8 +1115,9 @@ def _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito,
         asunto = "Otra forma de pago: {} a ${:,.0f} en {} con {}".format(nombre, nuevo, o.get("tienda"), requisito)
     lineas = [
         o.get("titulo") or nombre or "", "",
-        "Por qué te llega: {}, este teléfono bajaría ${:,.0f}. Es aparte del aviso de precio.".format(
-            "en otra tienda de Samsung" if otra_tienda else "pagando de otra forma", precio - nuevo),
+        "Por qué te llega: {}, {} bajaría ${:,.0f}. Es aparte del aviso de precio.".format(
+            "en otra tienda de Samsung" if otra_tienda else "pagando de otra forma", nombre or "este producto",
+            precio - nuevo),
         "- Precio normal en {} ahora: ${:,.0f}. Este es el que se compara con tu precio límite.".format(o.get("tienda"), precio),
         "- Con {}: ${:,.0f} (${:,.0f} menos).".format(requisito, nuevo, precio - nuevo),
         "- Qué pide: {}.".format(pide),
@@ -1139,8 +1150,14 @@ def _sin_reintento(pedir):
     """E6/M2: el pedir de vigia reintenta tras un corte (30 + 2 + 30 s); dentro de promos no se reintenta."""
     try:
         import inspect
-        if "reintento" in inspect.signature(pedir).parameters:
-            return lambda url, *a, **k: pedir(url, *a, **dict(k, reintento=0))
+        par = inspect.signature(pedir).parameters
+        extra = {}
+        if "reintento" in par:
+            extra["reintento"] = 0
+        if "intentos" in par:   # E11: reintento=0 solo quitaba la pausa; intentos=1 quita la segunda apertura
+            extra["intentos"] = 1
+        if extra:
+            return lambda url, *a, **k: pedir(url, *a, **dict(k, **extra))
     except (TypeError, ValueError):
         pass
     return pedir
@@ -1151,6 +1168,10 @@ def _olvidar_avisados(estado, ahora):
     hechos = estado.get("promos_avisado")
     if not isinstance(hechos, dict):
         return
+    hoy = ahora.astimezone(MX).strftime("%Y-%m-%d")
+    for k, v in list(hechos.items()):   # E11: formato viejo (solo el precio) pasa a {precio, fecha: hoy}
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            hechos[k] = {"precio": float(v), "fecha": hoy}
     limite = (ahora.astimezone(MX) - dt.timedelta(days=DIAS_AVISADO)).strftime("%Y-%m-%d")
     for k in [k for k, v in hechos.items() if isinstance(v, dict) and (v.get("fecha") or "") < limite]:
         del hechos[k]
@@ -1175,6 +1196,9 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
         try:
             precios, errores, _ = samsung_cerradas(pedir, list(skus)[:3], hay_tiempo, dormir)
             bueno = bool(precios or not errores)
+            if not precios and previo.get("precios"):   # E11: 200 sin precio (reto) no borra los precios buenos
+                bueno = False
+                errores.append("0 precios (antes habia): se conservan los anteriores")
             caja["cerradas"] = {"leido": _hora(ahora), "variantes": skus, "error": "; ".join(errores)[:300],
                                 "precios": precios if bueno else previo.get("precios", {}),
                                 # E6/A6: hora del ultimo precio bueno, aparte de la del ultimo intento
@@ -1232,11 +1256,17 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                 if f.get("codigo") and f.get("valor") is None and vigente(f, ahora) is not False:
                     _anade(extras, o, "Costco anuncia otra promoción al pagar (%s) sin decir de cuánto" % f["codigo"])
             propias += de_ficha
-        por_banco = {}
+        por_banco, anuncios = {}, []
+        de_ficha_ids = {id(f) for f in (de_ficha if tienda == "Costco" else [])}
         for f in propias:
             if f.get("tipo") not in ("descuento", "bonificacion"):
                 continue
             vig = vigente(f, ahora)   # solo lo vigente da precio alterno o aviso; lo vencido se descarta
+            if not AVISOS_DE_BANCO_POR_TEXTO and id(f) not in de_ficha_ids:
+                # E11: fila sacada de texto libre: solo nota con el literal, sin cifra calculada ni aviso aparte
+                if vig is not False and f.get("banco"):
+                    anuncios.append(f)
+                continue
             if vig is None and de_quien(f.get("banco")) == "propio" and f.get("valor") is not None:
                 _anade(extras, o, "%s tiene promoción aquí, pero no leí hasta cuándo vale: revísala" % f.get("banco"))
             if vig is not True:
@@ -1245,6 +1275,15 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             llave = (f.get("banco"), f.get("codigo") or "")
             if nuevo is not None and nuevo < precio - MARGEN and (llave not in por_banco or nuevo < por_banco[llave][0]):
                 por_banco[llave] = (nuevo, f)
+        anuncios.sort(key=lambda f: 0 if de_quien(f.get("banco")) == "propio" else 1)
+        dichos = []
+        for f in anuncios:
+            lit = re.sub(r"\s+", " ", f.get("beneficio") or "").strip()
+            lit = lit if len(lit) <= 90 else lit[:89].rstrip() + "…"
+            texto = '%s anuncia promoción con %s: "%s" (sin probar; revísala en la página)' % (tienda, f["banco"], lit)
+            if texto not in dichos and len(dichos) < 2:
+                dichos.append(texto)
+                _anade(extras, o, texto)
         for (banco, codigo), (nuevo, f) in sorted(por_banco.items()):
             quien = de_quien(banco)
             clave = "%s|%s|%s|%s" % (tienda, pid, vid, banco + ("|" + codigo if codigo else ""))
@@ -1256,7 +1295,7 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                                     else CIERRE_PAGO_TARJETA)
             if quien == "ajeno" and precio - nuevo >= AHORRO_APARTE:
                 _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, "tarjeta %s" % banco,
-                       "pagar con una tarjeta %s, que no tienes%s" % (banco, ("; " + cond) if cond else ""),
+                       "pagar con una tarjeta %s%s" % (banco, ("; " + cond) if cond else ""),
                        lit, f.get("url", ""), cierre=cierre, hasta=hasta,
                        pasos="solo te sirve si alguien de confianza con tarjeta %s paga por ti, o si sacas una; te "
                              "aviso porque la diferencia pasa de ${:,.0f}.".format(AHORRO_APARTE) % banco)
@@ -1305,8 +1344,9 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                 viejo = _vencido(cer.get("precios_leido"), ahora, HORAS_CERRADA_AVISO * 60)
                 cuenta = "pide cuenta con correo institucional" if tc == "estudiantes_mx" else "pide cuenta de empleado"
                 if viejo and nuevo < precio - MARGEN:   # E6/A6: precio viejo (relectura fallida): nota, nunca aviso
-                    _anade(extras, o, "en la {} ${:,.0f}, sin cupones ({}; visto el {})".format(
-                        nombre_tc, nuevo, cuenta, cer.get("precios_leido") or "?"))
+                    _anade(extras, o, "en la {} ${:,.0f}, sin cupones ({}{})".format(
+                        nombre_tc, nuevo, cuenta,
+                        "; visto el %s" % cer["precios_leido"] if cer.get("precios_leido") else ""))
                 elif viejo:
                     pass
                 elif precio - nuevo >= AHORRO_APARTE:
@@ -1861,7 +1901,47 @@ def selftest():
     assert v.cupones_en_texto("Cupón 20%: PRO-20") == ["PRO-20"] and v.cupones_en_texto("10% con HS26_ECO") == ["HS26_ECO"]
     assert [v.cupones_en_texto(x) for x in ("cupón de descuento", "código postal 04510", "10% con BBVA")] == [[], [], []]
 
+    # --- E11: un solo intento, regex sin retroceso, retos 200 que no borran, inicio futuro, formato viejo de avisados
+    vistos_k = []
+    _sin_reintento(lambda url, reintento=2.0, intentos=2: vistos_k.append((reintento, intentos)) or (200, ""))("u")
+    _sin_reintento(lambda url: vistos_k.append("sin params") or (200, ""))("u")
+    assert vistos_k == [(0, 1), "sin params"], vistos_k
+    c0 = time.perf_counter()
+    filas_msi_amazon("<p>Modelos " + ", ".join(["12"] * 200) + " y " + "1" * 60 + "x</p>")
+    assert time.perf_counter() - c0 < 1.0, "MSI_AMAZON con retroceso"
+    for reto in ("<script>var MSIE=1;</script>" + " " * 3000, "<p>msi</p>" + " " * 3000):
+        try:
+            lector_bancos_samsung(_pedir_falso({"offer/deals": (200, reto)}), dormir=lambda s: None)
+            raise AssertionError("reto con MSIE paso")
+        except RuntimeError:
+            pass
+    est_r = {}
+    leer_bancos(_pedir_falso(paginas_r := {"/msi": (200, MSI_BANCOS + " " * 20001),
+                                           "/blackfriday": (200, BF_BANCO + " " * 20001)}),
+                est_r, dt.datetime(2026, 11, 27, 18, 0, tzinfo=dt.timezone.utc), dormir=lambda s: None, tiendas={"Amazon"})
+    n_am = len(est_r["promos_bancos"]["tiendas"]["Amazon"]["filas"])
+    leer_bancos(_pedir_falso({"amazon": (200, "<html>Just a moment</html>" + " " * 60000)}), est_r,
+                dt.datetime(2026, 11, 28, 2, 0, tzinfo=dt.timezone.utc), dormir=lambda s: None, tiendas={"Amazon"})
+    t_r = est_r["promos_bancos"]["tiendas"]["Amazon"]
+    assert n_am == 6 and len(t_r["filas"]) == 6 and "sin filas" in t_r["error"], t_r   # reto 200 de 60 KB: se conservan
+    a27 = dt.datetime(2026, 11, 29, 18, 0, tzinfo=dt.timezone.utc)
+    assert vigente({"vigencia": "del 1 al 3 de diciembre de 2026"}, a27) is False                # aun no empieza
+    assert vigente({"vigencia": "del 26 al 30 de noviembre de 2026"}, a27) is True
+    est_v = {"promos_avisado": {"k": 30000}}
+    _olvidar_avisados(est_v, a27)
+    assert est_v["promos_avisado"]["k"] == {"precio": 30000.0, "fecha": "2026-11-29"}, est_v
+    rel_c, cuelga = _Reloj(), []
+
+    def pedir_cuelga(url, *a, **k):
+        cuelga.append(url)
+        rel_c.t += 30.0
+        raise RuntimeError("sin respuesta")
+    cosechar_extra(pedir_cuelga, dormir=lambda s: None, reloj=rel_c)
+    assert rel_c.t <= TOPE_CUPONERAS + 30 and len(cuelga) == 1, (rel_c.t, cuelga)              # peor caso 50 s
+
     # --- mejorar con ofertas de mentira (sin imprimir sus + APARTE: ensucian el registro de la nube)
+    # Camino viejo (avisos de banco por texto en True): se sigue probando entero; al final vuelve a False.
+    globals()["AVISOS_DE_BANCO_POR_TEXTO"] = True
     v_mod = _vigia(importar=True)
     silencio = contextlib.redirect_stdout(io.StringIO())
     silencio.__enter__()
@@ -1915,7 +1995,8 @@ def selftest():
         assert "**" not in a["cuerpo"] and "los tuyos" not in a["cuerpo"] and "Colmex" not in a["cuerpo"], a["cuerpo"]
         assert all(s in a["cuerpo"] for s in ("Precio normal en", "Vale hasta:", "Qué harías tú:", "tal cual:",
                                                "Liga de la oferta:", "No lo he probado")), a["cuerpo"]
-    assert "una tarjeta Banorte, que no tienes; el descuento es de 10 % y como máximo $5,000" in banorte["cuerpo"]
+    assert "una tarjeta Banorte; el descuento es de 10 % y como máximo $5,000" in banorte["cuerpo"]
+    assert "que no tienes" not in banorte["cuerpo"] and "Fold8 512 GB bajaría" in banorte["cuerpo"], banorte["cuerpo"]
     assert "Vale hasta: 2026-11-30." in banorte["cuerpo"] and "$3,417 menos" in banorte["cuerpo"], banorte["cuerpo"]
     assert "hasta 15 meses sin intereses con BBVA" in of[1]["nota"] and "hasta 15 meses" in of[2]["nota"], of
     assert "pagando con BBVA quedaría en $33,175, hasta 2026-11-30 (no probado: se ve al pagar)" in of[1]["nota"], of[1]["nota"]
@@ -2042,7 +2123,8 @@ def selftest():
     assert len(llamadas) == 3                                                 # menos de 60 minutos: no relee
     # BBVA del Buen Fin (13-17 nov): el 25 nov esta vencida y no da nada; el 15 nov da el aviso de banco propio
     prods_a = [{"id": "fold8", "tiendas": {"Amazon": {}}}]
-    for dia, espera in ((25, []), (15, ["Amazon|fold8|normal-512|BBVA|BBVABF26"])):
+    # E11: el cupon dice "Aplican solo el 17 de noviembre": el 15 aun no empieza (antes se probaba el 15)
+    for dia, espera in ((25, []), (15, []), (17, ["Amazon|fold8|normal-512|BBVA|BBVABF26"])):
         cuando = dt.datetime(2026, 11, dia, 18, 0, tzinfo=dt.timezone.utc)
         est = {"promos_bancos": {"tiendas": {t: {"leido": _hora(cuando), "error": "", "filas": f}
                                              for t, f in (("Amazon", []), ("BBVA", fb))}}}
@@ -2074,6 +2156,28 @@ def selftest():
     av = mejorar(of, est, [{"id": "fold8", "tiendas": {"Liverpool": {}}}], ahora, False, _pedir_falso({}), abrir,
                  reloj=_Reloj(), dormir=lambda s: None)
     assert [(a["clave"], a["precio"]) for a in av] == [("Liverpool|fold8|ultra-512|BBVA", 42499.0)], av
+    # E11: con AVISOS_DE_BANCO_POR_TEXTO en False (lo que corre), las redacciones de C1 y C3 no dan aviso ni cifra
+    globals()["AVISOS_DE_BANCO_POR_TEXTO"] = False
+    of = [dict(o) for o in of]
+    of[0]["nota"] = ""
+    av = mejorar(of, est, [{"id": "fold8", "tiendas": {"Liverpool": {}}}], ahora, False, _pedir_falso({}), abrir,
+                 reloj=_Reloj(), dormir=lambda s: None)
+    assert av == [] and 'Liverpool anuncia promoción con BBVA: "' in of[0]["nota"] and "quedaría" not in of[0]["nota"], \
+        (av, of[0]["nota"])
+    textos = ("<p>Black Friday del 26 al 30 de noviembre de 2026</p><p>Obtén una bonificación de 40% en accesorios con "
+              "Banorte.</p><p>Recibe hasta $1,000 de bonificación con 15% de descuento con BBVA.</p><p>Válido el 27 y 28 "
+              "de noviembre: 20% de descuento con HSBC.</p><p>Del 1 al 3 de diciembre de 2026: 25% de descuento con "
+              "Santander.</p><p>Bonificación de 30% en audífonos pagando con HSBC.</p>")
+    filas_t = filas_promo_banco(textos)
+    est = {"promos_bancos": {"tiendas": {"Amazon": {"leido": "2026-11-29 12:00", "error": "", "filas": filas_t},
+                                         "BBVA": {"leido": "2026-11-29 12:00", "error": "", "filas": []}}}}
+    of = ofertas_falsas()
+    av = mejorar(of, est, prods_a, a27, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
+    nota = of[1]["nota"]
+    assert av == [] and "quedaría" not in nota and nota.count(" anuncia promoción con ") == 2, (av, nota)
+    assert nota.index("con BBVA:") < nota.index("anuncia promoción con", nota.index("con BBVA:") + 1) and \
+        "Santander" not in nota, nota                                   # propios primero; lo que no empieza, fuera
+    assert all(len(x.split('"')[1]) <= 90 for x in nota.split("; ") if "anuncia" in x), nota
     silencio.__exit__(None, None, None)
 
     # --- vigia: cupones_candidatos deja fuera los codigos de tienda cerrada (EPP)
