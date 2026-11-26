@@ -80,7 +80,10 @@ NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BB
 
 
 # ------------------------------------------------------------------------------- utilidades
-def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0):
+def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
+    """(estado, texto). Un corte de red o un tope de tiempo se reintenta una vez tras `reintento` segundos; si vuelve
+    a fallar, RuntimeError("sin respuesta: <host>: <causa>"). Una respuesta HTTP con error no lanza: da su codigo."""
+    import socket
     cab = {"User-Agent": UA, "Accept-Language": "es-MX,es;q=0.9,en;q=0.6", "Accept-Encoding": "gzip",
            "Accept": "application/json, text/plain, */*" if json_api else
                      "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8"}
@@ -95,19 +98,26 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0)
     abre = abridor.open if abridor else urllib.request.urlopen
     if pausa:
         time.sleep(pausa)
-    try:
-        with abre(req, timeout=30) as r:
-            b = r.read()
-            if r.headers.get("Content-Encoding") == "gzip":
-                b = gzip.decompress(b)
-            return r.status, decodificar(b, r.headers.get("Content-Type", ""))
-    except urllib.error.HTTPError as e:
-        b = e.read() or b""
+    for intento in (1, 2):
         try:
-            b = gzip.decompress(b)
-        except Exception:
-            pass
-        return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
+            with abre(req, timeout=30) as r:
+                b = r.read()
+                if r.headers.get("Content-Encoding") == "gzip":
+                    b = gzip.decompress(b)
+                return r.status, decodificar(b, r.headers.get("Content-Type", ""))
+        except urllib.error.HTTPError as e:   # va antes: HTTPError tambien es URLError
+            b = e.read() or b""
+            try:
+                b = gzip.decompress(b)
+            except Exception:
+                pass
+            return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
+        except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError) as e:
+            if intento == 2:
+                causa = getattr(e, "reason", None) or e
+                raise RuntimeError("sin respuesta: %s: %s" % (urllib.parse.urlsplit(url).hostname, causa))
+            if reintento:
+                time.sleep(reintento)
 
 
 def decodificar(b, tipo=""):
@@ -828,6 +838,153 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
     return avisos
 
 
+# Reloj general: pasado este tiempo desde el arranque, las tiendas que faltan se saltan como "no leidas esta corrida"
+# (el trabajo de GitHub tiene 12 min; asi queda margen para escribir la memoria y lanzar la siguiente corrida).
+SEGUNDOS_CORRIDA = 420
+
+
+def reloj_vencido(arranque, ahora=None):
+    return (time.monotonic() if ahora is None else ahora) - arranque > SEGUNDOS_CORRIDA
+
+
+def recortar_vistos(vistos, tope=400):
+    """Los `tope` guids del foro vistos mas recientemente (el valor es la fecha del hilo, RFC 2822 o ISO);
+    una fecha ilegible cuenta como la mas vieja."""
+    def cuando(fecha):
+        try:
+            d = email.utils.parsedate_to_datetime(fecha)
+        except Exception:
+            try:
+                d = dt.datetime.fromisoformat(str(fecha))
+            except Exception:
+                return float("-inf")
+        return (d if d.tzinfo else d.replace(tzinfo=dt.timezone.utc)).timestamp()
+    return dict(sorted(vistos.items(), key=lambda kv: cuando(kv[1]), reverse=True)[:tope])
+
+
+def avisar_disponibilidad(estado, prods, mejores, leidas, hoy, abrir=None):
+    """Corre disponibilidad() y abre un aviso por cada resultado (abrir=None: solo imprime, para --seco).
+    Si un aviso no se pudo abrir, se deshace lo que disponibilidad() marco para esa clave, para que la proxima
+    corrida lo vuelva a intentar: un "agotado" vuelve a quedar a una ausencia de avisar; un "volvio" sigue agotado."""
+    antes_ag = dict(estado.get("agotados", {}))
+    avisos = disponibilidad(estado, prods, mejores, leidas, hoy)
+    ag, conocidos = estado.get("agotados", {}), estado.get("conocidos", {})
+    claves = {}   # comienzo del asunto que arma disponibilidad() -> clave
+    for c in ag:
+        if c not in antes_ag and c in conocidos:
+            claves["Agotado: {} ya no esta a la venta en {}".format(conocidos[c]["producto"], c.split("|")[0])] = c
+    for c in antes_ag:
+        if c not in ag and c in mejores:
+            claves["Volvio a la venta: {} en {} a ".format(mejores[c]["nombre"], c.split("|")[0])] = c
+    for asunto, cuerpo in avisos:
+        print(" * DISPONIBILIDAD", asunto)
+        if abrir is None:
+            continue
+        try:
+            abrir(asunto, cuerpo)
+        except Exception as ex:
+            print("   no se pudo abrir el aviso:", ex)
+            c = next((k for pref, k in claves.items() if asunto.startswith(pref)), None)
+            if c is None:
+                print("   (no halle su clave: el aviso no se reintentara)")
+            elif c in antes_ag:
+                ag[c] = antes_ag[c]
+            else:
+                ag.pop(c, None)
+                estado.setdefault("ausente", {})[c] = AUSENCIAS_AGOTADO - 1
+    return avisos
+
+
+def _partes(regex):
+    """Alternativas de primer nivel de una regla (lo separado por | fuera de parentesis y corchetes)."""
+    partes, prof, act, i = [], 0, "", 0
+    while i < len(regex):
+        ch = regex[i]
+        if ch == "\\" and i + 1 < len(regex):
+            act += regex[i:i + 2]
+            i += 2
+            continue
+        if ch in "([":
+            prof += 1
+        elif ch in ")]":
+            prof -= 1
+        if ch == "|" and prof == 0:
+            partes.append(act)
+            act = ""
+        else:
+            act += ch
+        i += 1
+    return [p for p in partes + [act] if p]
+
+
+def _legible(regex):
+    """Una regla de titulos dicha con palabras ('estaci[oó]n\\s+de' -> 'estacion de')."""
+    m = re.match(r"^\^\(\?!\.\*\((.*?)\)\)\.\*\((.*)\)$", regex)
+    if m:
+        return "si el titulo no dice %s: %s" % (" ni ".join(_legible(x) for x in _partes(m.group(1))),
+                                                 ", ".join(_legible(x) for x in _partes(m.group(2))))
+    s = re.sub(r"\\b|\(\?:|\^|\$|®\??", "", regex)
+    s = re.sub(r"\\s[*+?]?", " ", s)
+    s = re.sub(r"\[([^\]])[^\]]*\]", r"\1", s)
+    s = s.replace("\\d", "#").replace("\\", "").replace("?", "").replace("*", "").replace("+", "")
+    s = s.replace("|", " o ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def cobertura(prods=None):
+    """Que se vigila, en palabras, para leer en una pantalla. No usa red."""
+    prods = prods or cargar_config()
+    pesos = lambda n: "${:,}".format(n)
+    print("QUE VIGILA EL VIGIA (segun productos.json)")
+    glob = EXCLUIR[3:-3] if EXCLUIR.startswith(r"\b(") and EXCLUIR.endswith(r")\b") else EXCLUIR
+    print("Nunca entran, en ningun producto: " + ", ".join(_legible(x) for x in _partes(glob)))
+    for p in prods:
+        print("")
+        print("== %s ==" % p["nombre"])
+        colores = {}
+        for sku, (vid, color, _pag) in p["tiendas"].get("Samsung", {}).get("skus", {}).items():
+            colores.setdefault(vid, []).append(color)
+        print("Se vigila (topes: ganga / comprar / mirar):")
+        for v in p["variantes"]:
+            g, c, t = topes(p, v)
+            print("  - %s: %s / %s / %s (precio de lista %s)" % (v["nombre"], pesos(g), pesos(c), pesos(t), pesos(v["lista"])))
+            pide = [_legible(x) for x in v.get("todas", [])]
+            no = [_legible(x) for x in v.get("ninguna", [])]
+            if pide or no:
+                print("      el titulo debe decir: %s%s" % (" y ".join(pide) or "(nada mas)",
+                                                         ("; y no decir: " + ", ".join(no)) if no else ""))
+            if colores.get(v["id"]):
+                print("      colores en Samsung: " + ", ".join(colores[v["id"]]))
+        print("Queda fuera:")
+        if p.get("excluir"):
+            print("  - titulos que digan: " + ", ".join(_legible(x) for x in _partes(p["excluir"])))
+        print("  - precios por debajo de %s (no pueden ser el aparato)" % pesos(p["piso"]))
+        print("  - cualquier otra version del producto que no este en la lista de arriba")
+        if colores:
+            sin = [v["nombre"] for v in p["variantes"] if v["id"] not in colores]
+            if sin:
+                print("  - en Samsung no se piden estas versiones (no tienen codigo de modelo): " + ", ".join(sin))
+        req = p["requisitos"]
+        if req.get("solo_vendedor_oficial"):
+            print("  - lo que venda un tercero: solo cuenta la marca o la tienda misma")
+        for tienda, regla in sorted(req.get("vendedor_oficial", {}).items()):
+            print("      en %s solo cuenta si vende: %s" % (tienda, _legible(regla)))
+        if not req.get("permite_importados"):
+            print("  - importados")
+        for k in sorted(p):
+            if k in ("_regla", "_comentario", "_variantes") and isinstance(p[k], str):
+                print("  nota: " + p[k])
+        for k in ("_regla", "_comentario"):
+            if isinstance(req.get(k), str):
+                print("  nota: " + req[k])
+        directas = [t for t in LECTORES if t in p["tiendas"]]
+        print("Tiendas que se leen directo: " + ", ".join(directas))
+        foro = [x for x in (_legible(a) for a in _partes(TIENDAS_FORO))
+                if not any(re.search(re.escape(x), t, re.I) for t in directas)]
+        print("Tiendas que solo entran por el foro Promodescuentos: " + ", ".join(foro))
+    return 0
+
+
 def selftest():
     prods = cargar_config()
     p = prods[0]
@@ -968,17 +1125,113 @@ def selftest():
              "cupones_reprobados": {"fold8|VIEJO5": int(time.time())}}
     cand = cupones_candidatos(prods[0], est_c)
     assert cand[0] == "NUEVO10" and "VIEJO5" not in cand, cand
+    # --- robustez (25 nov 2026)
+    import io
+    import contextlib
+    import importlib.util
+    import subprocess
+    # pedir(): un corte de red se reintenta una vez; si sigue, RuntimeError con el host; HTTPError sigue dando su codigo
+    class Abridor:
+        def __init__(self, fallas, error):
+            self.fallas, self.error, self.veces = fallas, error, 0
+
+        def open(self, req, timeout=None):
+            self.veces += 1
+            if self.veces <= self.fallas:
+                raise self.error
+            raise urllib.error.HTTPError(req.full_url, 404, "no", {}, io.BytesIO(b"nada"))
+    for err in (urllib.error.URLError("dns caido"), TimeoutError("tope"), ConnectionResetError("cortada")):
+        a = Abridor(1, err)
+        assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 2, (err, a.veces)
+        a = Abridor(2, err)
+        try:
+            pedir("https://x.example/a", abridor=a, reintento=0)
+            raise AssertionError("pedir no lanzo tras dos cortes")
+        except RuntimeError as ex:
+            assert str(ex).startswith("sin respuesta: x.example: ") and a.veces == 2, ex
+    a = Abridor(0, None)
+    assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 1
+    # avisos de disponibilidad: si el aviso no se abre, la proxima corrida lo vuelve a intentar
+    def falla(asunto, cuerpo):
+        raise RuntimeError("GitHub no responde")
+    abiertos = []
+    est_d = {"conocidos": {"Samsung|fold8|ultra-512": {"producto": "Fold8 Ultra 512 GB", "precio": 34199.2, "url": "u",
+                                                       "visto": "h"}}}
+    with contextlib.redirect_stdout(io.StringIO()):
+        for _ in range(AUSENCIAS_AGOTADO):
+            avisar_disponibilidad(est_d, prods, {}, {"Samsung"}, "h", falla)
+        assert not est_d["agotados"] and est_d["ausente"]["Samsung|fold8|ultra-512"] == AUSENCIAS_AGOTADO - 1, est_d
+        av = avisar_disponibilidad(est_d, prods, {}, {"Samsung"}, "h", lambda a, c: abiertos.append(a))
+        assert len(av) == 1 and abiertos == [av[0][0]] and "Samsung|fold8|ultra-512" in est_d["agotados"], est_d
+        assert avisar_disponibilidad(est_d, prods, vuelta, {"Samsung"}, "h", falla)[0][0].startswith("Volvio")
+        assert "Samsung|fold8|ultra-512" in est_d["agotados"], est_d                 # fallo: sigue agotado
+        av = avisar_disponibilidad(est_d, prods, vuelta, {"Samsung"}, "h", lambda a, c: abiertos.append(a))
+        assert av[0][0].startswith("Volvio") and not est_d["agotados"] and len(abiertos) == 2, est_d
+    # recorte del foro: se quedan los mas recientes por fecha, no por orden alfabetico del guid
+    vis = {"a-viejo": "Mon, 02 Nov 2026 10:00:00 -0600", "z-nuevo": "Wed, 25 Nov 2026 10:00:00 -0600",
+           "m-medio": "Fri, 20 Nov 2026 10:00:00 -0600", "b-iso": "2026-11-24T09:00:00+00:00", "c-roto": "sin fecha"}
+    assert list(recortar_vistos(vis, 3)) == ["z-nuevo", "b-iso", "m-medio"], recortar_vistos(vis, 3)
+    # reloj general: vencido solo pasado SEGUNDOS_CORRIDA
+    assert not reloj_vencido(100.0, 100.0 + SEGUNDOS_CORRIDA) and reloj_vencido(100.0, 101.0 + SEGUNDOS_CORRIDA)
+    # --cobertura: corre sin red y nombra cada variante, sus topes y las tiendas
+    salida = io.StringIO()
+    with contextlib.redirect_stdout(salida):
+        assert cobertura(prods) == 0
+    texto = salida.getvalue()
+    for x in prods:
+        for v in x["variantes"]:
+            assert v["nombre"] in texto and "{:,}".format(topes(x, v)[0]) in texto, v["nombre"]
+    assert "Grafito" in texto and "foro" in texto and "Gameplanet" in texto, texto[:300]
+    # pruebas\casos_*.py con correr(v), en orden alfabetico; durante ellas la red y las pausas quedan prohibidas
+    def sin_red(*a, **k):
+        raise AssertionError("una prueba quiso usar la red o dormir")
+    yo = sys.modules[__name__]
+    guardados = (yo.pedir, urllib.request.urlopen, time.sleep)
+    carpeta = os.path.join(AQUI, "pruebas")
+    corridos = []
+    try:
+        yo.pedir = urllib.request.urlopen = time.sleep = sin_red
+        for nombre in sorted(os.listdir(carpeta)) if os.path.isdir(carpeta) else []:
+            if not (nombre.startswith("casos_") and nombre.endswith(".py")):
+                continue
+            spec = importlib.util.spec_from_file_location("prueba_" + nombre[:-3], os.path.join(carpeta, nombre))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            if hasattr(mod, "correr"):
+                mod.correr(yo)
+                corridos.append(nombre)
+    finally:
+        yo.pedir, urllib.request.urlopen, time.sleep = guardados
+    # modulos de las lineas A y B (si existen junto a vigia.py), cada uno en su propio proceso
+    if os.environ.get("SELFTEST_SOLO_NUCLEO") != "1":
+        for mod in ("prospectiva.py", "promos.py"):
+            ruta = os.path.join(AQUI, mod)
+            if not os.path.exists(ruta):
+                continue
+            try:
+                r = subprocess.run([sys.executable, "-X", "utf8", ruta, "--selftest"], capture_output=True, text=True,
+                                   encoding="utf-8", errors="replace", timeout=60, cwd=AQUI)
+            except subprocess.TimeoutExpired:
+                raise AssertionError("%s --selftest no termino en 60 s" % mod)
+            assert r.returncode == 0, "%s --selftest fallo (codigo %s): %s" % (mod, r.returncode,
+                                                                             (r.stdout + r.stderr)[-600:])
+            corridos.append(mod)
     print("selftest OK: %d titulos Fold8, %d PS5 y %d Gameplanet, topes, vendedor oficial, importacion y agotado/regreso"
           % (len(casos), len(casos_ps5), len(casos_gp)))
+    print("selftest OK: red cortada, avisos de disponibilidad que fallan, recorte del foro, reloj, --cobertura; "
+          "pruebas aparte: %s" % (", ".join(corridos) or "ninguna"))
     return 0
 
 
 def main():
     if "--selftest" in sys.argv:
         return selftest()
+    if "--cobertura" in sys.argv:
+        return cobertura()
     seco = "--seco" in sys.argv
     prueba = os.environ.get("PRUEBA", "").lower() in ("1", "true", "yes")
     ahora = dt.datetime.now(dt.timezone.utc)
+    arranque = time.monotonic()   # reloj general de la corrida (SEGUNDOS_CORRIDA)
     prods = cargar_config()
     por_id = {p["id"]: p for p in prods}
     try:
@@ -1033,6 +1286,10 @@ def main():
         usan = [p for p in prods if tienda in p["tiendas"]]
         if not usan:
             continue
+        if reloj_vencido(arranque):   # se trata como "no leida esta corrida": ni leidas, ni ausencias, ni falla
+            print("tienda saltada %-10s se acabo el tiempo de la corrida (%d s): no se lee esta vez"
+                  % (tienda, SEGUNDOS_CORRIDA))
+            continue
 
         def todas(lector=lector, usan=usan, tienda=tienda):
             r = []
@@ -1085,13 +1342,8 @@ def main():
     if "conocidos" not in estado:
         sembrar_conocidos(estado, prods, mejores, leidas)
         print("   disponibilidad sembrada; agotados de arranque:", ", ".join(estado["agotados"]) or "ninguno")
-    for asunto, cuerpo in disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")):
-        print(" * DISPONIBILIDAD", asunto)
-        if not seco:
-            try:
-                abrir_issue(asunto, cuerpo)
-            except Exception as ex:
-                print("   no se pudo abrir el aviso:", ex)
+    avisar_disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
+                          None if seco else abrir_issue)
 
     # --- avisos del foro (tiendas que no se dejan leer, y recetas con banco)
     sembrar = not estado.get("sembrado")
@@ -1161,7 +1413,7 @@ def main():
         with open(PRECIOS, "w", encoding="utf-8") as f:
             json.dump(actuales, f, ensure_ascii=False, indent=1, sort_keys=True)
     if len(vistos) > 600:
-        estado["vistos"] = dict(list(vistos.items())[-400:])
+        estado["vistos"] = recortar_vistos(vistos, 400)
     if json.dumps(estado, sort_keys=True) != antes:
         with open(ESTADO, "w", encoding="utf-8") as f:
             json.dump(estado, f, ensure_ascii=False, indent=1, sort_keys=True)
