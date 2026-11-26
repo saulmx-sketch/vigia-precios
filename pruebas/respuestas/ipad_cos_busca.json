@@ -1,0 +1,112 @@
+{
+ "products": [
+  {
+   "code": "VA702609",
+   "name": "Apple iPad Air 11\" M4 Wi-Fi 256GB",
+   "url": "/Electronicos/Apple/iPad/Apple-iPad-Air-11-M4-Wi-Fi-256GB/p/VA702609",
+   "price": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$34,998.00",
+    "formattedValue": "$17,499.00",
+    "intValue": 1749900,
+    "priceType": "BUY",
+    "value": 17499.0
+   },
+   "basePrice": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$40,998.00",
+    "formattedValue": "$20,499.00",
+    "intValue": 2049900,
+    "priceType": "BUY",
+    "value": 20499.0
+   },
+   "stock": {
+    "contactDay": 0,
+    "deliveryLeadTime": 0,
+    "stockLevelStatus": "inStock"
+   },
+   "couponDiscount": {
+    "discountType": "default",
+    "discountValue": 3000.0,
+    "discountValueExcVat": 0.0,
+    "formattedDiscountValue": "$3,000.00",
+    "formattedDiscountValueExcVat": "$0.00",
+    "hideDiscountCalculation": false
+   },
+   "isExternalVendorProduct": false,
+   "isExternalVendorVariantProduct": false
+  },
+  {
+   "code": "VA696467",
+   "name": "Apple iPad Air 11\" M4 Wi-Fi 128GB",
+   "url": "/Electronicos/Apple/iPad/Apple-iPad-Air-11-M4-Wi-Fi-128GB/p/VA696467",
+   "price": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$29,598.00",
+    "formattedValue": "$14,799.00",
+    "intValue": 1479900,
+    "priceType": "BUY",
+    "value": 14799.0
+   },
+   "basePrice": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$35,798.00",
+    "formattedValue": "$17,899.00",
+    "intValue": 1789900,
+    "priceType": "BUY",
+    "value": 17899.0
+   },
+   "stock": {
+    "contactDay": 0,
+    "deliveryLeadTime": 0,
+    "stockLevelStatus": "inStock"
+   },
+   "couponDiscount": {
+    "discountType": "default",
+    "discountValue": 3100.0,
+    "discountValueExcVat": 0.0,
+    "formattedDiscountValue": "$3,100.00",
+    "formattedDiscountValueExcVat": "$0.00",
+    "hideDiscountCalculation": false
+   },
+   "isExternalVendorProduct": false,
+   "isExternalVendorVariantProduct": false
+  },
+  {
+   "code": "VA702626",
+   "name": "Apple iPad Air 13\" M4 Wi-Fi 512GB",
+   "url": "/Electronicos/Apple/iPad/Apple-iPad-Air-13-M4-Wi-Fi-512GB/p/VA702626",
+   "price": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$54,998.00",
+    "formattedValue": "$27,499.00",
+    "intValue": 2749900,
+    "priceType": "BUY",
+    "value": 27499.0
+   },
+   "basePrice": {
+    "currencyIso": "MXN",
+    "formattedPriceForSetOfTwoQuantities": "$60,998.00",
+    "formattedValue": "$30,499.00",
+    "intValue": 3049900,
+    "priceType": "BUY",
+    "value": 30499.0
+   },
+   "stock": {
+    "contactDay": 0,
+    "deliveryLeadTime": 0,
+    "stockLevelStatus": "inStock"
+   },
+   "couponDiscount": {
+    "discountType": "default",
+    "discountValue": 3000.0,
+    "discountValueExcVat": 0.0,
+    "formattedDiscountValue": "$3,000.00",
+    "formattedDiscountValueExcVat": "$0.00",
+    "hideDiscountCalculation": false
+   },
+   "isExternalVendorProduct": false,
+   "isExternalVendorVariantProduct": false
+  }
+ ]
+}

@@ -140,12 +140,14 @@ def _correr(v):
     # F4. PS5 Pro de Liverpool sin la palabra "Pro" (2 TB): no se le pega "Digital" y la variante la rechaza
     with open(os.path.join(RESP, "liv_pdp_1186785807_2tb_alterada.html"), encoding="utf-8") as f:
         fi = v.ficha_liverpool_texto(f.read(), "1186785807")
-    assert "igital" not in fi["titulo"] and "2 TB" in fi["titulo"], fi["titulo"]
-    assert v.variante(ps, fi["titulo"]) is None
+    tit = v.titulo_con_atributos(ps, "Liverpool", fi["titulo"], fi["atributos"])   # reglas de productos.json (ps5)
+    assert "igital" not in tit and "2 TB" in tit, tit
+    assert v.variante(ps, tit) is None
     assert v.variante(ps, "Consola PS5 Digital 2 TB") is None and v.variante(ps, "Consola PS5 Digital 825 GB")["id"] == "digital"
-    assert v.consola_de_ficha({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "2 TB"}) == ""
-    assert v.consola_de_ficha({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "825 GB",
-                               "Capacidad de memoria RAM": "2 TB"}) == " Digital (sin lector de disco)"
+    agrega = lambda attrs: v.titulo_con_atributos(ps, "Liverpool", "X", attrs)[1:]
+    assert agrega({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "2 TB"}) == ""
+    assert agrega({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "825 GB",
+                   "Capacidad de memoria RAM": "2 TB"}) == " Digital (sin lector de disco)"
 
     # P1. Una ficha rara (precio "8,499.00") no tumba los avisos; la oferta buena de detras sale igual
     v.VENDEDOR_OFICIAL["TiendaX"] = r"^\s*tiendax\s*$"
@@ -173,6 +175,19 @@ def _correr(v):
             v.publicar_aviso(av, avisado, False, False, abrir=lambda a, c: abiertos.append(a), niveles=niveles)
     assert abiertos == ["GANGA $7,100 · PS5 Digital (sin lector) · TiendaX"], abiertos
     assert est["avisado"] == {k: 7100.0} and est["avisado_nivel"] == {k: ["GANGA", 7100.0]}, est
+
+    # Relectura pendiente (coordinador, 25 nov): cuenta dentro del tope de 6, despues de las ofertas nuevas
+    v.FICHAS["TiendaX"] = ps5_x(7100.0)
+    kr = "TiendaX|ps5|relee"
+    est = {"avisado": {kr: 7000.0}, "avisado_nivel": {kr: ["GANGA", 7000.0, v.RELEER]}}
+    mejores = {"TiendaX|ps5|n%d" % i: oferta_x("TiendaX", 7200.0 + i) for i in range(6)}
+    mejores[kr] = oferta_x("TiendaX", 7000.0)
+    claves = [a["clave"] for a in v.avisos_de_precio(mejores, por_id, est["avisado"], est, AHORA)]
+    assert len(claves) == 6 and kr not in claves, claves          # las 6 nuevas se releyeron; la pendiente: sin tiempo
+    assert est["avisado_nivel"][kr] == ["GANGA", 7000.0, v.RELEER], est   # sigue pendiente
+    avs = v.avisos_de_precio({kr: oferta_x("TiendaX", 7000.0)}, por_id, est["avisado"], est, AHORA)
+    assert [(a["resultado"], a["relectura"]) for a in avs] == [("confirmada", True)], avs
+    assert avs[0]["cuerpo"].startswith("Confirmación del aviso anterior"), avs[0]["cuerpo"][:120]
 
     # R1. Ida y vuelta de version: si la version vieja reaviso (avisado cambio), el nivel guardado se descarta
     est = {"avisado": {k: 7200.0}, "avisado_nivel": {k: ["SIN CONFIRMAR", 7000.0]}}

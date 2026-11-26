@@ -30,7 +30,10 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 ESTADO = os.path.join(AQUI, "visto.json")
 PRECIOS = os.path.join(AQUI, "precios.json")
 HISTORIAL = os.path.join(AQUI, "historial_precios.csv")
-CONFIG = os.path.join(AQUI, "productos.json")
+# Otro archivo de productos con el mismo esquema: VIGIA_CONFIG=<ruta>. Con ella solo corren --seco y --cobertura
+# (main se niega a lo demas: un archivo de muestra no escribe estado ni avisa).
+CONFIG_PRINCIPAL = os.path.join(AQUI, "productos.json")
+CONFIG = os.environ.get("VIGIA_CONFIG") or CONFIG_PRINCIPAL
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
       "Chrome/130.0.0.0 Safari/537.36")
 MX = dt.timezone(dt.timedelta(hours=-6))
@@ -144,17 +147,29 @@ def decodificar(b, tipo=""):
         return b.decode("cp1252", "replace")
 
 
-def cargar_config(ruta=CONFIG):
+def cargar_config(ruta=None):
+    """Productos de `ruta`; sin ruta, siempre productos.json (lo que esperan las pruebas aunque VIGIA_CONFIG este
+    puesta). main() y cobertura() piden CONFIG, que si sigue a VIGIA_CONFIG."""
+    ruta = ruta or CONFIG_PRINCIPAL
+    nombre = os.path.basename(ruta)
     with open(ruta, encoding="utf-8") as f:
         prods = json.load(f)["productos"]
     for p in prods:  # validacion: un producto mal escrito aborta con mensaje claro, no vigila a medias
         for campo in ("id", "nombre", "patron", "piso", "fracciones", "variantes", "tiendas", "requisitos"):
             if campo not in p:
-                raise SystemExit("productos.json: al producto %s le falta '%s'" % (p.get("id", "?"), campo))
+                raise SystemExit("%s: al producto %s le falta '%s'" % (nombre, p.get("id", "?"), campo))
         for v in p["variantes"]:
             if "id" not in v or "nombre" not in v or "lista" not in v:
-                raise SystemExit("productos.json: variante incompleta en %s: %s" % (p["id"], v))
-        re.compile(p["patron"])
+                raise SystemExit("%s: variante incompleta en %s: %s" % (nombre, p["id"], v))
+        try:
+            for rx in [p["patron"], p.get("excluir") or ""] + [x for v in p["variantes"] for x in v.get("todas", []) + v.get("ninguna", [])]:
+                re.compile(rx)
+            for tienda, reglas in (p.get("ficha_atributos") or {}).items():
+                for r in reglas:
+                    for rx in list((r.get("si") or {}).values()) + [r.get("no_si") or "", r.get("no_si_atributos") or ""]:
+                        re.compile(rx)
+        except re.error as ex:
+            raise SystemExit("%s: regla mal escrita en %s: %s" % (nombre, p["id"], ex))
     return prods
 
 
@@ -727,25 +742,29 @@ def objetos_con(plano, clave, valor, intentos=400):
     return salida
 
 
-def consola_de_ficha(attrs, titulo=""):
-    """Lo que se anade al titulo de Liverpool segun los atributos de la ficha. Liverpool titula su PS5 Digital sin la
-    palabra "digital" ("Consola PS5 de 825 GB edicion bundle"); su ficha si lo dice. Medido el 25 nov 2026:
-    1186785807 Tipo de consola "Fija", Lector integrado "Sin lector" (Digital); 1186785793 "Fija", "CD" (con lector);
-    1156059630, el PlayStation Portal, "Fija/portátil", "Sin lector" (no se anade nada: no es la consola)."""
-    if (attrs.get("Tipo de consola") or "").strip() != "Fija":
-        return ""
-    lector = (attrs.get("Lector integrado") or "").strip()
-    if not lector:
-        return ""
-    if lector.lower() != "sin lector":
-        return " con lector de disco"
-    # la PS5 Pro tambien es fija y sin lector: si el titulo o un atributo (Disco duro, capacidad) dicen 2 TB, no es la
-    # Digital (revisor R1-F4); no se anade nada y el titulo queda como lo da la ficha
-    capacidad = [str(v) for k, v in attrs.items()
-                 if re.search(r"disco\s+duro|capacidad|almacenamiento", k or "", re.I) and not re.search(r"expansi|ram\b", k or "", re.I)]
-    if re.search(r"\b2\s*tb\b", " ".join([titulo] + capacidad), re.I):
-        return ""
-    return " Digital (sin lector de disco)"
+def titulo_con_atributos(prod, tienda, titulo, atributos):
+    """Titulo de la ficha completado con sus atributos, segun las reglas del producto en productos.json:
+    "ficha_atributos": {tienda: [regla, ...]}, la primera que aplica gana. Regla:
+      "si": {nombre de atributo: regex}   todos deben casar (sin mayusculas/minusculas; atributo que falta = no casa)
+      "no_si": regex, "no_si_atributos": regex   la regla no aplica si "no_si" casa en el titulo o en el valor de algun
+                                                 atributo cuyo nombre case "no_si_atributos"
+      "agrega": texto                    se anade al titulo, separado por un espacio
+    Producto sin reglas para esa tienda, o lector que no entrega atributos: el titulo queda como lo da la ficha.
+    Sirve para tiendas que titulan sin decir la variante y la dicen en la ficha (medido con Liverpool, 25 nov 2026)."""
+    reglas = (prod.get("ficha_atributos") or {}).get(tienda) or []
+    if not reglas or not atributos:
+        return titulo
+    for r in reglas:
+        if not all(re.search(rx, str(atributos.get(nombre) or ""), re.I) and atributos.get(nombre) not in (None, "")
+                   for nombre, rx in (r.get("si") or {}).items()):
+            continue
+        if r.get("no_si"):
+            mirar = [titulo] + [str(v) for k, v in atributos.items()
+                                if r.get("no_si_atributos") and re.search(r["no_si_atributos"], k or "", re.I)]
+            if re.search(r["no_si"], " ".join(mirar), re.I):
+                continue
+        return "%s %s" % (titulo, r.get("agrega", "")) if r.get("agrega") else titulo
+    return titulo
 
 
 def ficha_liverpool_texto(t, pid, sku=None):
@@ -782,9 +801,10 @@ def ficha_liverpool_texto(t, pid, sku=None):
         color = a.get("Color") or {}
         extra = [(a.get("Size") or {}).get("name"), color.get("clothingBrandColor") or color.get("name")]
         titulo = " ".join([prin["title"]] + [x for x in extra if x and x.lower() not in prin["title"].lower()])
-        titulo += consola_de_ficha(attrs, titulo)
         inv = s.get("inventoryStatus", prin.get("inventoryStatus"))
-        opciones.append({"titulo": titulo, "precio": float(precio) if precio else None, "vendedor": vend,
+        # los atributos de la ficha van aparte: quien conoce el producto (leer_liverpool, confirmar) completa el titulo
+        # con titulo_con_atributos y las reglas de productos.json
+        opciones.append({"titulo": titulo, "atributos": attrs, "precio": float(precio) if precio else None, "vendedor": vend,
                          "existencia": inv if isinstance(inv, bool) else None, "sku": s.get("skuId", ""),
                          "importado": bool(flags.get("isInternational") or flags.get("isCrossBorder")),
                          "url": "%s/pdp/p/%s" % (LIVERPOOL, pid) + ("?skuId=%s" % s["skuId"] if s.get("skuId") else "")})
@@ -818,9 +838,9 @@ def ficha_liverpool(url_o_id):
 
 
 def leer_liverpool(prod, cfg, estado):
-    """Busqueda (titulo y precio) y, para lo que es el producto y pasa el piso, su ficha: titulo (con lo que digan sus
-    atributos de consola), precio de cada variante, existencia y quien vende. Lo que no tiene ficha leida o no dice
-    quien vende no se publica."""
+    """Busqueda (titulo y precio) y, para lo que es el producto y pasa el piso, su ficha: titulo (completado con sus
+    atributos segun las reglas "ficha_atributos" del producto), precio de cada variante, existencia y quien vende. Lo que
+    no tiene ficha leida o no dice quien vende no se publica."""
     e, t = pedir(LIVERPOOL + "?s=" + cfg["consulta"])
     if e != 200 or "-price" not in t:
         raise RuntimeError("Liverpool respondio %s (%d bytes)" % (e, len(t)))
@@ -832,7 +852,7 @@ def leer_liverpool(prod, cfg, estado):
             continue
         titulo, pid, precio = html.unescape(m.group(1)), m.group(2), float(pr.group(1).replace(",", ""))
         # candidato a ficha: es el producto (patron), no es accesorio ni usado (EXCLUIR, excluir) y pasa el piso,
-        # aunque el titulo del listado no diga la variante: la ficha la dice (PS5 Digital sin "digital" en el titulo)
+        # aunque el titulo del listado no diga la variante: la ficha puede decirla (ver titulo_con_atributos)
         if re.search(prod["patron"], titulo, re.I) and not re.search(EXCLUIR, titulo, re.I) and \
            not (prod.get("excluir") and re.search(prod["excluir"], titulo, re.I)) and precio >= prod["piso"] and \
            (pid not in cands or precio < cands[pid][1]):
@@ -859,12 +879,13 @@ def leer_liverpool(prod, cfg, estado):
             if not op["vendedor"]:
                 print("   Liverpool: no se publica %s: la ficha no dice quien vende" % op["url"])
                 continue
-            of = oferta(prod, "Liverpool", op["titulo"], op["precio"], op["url"], op["vendedor"], "", importado=op["importado"])
+            tit = titulo_con_atributos(prod, "Liverpool", op["titulo"], op.get("atributos"))
+            of = oferta(prod, "Liverpool", tit, op["precio"], op["url"], op["vendedor"], "", importado=op["importado"])
             if of:
                 salida.append(of)
                 print("   Liverpool: entra %s $%s (%s, lo vende %s)" % (of["titulo"][:90], "{:,.0f}".format(of["precio"]),
                                                                        of["nombre"], of["vendedor"]))
-            elif variante(prod, op["titulo"]) and not vendedor_oficial(prod, "Liverpool", op["vendedor"]):
+            elif variante(prod, tit) and not vendedor_oficial(prod, "Liverpool", op["vendedor"]):
                 print("   Liverpool: no se publica %s: lo vende %s (tercero de su marketplace)" % (op["url"], op["vendedor"]))
     if elegidos and not leidas:
         raise RuntimeError("Liverpool: ninguna de %d fichas se pudo leer" % len(elegidos))
@@ -1035,6 +1056,7 @@ def _confirmar(o, prod, estado, lector):
     buenas, motivos, sin_existencia = [], [], []
     for op in fi.get("opciones") or [fi]:
         precio, titulo = numero(op.get("precio")), str(op.get("titulo") or o["titulo"])
+        titulo = titulo_con_atributos(prod, o["tienda"], titulo, op.get("atributos"))
         if o["tienda"] == "Samsung":
             # el catalogo no dice color ni capacidad (el modelo los fija) y da el precio sin cupones: el total del
             # carrito de esta corrida manda
@@ -1215,6 +1237,19 @@ def nivel_avisado(niveles, clave, precio):
     return v if isinstance(v, str) else None
 
 
+# Tercer elemento de avisado_nivel (la version d6ab147 no lee avisado_nivel; las rondas 2 y 3 solo leen los dos primeros):
+RELEER = "releer"   # se aviso GANGA/COMPRAR con "ficha sin releer": queda pendiente de relectura en las corridas siguientes
+HECHO = "hecho"     # ya salio el correo de confirmacion o de correccion de esa relectura: no se vuelve a releer
+
+
+def marca_avisado(niveles, clave, precio):
+    """Tercer elemento de avisado_nivel[clave] ("releer", "hecho" o None), si sigue valiendo para ese precio."""
+    v = niveles.get(clave)
+    if isinstance(v, (list, tuple)) and len(v) >= 3 and nivel_avisado(niveles, clave, precio):
+        return v[2]
+    return None
+
+
 def normalizar_avisado(estado):
     """Deja estado["avisado"] como {clave: precio} (numeros, lo que lee cualquier version anterior del vigia, para poder
     volver atras sin que truene) y en estado["avisado_nivel"] {clave: [nivel, precio avisado]}; un nivel cuyo precio ya
@@ -1234,7 +1269,8 @@ def normalizar_avisado(estado):
     for c in list(niveles):
         niv = nivel_avisado(niveles, c, avisado.get(c)) if c in avisado else None
         if niv:
-            niveles[c] = [niv, avisado[c]]
+            marca = marca_avisado(niveles, c, avisado[c])
+            niveles[c] = [niv, avisado[c]] + ([marca] if marca else [])
         else:
             niveles.pop(c)
     return avisado, niveles
@@ -1260,17 +1296,22 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
                 continue
             ant, niv_ant = avisado_de(avisado[clave]) if clave in avisado else (None, None)
             niv_ant = niv_ant or nivel_avisado(niveles, clave, ant)
-            if ant is not None and o["precio"] > ant - BAJA_MINIMA and niv_ant != "SIN CONFIRMAR":
+            marca = marca_avisado(niveles, clave, ant)
+            # relectura: avisado con "ficha sin releer" y sin bajar lo bastante para un aviso nuevo
+            relee = ant is not None and o["precio"] > ant - BAJA_MINIMA and marca == RELEER and niv in NIVELES_CONFIRMAR
+            if ant is not None and o["precio"] > ant - BAJA_MINIMA and not relee and \
+               not (niv_ant == "SIN CONFIRMAR" and marca != HECHO):
                 continue
-            pend.append((clave, o, prod, var, niv, ant, niv_ant))
+            pend.append((clave, o, prod, var, niv, ant, niv_ant, relee))
         except Exception as ex:
             print("   aviso de %s no se pudo revisar: %s" % (clave, str(ex)[:120]))
-    pend.sort(key=lambda x: x[1]["precio"])
+    # las ofertas nuevas primero (del mas barato al mas caro); las relecturas pendientes despues, dentro del mismo tope
+    pend.sort(key=lambda x: (x[7], x[1]["precio"]))
     hechos = []
     if arranque is not None:
         estado["_arranque"] = arranque
     try:
-        for clave, o, prod, var, niv, ant, niv_ant in pend:
+        for clave, o, prod, var, niv, ant, niv_ant, relee in pend:
             resultado, final, razon_f = None, o, ""
             if niv in NIVELES_CONFIRMAR:
                 resultado, final, razon_f = confirmar(o, prod, estado)
@@ -1281,13 +1322,18 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
                 niv_f = "SIN CONFIRMAR"
             else:
                 niv_f = niv
-            if ant is not None and final["precio"] > ant - BAJA_MINIMA:
+            if relee:
+                # pendiente de relectura: un solo correo mas cuando la ficha se deja leer (confirmacion o correccion);
+                # si sigue sin poderse leer, nada (queda pendiente)
+                if resultado not in ("confirmada", "no_coincide"):
+                    continue
+            elif ant is not None and final["precio"] > ant - BAJA_MINIMA:
                 # sin bajar lo bastante de lo ya avisado: solo vuelve a avisar, una vez, si antes salio SIN CONFIRMAR y
                 # ahora la ficha lo confirma (al precio que sea, dentro de su nivel; revisor R1-P3)
                 if not (niv_ant == "SIN CONFIRMAR" and resultado == "confirmada" and niv_f != "SIN CONFIRMAR"):
                     continue
             hechos.append({"clave": clave, "o": final, "prod": prod, "var": var, "nivel": niv_f, "listado": niv,
-                           "resultado": resultado, "razon": razon_f})
+                           "resultado": resultado, "razon": razon_f, "relectura": relee})
     finally:
         estado.pop("_confirmaciones", None)
         estado.pop("_arranque", None)
@@ -1297,6 +1343,11 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
         try:
             a["asunto"], a["cuerpo"] = texto_aviso(a["o"], a["prod"], a["var"], a["nivel"], a["resultado"], a["razon"],
                                                    mejores, hora, a["listado"])
+            if a.get("relectura"):
+                previo = ("Confirmación del aviso anterior, que salió sin releer la ficha: ahora se releyó y coincide."
+                          if a["resultado"] == "confirmada" else
+                          "Corrección del aviso anterior, que salió sin releer la ficha: ahora se releyó y no coincide.")
+                a["cuerpo"] = previo + "\n\n" + a["cuerpo"]
         except Exception as ex:   # texto de respaldo: el aviso sale aunque algo del texto falle
             print("   texto del aviso de %s fallo (%s); sale el texto corto" % (a["clave"], str(ex)[:100]))
             a["asunto"] = "%s %s · %s · %s" % (a["nivel"], pesos(numero(a["precio"])), a["var"]["nombre"], a["o"].get("tienda"))
@@ -1317,7 +1368,9 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
             return False
         avisado[av["clave"]] = av["precio"]
         if niveles is not None:
-            niveles[av["clave"]] = [av["nivel"], av["precio"]]
+            marca = HECHO if av.get("relectura") else \
+                RELEER if av.get("resultado") == "sin_releer" and av.get("nivel") in ("GANGA", "COMPRAR") else None
+            niveles[av["clave"]] = [av["nivel"], av["precio"]] + ([marca] if marca else [])
         return True
     except Exception as ex:
         print("   no se pudo abrir el aviso:", ex)
@@ -1716,9 +1769,9 @@ def _legible(regex):
 
 def cobertura(prods=None):
     """Que se vigila, en palabras, para leer en una pantalla. No usa red."""
-    prods = prods or cargar_config()
+    prods = prods or cargar_config(CONFIG)
     pesos = lambda n: "${:,}".format(n)
-    print("QUE VIGILA EL VIGIA (segun productos.json)")
+    print("QUE VIGILA EL VIGIA (segun %s)" % os.path.basename(CONFIG))
     glob = EXCLUIR[3:-3] if EXCLUIR.startswith(r"\b(") and EXCLUIR.endswith(r")\b") else EXCLUIR
     print("Nunca entran, en ningun producto: " + ", ".join(_legible(x) for x in _partes(glob)))
     for p in prods:
@@ -1760,8 +1813,16 @@ def cobertura(prods=None):
         for k in ("_regla", "_comentario"):
             if isinstance(req.get(k), str):
                 print("  nota: " + req[k])
+        for tienda, reglas in sorted((p.get("ficha_atributos") or {}).items()):
+            for r in reglas:
+                print("  en %s el titulo se completa con la ficha: si %s, se anade \"%s\"%s" % (
+                    tienda, " y ".join("%s es %s" % (k, _legible(x)) for k, x in (r.get("si") or {}).items()),
+                    r.get("agrega", ""), (" (salvo si dice %s)" % _legible(r["no_si"])) if r.get("no_si") else ""))
         directas = [t for t in LECTORES if t in p["tiendas"]]
         print("Tiendas que se leen directo: " + ", ".join(directas))
+        sin_lector = [t for t in p["tiendas"] if t not in LECTORES]
+        if sin_lector:
+            print("Tiendas configuradas que aun no tienen lector: " + ", ".join(sin_lector))
         foro = [x for x in (_legible(a) for a in _partes(TIENDAS_FORO))
                 if not any(re.search(re.escape(x), t, re.I) for t in directas)]
         print("Tiendas que solo entran por el foro Promodescuentos: " + ", ".join(foro))
@@ -2016,16 +2077,22 @@ def main():
     if "--cobertura" in sys.argv:
         return cobertura()
     seco = "--seco" in sys.argv
+    if CONFIG != CONFIG_PRINCIPAL and not seco:
+        print("VIGIA_CONFIG=%s: con otro archivo de productos solo se corre --seco o --cobertura (no se escribe estado "
+              "ni se avisa). Quita la variable para la corrida normal." % CONFIG)
+        return 3
     prueba = os.environ.get("PRUEBA", "").lower() in ("1", "true", "yes")
     ahora = dt.datetime.now(dt.timezone.utc)
     arranque = time.monotonic()   # reloj general de la corrida (SEGUNDOS_CORRIDA)
     LIVERPOOL_LEIDAS.clear()
-    prods = cargar_config()
+    prods = cargar_config(CONFIG)
     por_id = {p["id"]: p for p in prods}
     try:
         with open(ESTADO, encoding="utf-8") as f:
             estado = json.load(f)
     except Exception:
+        estado = {}
+    if CONFIG != CONFIG_PRINCIPAL:   # archivo de muestra: no se mezcla con la memoria de los productos vigilados
         estado = {}
     antes = json.dumps(estado, sort_keys=True)
     fallos = estado.setdefault("fallos_fuente", {})
