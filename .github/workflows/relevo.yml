@@ -1,0 +1,33 @@
+name: relevo
+# Relevo de la cadena del vigia: cuando termina una corrida de "vigia", comprueba que haya dejado lanzada
+# la siguiente; si no, la relanza y abre un aviso. Solo relanza y avisa: nunca revisa ni guarda estado.
+# Toda la logica vive en .github/scripts/relevo.sh (se prueba con pruebas/simular_relevo.sh).
+on:
+  workflow_run:
+    workflows: [vigia]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  actions: write
+  issues: write
+  contents: read
+concurrency:
+  group: relevo
+  cancel-in-progress: false
+jobs:
+  relevo:
+    runs-on: ubuntu-latest
+    # 12 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
+    # relevo cortado por tope no avisa a nadie.
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - name: Relanzar la cadena si quedo detenida
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERMINO_ID: ${{ github.event.workflow_run.id }}
+          TERMINO_URL: ${{ github.event.workflow_run.html_url }}
+          TERMINO_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          TERMINO_HORA: ${{ github.event.workflow_run.updated_at }}
+          TERMINO_EVENTO: ${{ github.event.workflow_run.event }}
+        run: bash .github/scripts/relevo.sh

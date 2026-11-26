@@ -46,11 +46,18 @@ HORAS_SIN_LEER_DEFECTO = 2
 EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
            r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version)\b")
 # Quien cuenta como vendedor oficial en cada tienda cuando el producto pide "solo_vendedor_oficial".
-# {marca} se cambia por la marca del producto. Tienda que no aparece aqui = la tienda vende ella misma.
+# {marca} se cambia por la marca del producto. Tienda que no aparece aqui = NO oficial (desde el 25 nov 2026, revisor
+# R1-F3: una tienda nueva sin su regla dejaba pasar a cualquier revendedor); toda tienda que vende ella misma va aqui.
 VENDEDOR_OFICIAL = {
+    "Samsung": r"^\s*samsung\s*$",                                        # leer_samsung escribe "Samsung" fijo
     "Amazon": r"^\s*(amazon(\s+m[eé]xico)?|{marca}(\s+m[eé]xico)?)\s*$",   # no terceros ni "Remates de Almacen"
     "Elektra": r"^\s*elektra\s*$",                                        # no vendedores del marketplace
     "Gameplanet": r"^\s*game\s*planet\s*$",                               # vendedor leido de la ficha (ld+json)
+    # Liverpool: la ficha no escribe "Liverpool" como vendedor; lo que dice es si el articulo es de su marketplace
+    # (isMarketPlace, hasHybridSeller y las ofertas de terceros con su sellerName). ficha_liverpool pone "Liverpool"
+    # solo cuando la ficha dice que no es de marketplace ni tiene ofertas de terceros (medido el 25 nov 2026).
+    "Liverpool": r"^\s*liverpool\s*$",
+    "Costco": r"^\s*costco\b",                                            # su API marca isExternalVendorProduct
 }
 SENAL_IMPORTADO = r"importaci[oó]n|desde Estados Unidos|Amazon Estados Unidos|Amazon Global|Env[ií]o internacional"
 # En el foro solo se atienden tiendas establecidas en Mexico (no importadores ni revendedores).
@@ -80,7 +87,10 @@ NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BB
 
 
 # ------------------------------------------------------------------------------- utilidades
-def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0):
+def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
+    """(estado, texto). Un corte de red o un tope de tiempo se reintenta una vez tras `reintento` segundos; si vuelve
+    a fallar, RuntimeError("sin respuesta: <host>: <causa>"). Una respuesta HTTP con error no lanza: da su codigo."""
+    import socket
     cab = {"User-Agent": UA, "Accept-Language": "es-MX,es;q=0.9,en;q=0.6", "Accept-Encoding": "gzip",
            "Accept": "application/json, text/plain, */*" if json_api else
                      "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8"}
@@ -95,19 +105,26 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0)
     abre = abridor.open if abridor else urllib.request.urlopen
     if pausa:
         time.sleep(pausa)
-    try:
-        with abre(req, timeout=30) as r:
-            b = r.read()
-            if r.headers.get("Content-Encoding") == "gzip":
-                b = gzip.decompress(b)
-            return r.status, decodificar(b, r.headers.get("Content-Type", ""))
-    except urllib.error.HTTPError as e:
-        b = e.read() or b""
+    for intento in (1, 2):
         try:
-            b = gzip.decompress(b)
-        except Exception:
-            pass
-        return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
+            with abre(req, timeout=30) as r:
+                b = r.read()
+                if r.headers.get("Content-Encoding") == "gzip":
+                    b = gzip.decompress(b)
+                return r.status, decodificar(b, r.headers.get("Content-Type", ""))
+        except urllib.error.HTTPError as e:   # va antes: HTTPError tambien es URLError
+            b = e.read() or b""
+            try:
+                b = gzip.decompress(b)
+            except Exception:
+                pass
+            return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
+        except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError) as e:
+            if intento == 2:
+                causa = getattr(e, "reason", None) or e
+                raise RuntimeError("sin respuesta: %s: %s" % (urllib.parse.urlsplit(url).hostname, causa))
+            if reintento:
+                time.sleep(reintento)
 
 
 def decodificar(b, tipo=""):
@@ -179,7 +196,7 @@ def vendedor_oficial(prod, tienda, vendedor):
     # el producto puede fijar su propia regla por tienda (PS5: en Amazon solo Amazon Mexico; Sony no vende directo)
     regla = prod["requisitos"].get("vendedor_oficial", {}).get(tienda) or VENDEDOR_OFICIAL.get(tienda)
     if not regla:
-        return True
+        return False   # tienda sin regla: no se sabe quien cuenta como oficial, asi que nadie
     return bool(re.search(regla.replace("{marca}", re.escape(prod.get("marca", "zzzz"))), vendedor or "", re.I))
 
 
@@ -408,7 +425,8 @@ def leer_samsung(prod, cfg, estado):
                 ("promocion vigente hasta " + fin) if fin else "", nota] if x)
             precio = final
         except Exception as ex:
-            nota = "precio de pagina, cupones sin probar (%s)" % str(ex)[:60]
+            print("   Samsung: carrito de %s sin probar: %s" % (sku, str(ex)[:120]))
+            nota = "precio de pagina, cupones sin probar"
         var = var_por_id(prod, vid)
         of = oferta(prod, "Samsung", "%s %s" % (var["nombre"], color), precio, pagina, "Samsung", nota, var=var)
         if of:
@@ -438,6 +456,23 @@ def amazon_rechazo(e, t, senal):
 
 
 def ficha_amazon(t):
+    """Con el texto de una ficha: (titulo, precio a pagar o None, vendedor, importado), como siempre.
+    Con una liga o un ASIN: pide la ficha y devuelve el diccionario de ficha (ver confirmar); RuntimeError si Amazon
+    la rechaza (desde la nube de GitHub pasa 3 de cada 4 veces)."""
+    if re.match(r"(https?://\S+|[A-Z0-9]{10})$", t or ""):
+        url = t if t.startswith("http") else "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % t
+        e, p = pedir(url, pausa=1.0)
+        r = amazon_rechazo(e, p, 'id="productTitle"')
+        if r:
+            raise RuntimeError("Amazon respondio %s en la ficha" % r)
+        titulo, precio, vend, imp = _ficha_amazon(p)
+        agotado = re.search(r"No disponible por el momento|Actualmente no disponible", p)
+        return {"titulo": titulo, "precio": precio, "vendedor": vend, "importado": imp, "url": url,
+                "existencia": True if precio is not None else False if agotado else None}
+    return _ficha_amazon(t)
+
+
+def _ficha_amazon(t):
     """Titulo, precio a pagar (None si esta agotado o sin precio), vendedor e importado, leidos de la ficha."""
     tit = re.search(r'id="productTitle"[^>]*>(.*?)</span>', t, re.S)
     titulo = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", tit.group(1)))).strip() if tit else ""
@@ -496,19 +531,38 @@ def _leer_amazon(prod, cfg, estado, diag):
                 candidatas.append((m.group(1), titulo, precio, "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""))
     salida = []
     if not fallo:
-        # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio.
+        # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio de busqueda (eso
+        # alimenta la tabla, nunca basta para avisar: lo que va a avisar pasa por confirmar()).
         for asin, titulo, precio, nota in candidatas:
             url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
             previo = memo.get(asin)
-            if previo and previo[0] == precio:
-                vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
+            paga = precio
+            # quinto elemento: el precio que dio la ficha (la version d6ab147 solo lee los cuatro primeros). Lo
+            # recordado sin el (escrito antes del 25 nov) se trata como no recordado: se relee la ficha una vez.
+            if previo and previo[0] == precio and len(previo) > 4 and previo[4]:
+                vend, importado, paga = previo[1], bool(previo[2]), previo[4]
             else:
                 e, t = pedir(url, pausa=1.0)
-                diag.append("ficha %s %s" % (asin, amazon_rechazo(e, t, 'id="productTitle"') or "ok"))
-                _, _, vend, importado = ficha_amazon(t)
+                r = amazon_rechazo(e, t, 'id="productTitle"')
+                diag.append("ficha %s %s" % (asin, r or "ok"))
+                _, pf, vend, importado = _ficha_amazon(t)
+                if not r:
+                    if pf is None:
+                        continue   # la ficha leida no tiene precio a pagar: agotado o sin oferta propia
+                    # La busqueda y la ficha pueden mostrar ofertas distintas (otro vendedor, usado): manda la ficha,
+                    # que es la del vendedor leido.
+                    paga = pf
+                elif previo and previo[0] == precio:
+                    # ficha rechazada (pasa en la nube) y lo recordado es viejo, sin precio de ficha: como antes, el
+                    # vendedor recordado con el precio de busqueda, para no vaciar la tabla; no se reescribe la memoria
+                    vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
+                    of = oferta(prod, "Amazon", titulo, paga, url, vend, nota, importado=importado)
+                    if of:
+                        salida.append(of)
+                    continue
             if vend:
-                memo[asin] = [precio, vend, importado, prod["id"]]
-            of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", nota, importado=importado)
+                memo[asin] = [precio, vend, importado, prod["id"], paga]
+            of = oferta(prod, "Amazon", titulo, paga, url, vend or "sin confirmar", nota, importado=importado)
             if of and (vend or not solo_oficial):
                 salida.append(of)
         return salida
@@ -524,38 +578,104 @@ def _leer_amazon(prod, cfg, estado, diag):
         diag.append("ficha %s %s" % (asin, r or "ok"))
         if r:
             raise RuntimeError("%s y %s en la ficha %s" % (fallo, r, asin))
-        titulo, precio, vend, importado = ficha_amazon(t)
+        titulo, precio, vend, importado = _ficha_amazon(t)
         if precio is None or not marca_ok(prod, titulo):
             continue   # agotado o sin precio a la vista: hoy no se ofrece
         if vend:
-            memo[asin] = [precio, vend, importado, prod["id"]]
+            memo[asin] = [precio, vend, importado, prod["id"], precio]
         of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", "", importado=importado)
         if of and (vend or not solo_oficial):
             salida.append(of)
     return salida
 
 
+MESES = "ene feb mar abr may jun jul ago sep oct nov dic".split()
+
+
+def hasta_mx(iso):
+    """'2026-11-30T05:59:59.999Z' -> '29 nov 23:59' (hora de Mexico); '' si no se entiende."""
+    try:
+        d = dt.datetime.fromisoformat((iso or "").replace("Z", "+00:00")).astimezone(MX)
+    except ValueError:
+        return ""
+    return "%d %s %s" % (d.day, MESES[d.month - 1], d.strftime("%H:%M"))
+
+
+COSTCO_API = "https://www.costco.com.mx/rest/v2/mexico/products/"
+
+
+def _costco(p):
+    """Ficha de un producto de la API de Costco (busqueda o producto). Costco marca en cada producto si lo vende un
+    tercero (isExternalVendorProduct); en las busquedas del 25 nov 2026 de Fold8 y PS5 (40 productos) ninguno lo era."""
+    base = (p.get("basePrice") or p.get("price") or {}).get("value")
+    cup = p.get("couponDiscount") or {}
+    precio = base - (cup.get("discountValue") or 0) if base is not None else None
+    externo = p.get("isExternalVendorProduct") or p.get("isExternalVendorVariantProduct")
+    return {"titulo": p.get("name", ""), "precio": precio, "importado": False,
+            "vendedor": "vendedor externo en Costco" if externo else "Costco (pide membresia)",
+            "existencia": (p.get("stock") or {}).get("stockLevelStatus") != "outOfStock" if p.get("stock") else None,
+            "url": "https://www.costco.com.mx" + p.get("url", ""),
+            "nota": "descuento de tienda ${:,.0f} ya restado".format(cup["discountValue"]) if cup.get("discountValue") else "",
+            "vigencia": hasta_mx(cup.get("discountEndDate")) if cup.get("discountValue") else ""}
+
+
+def ficha_costco(url_o_id):
+    m = re.search(r"(\d{4,})\D*$", str(url_o_id))
+    if not m:
+        raise RuntimeError("liga de Costco sin numero de articulo")
+    e, t = pedir(COSTCO_API + m.group(1) + "?fields=FULL&lang=es_MX&curr=MXN", pausa=1.0)
+    if e != 200:
+        raise RuntimeError("Costco respondio %s en la ficha %s" % (e, m.group(1)))
+    return _costco(json.loads(t))
+
+
 def leer_costco(prod, cfg, estado):
-    e, t = pedir("https://www.costco.com.mx/rest/v2/mexico/products/search?query=%s&fields=FULL&lang=es_MX&curr=MXN"
-                 % urllib.parse.quote(cfg["consulta"]))
+    e, t = pedir(COSTCO_API + "search?query=%s&fields=FULL&lang=es_MX&curr=MXN" % urllib.parse.quote(cfg["consulta"]))
     if e != 200:
         raise RuntimeError("Costco respondio %s" % e)
     salida = []
     for p in json.loads(t).get("products", []):
-        base = (p.get("basePrice") or p.get("price") or {}).get("value")
-        if base is None or (p.get("stock") or {}).get("stockLevelStatus") == "outOfStock":
+        f = _costco(p)
+        if f["precio"] is None or f["existencia"] is False:
             continue
-        cup = (p.get("couponDiscount") or {})
-        precio = base - (cup.get("discountValue") or 0)
-        nota = "descuento de tienda ${:,.0f} hasta {}".format(cup["discountValue"], (cup.get("discountEndDate") or "")[:10]) if cup.get("discountValue") else ""
-        of = oferta(prod, "Costco", p.get("name", ""), precio, "https://www.costco.com.mx" + p.get("url", ""), "Costco (pide membresia)", nota)
+        of = oferta(prod, "Costco", f["titulo"], f["precio"], f["url"], f["vendedor"], f["nota"])
         if of:
+            if f["vigencia"]:
+                of["vigencia"] = f["vigencia"]
             salida.append(of)
     return salida
 
 
+ELEKTRA_API = "https://www.elektra.mx/api/catalog_system/pub/products/search"
+
+
+def ficha_elektra(url_o_id):
+    """La ficha de Elektra es su API por numero de articulo: cada vendedor con su precio y existencia (sellerName)."""
+    m = re.search(r"(\d{6,})(?:/p)?/?$", str(url_o_id))
+    if not m:
+        raise RuntimeError("liga de Elektra sin numero de articulo")
+    e, t = pedir(ELEKTRA_API + "?fq=productId:" + m.group(1), pausa=1.0)
+    if e not in (200, 206):
+        raise RuntimeError("Elektra respondio %s en la ficha %s" % (e, m.group(1)))
+    d = json.loads(t)
+    if not d:
+        raise RuntimeError("Elektra no devolvio el articulo %s" % m.group(1))
+    p, opciones = d[0], []
+    for it in p.get("items", []):
+        for s in it.get("sellers", []):
+            co = s.get("commertialOffer", {})
+            opciones.append({"titulo": it.get("nameComplete") or p.get("productName", ""), "precio": co.get("Price") or None,
+                             "vendedor": s.get("sellerName", ""), "existencia": co.get("AvailableQuantity", 0) > 0,
+                             "importado": False, "url": p.get("link", ""), "defecto": bool(s.get("sellerDefault"))})
+    if not opciones:
+        raise RuntimeError("la ficha %s de Elektra no trae vendedores" % m.group(1))
+    top = next((o for o in opciones if o["existencia"] and o["defecto"]), None) or \
+        next((o for o in opciones if o["existencia"]), opciones[0])
+    return dict(top, opciones=opciones)
+
+
 def leer_elektra(prod, cfg, estado):
-    e, t = pedir("https://www.elektra.mx/api/catalog_system/pub/products/search?ft=%s&_from=0&_to=49" % urllib.parse.quote(cfg["consulta"]))
+    e, t = pedir(ELEKTRA_API + "?ft=%s&_from=0&_to=49" % urllib.parse.quote(cfg["consulta"]))
     if e not in (200, 206):
         raise RuntimeError("Elektra respondio %s" % e)
     salida = []
@@ -570,21 +690,182 @@ def leer_elektra(prod, cfg, estado):
     return salida
 
 
+LIVERPOOL = "https://www.liverpool.com.mx/tienda"
+LIVERPOOL_FICHAS = 8      # fichas por producto y corrida, las mas baratas primero (1 s de pausa entre una y otra)
+
+
+def next_plano(t):
+    """Los datos que Next.js manda dentro de la pagina (self.__next_f.push), ya como texto: ahi viene la ficha."""
+    salida = []
+    for p in re.findall(r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)', t):
+        try:
+            salida.append(json.loads('"%s"' % p))
+        except ValueError:
+            pass
+    return "".join(salida)
+
+
+def objetos_con(plano, clave, valor, intentos=400):
+    """Objetos JSON del texto que traen clave=valor en su primer nivel (se busca hacia atras la llave que los abre)."""
+    dec, salida, vistos = json.JSONDecoder(), [], set()
+    for m in re.finditer(r'"%s":"%s"' % (re.escape(clave), re.escape(valor)), plano):
+        j = m.start()
+        for _ in range(intentos):
+            j = plano.rfind("{", 0, j)
+            if j < 0 or j in vistos:
+                break
+            try:
+                o, fin = dec.raw_decode(plano, j)
+            except ValueError:
+                continue
+            if fin > m.start() and isinstance(o, dict) and o.get(clave) == valor:
+                vistos.add(j)
+                salida.append(o)
+                break
+    return salida
+
+
+def consola_de_ficha(attrs, titulo=""):
+    """Lo que se anade al titulo de Liverpool segun los atributos de la ficha. Liverpool titula su PS5 Digital sin la
+    palabra "digital" ("Consola PS5 de 825 GB edicion bundle"); su ficha si lo dice. Medido el 25 nov 2026:
+    1186785807 Tipo de consola "Fija", Lector integrado "Sin lector" (Digital); 1186785793 "Fija", "CD" (con lector);
+    1156059630, el PlayStation Portal, "Fija/portátil", "Sin lector" (no se anade nada: no es la consola)."""
+    if (attrs.get("Tipo de consola") or "").strip() != "Fija":
+        return ""
+    lector = (attrs.get("Lector integrado") or "").strip()
+    if not lector:
+        return ""
+    if lector.lower() != "sin lector":
+        return " con lector de disco"
+    # la PS5 Pro tambien es fija y sin lector: si el titulo o un atributo (Disco duro, capacidad) dicen 2 TB, no es la
+    # Digital (revisor R1-F4); no se anade nada y el titulo queda como lo da la ficha
+    capacidad = [str(v) for k, v in attrs.items()
+                 if re.search(r"disco\s+duro|capacidad|almacenamiento", k or "", re.I) and not re.search(r"expansi|ram\b", k or "", re.I)]
+    if re.search(r"\b2\s*tb\b", " ".join([titulo] + capacidad), re.I):
+        return ""
+    return " Digital (sin lector de disco)"
+
+
+def ficha_liverpool_texto(t, pid, sku=None):
+    """Ficha de Liverpool desde su pagina. Medido el 25 nov 2026 (fichas 1156059630, 1203150349, 1186785807,
+    1207352230, 999683571464): el articulo trae title, productAttributes, configurationFlags (isMarketPlace,
+    hasHybridSeller, isInternational) y cada variante (skuId) su priceInfo, inventoryStatus, attributes (Size, Color) y
+    promotions.offersInfo: {"offersCount": 0} si lo vende Liverpool, o las ofertas de terceros con sellerName y precio.
+    La ficha nunca escribe "Liverpool" como vendedor: se pone solo cuando dice que no hay marketplace ni terceros."""
+    plano = next_plano(t)
+    objs = objetos_con(plano, "productId", pid)
+    prin = next((o for o in objs if "variants" in o and o.get("title")), None)
+    if not prin:
+        raise RuntimeError("la ficha %s de Liverpool no trae los datos del articulo" % pid)
+    skus = [o for o in objs if o.get("skuId")] or prin.get("variants") or []
+    attrs = {d.get("name"): d.get("value") for g in prin.get("productAttributes") or [] for d in g.get("details") or []}
+    opciones = []
+    for s in skus:
+        flags = s.get("configurationFlags") or prin.get("configurationFlags") or {}
+        ofs = (s.get("promotions") or {}).get("offersInfo")
+        pi = s.get("priceInfo") or prin.get("priceInfo") or {}
+        precio = (pi.get("promoPrice") or {}).get("price") or pi.get("salePrice")
+        if flags.get("isMarketPlace") or flags.get("hasHybridSeller") or (ofs or {}).get("offersCount"):
+            # de marketplace (o mixto): cuenta la mejor oferta de tercero, con su nombre y su precio
+            # Limite conocido (R1-P2): en una ficha mixta se pierde el precio propio de Liverpool (no sale aviso falso).
+            best = (ofs or {}).get("bestOffer") or {}
+            vend = (best.get("sellerName") or "").strip()
+            bp = best.get("priceInfo") or {}
+            precio = (bp.get("promoPrice") or {}).get("price") or bp.get("salePrice") or precio
+        elif ofs is not None and "offersCount" in ofs:
+            vend = "Liverpool"       # la ficha dice: ni marketplace ni ofertas de terceros
+        else:
+            vend = ""                # no se pudo leer quien vende: no se publica
+        a = s.get("attributes") or {}
+        color = a.get("Color") or {}
+        extra = [(a.get("Size") or {}).get("name"), color.get("clothingBrandColor") or color.get("name")]
+        titulo = " ".join([prin["title"]] + [x for x in extra if x and x.lower() not in prin["title"].lower()])
+        titulo += consola_de_ficha(attrs, titulo)
+        inv = s.get("inventoryStatus", prin.get("inventoryStatus"))
+        opciones.append({"titulo": titulo, "precio": float(precio) if precio else None, "vendedor": vend,
+                         "existencia": inv if isinstance(inv, bool) else None, "sku": s.get("skuId", ""),
+                         "importado": bool(flags.get("isInternational") or flags.get("isCrossBorder")),
+                         "url": "%s/pdp/p/%s" % (LIVERPOOL, pid) + ("?skuId=%s" % s["skuId"] if s.get("skuId") else "")})
+    if not opciones:
+        raise RuntimeError("la ficha %s de Liverpool no trae variantes" % pid)
+    vivas = [o for o in opciones if o["existencia"] and o["precio"]]
+    top = next((o for o in opciones if sku and o["sku"] == sku), None) or \
+        (min(vivas, key=lambda o: o["precio"]) if vivas else opciones[0])
+    return dict(top, opciones=opciones)
+
+
+# Fichas de Liverpool ya leidas en esta corrida (memoria del proceso, no del estado): confirmar() no las vuelve a pedir.
+# main() la vacia al arrancar; las pruebas tambien.
+LIVERPOOL_LEIDAS = {}
+LIVERPOOL_SEGUNDOS = 120  # tope de tiempo para abrir fichas en leer_liverpool (y se para tras 2 fallas seguidas)
+
+
+def ficha_liverpool(url_o_id):
+    m = re.search(r"(\d{6,})(?:\?skuId=(\d+))?\s*$", str(url_o_id))
+    if not m:
+        raise RuntimeError("liga de Liverpool sin numero de articulo")
+    leida = LIVERPOOL_LEIDAS.get(m.group(1))
+    if leida:
+        ops, sku = leida["opciones"], m.group(2)
+        top = next((o for o in ops if sku and o["sku"] == sku), None) or leida
+        return dict(top, opciones=ops)
+    e, t = pedir("%s/pdp/p/%s" % (LIVERPOOL, m.group(1)), pausa=1.0)
+    if e != 200:
+        raise RuntimeError("Liverpool respondio %s en la ficha %s" % (e, m.group(1)))
+    return ficha_liverpool_texto(t, m.group(1), m.group(2))
+
+
 def leer_liverpool(prod, cfg, estado):
-    e, t = pedir("https://www.liverpool.com.mx/tienda?s=" + cfg["consulta"])
+    """Busqueda (titulo y precio) y, para lo que es el producto y pasa el piso, su ficha: titulo (con lo que digan sus
+    atributos de consola), precio de cada variante, existencia y quien vende. Lo que no tiene ficha leida o no dice
+    quien vende no se publica."""
+    e, t = pedir(LIVERPOOL + "?s=" + cfg["consulta"])
     if e != 200 or "-price" not in t:
         raise RuntimeError("Liverpool respondio %s (%d bytes)" % (e, len(t)))
-    salida = []
+    cands = {}
     for m in re.finditer(r'<h3[^>]*>([^<]*)</h3><div[^>]*data-testid="(\d+)-price">(.{0,700}?)</div>', t, re.S):
         pr = re.search(r'data-testid="discounted".{0,200}?\$(?:<!-- -->)?([\d,]+)', m.group(3), re.S) or \
              re.search(r"\$(?:<!-- -->)?([\d,]+)", m.group(3))
         if not pr:
             continue
-        of = oferta(prod, "Liverpool", html.unescape(m.group(1)), float(pr.group(1).replace(",", "")),
-                    "https://www.liverpool.com.mx/tienda/pdp/p/" + m.group(2), "Liverpool",
-                    "es el precio mas bajo de sus variantes")
-        if of:
-            salida.append(of)
+        titulo, pid, precio = html.unescape(m.group(1)), m.group(2), float(pr.group(1).replace(",", ""))
+        # candidato a ficha: es el producto (patron), no es accesorio ni usado (EXCLUIR, excluir) y pasa el piso,
+        # aunque el titulo del listado no diga la variante: la ficha la dice (PS5 Digital sin "digital" en el titulo)
+        if re.search(prod["patron"], titulo, re.I) and not re.search(EXCLUIR, titulo, re.I) and \
+           not (prod.get("excluir") and re.search(prod["excluir"], titulo, re.I)) and precio >= prod["piso"] and \
+           (pid not in cands or precio < cands[pid][1]):
+            cands[pid] = (titulo, precio)
+    elegidos = sorted(cands.items(), key=lambda kv: kv[1][1])[:LIVERPOOL_FICHAS]
+    salida, leidas, seguidas, t0 = [], 0, 0, time.monotonic()
+    for i, (pid, (titulo, precio)) in enumerate(elegidos):
+        if i and (seguidas >= 2 or time.monotonic() - t0 > LIVERPOOL_SEGUNDOS):
+            print("   Liverpool: se dejan de abrir fichas (%s); no se publican %d articulos" % (
+                "2 fallas seguidas" if seguidas >= 2 else "pasaron %d s" % LIVERPOOL_SEGUNDOS, len(elegidos) - i))
+            break
+        try:
+            fi = ficha_liverpool(pid)
+        except Exception as ex:
+            seguidas += 1
+            print("   Liverpool: no se publica %s (%s, $%s): la ficha no se pudo leer: %s" % (pid, titulo[:40], precio, str(ex)[:90]))
+            continue
+        seguidas = 0
+        LIVERPOOL_LEIDAS[pid] = fi
+        leidas += 1
+        for op in fi["opciones"]:
+            if op["existencia"] is False or not op["precio"]:
+                continue
+            if not op["vendedor"]:
+                print("   Liverpool: no se publica %s: la ficha no dice quien vende" % op["url"])
+                continue
+            of = oferta(prod, "Liverpool", op["titulo"], op["precio"], op["url"], op["vendedor"], "", importado=op["importado"])
+            if of:
+                salida.append(of)
+                print("   Liverpool: entra %s $%s (%s, lo vende %s)" % (of["titulo"][:90], "{:,.0f}".format(of["precio"]),
+                                                                       of["nombre"], of["vendedor"]))
+            elif variante(prod, op["titulo"]) and not vendedor_oficial(prod, "Liverpool", op["vendedor"]):
+                print("   Liverpool: no se publica %s: lo vende %s (tercero de su marketplace)" % (op["url"], op["vendedor"]))
+    if elegidos and not leidas:
+        raise RuntimeError("Liverpool: ninguna de %d fichas se pudo leer" % len(elegidos))
     return salida
 
 
@@ -593,6 +874,24 @@ GP_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas", "PreOrder":
 
 
 def ficha_gameplanet(t):
+    """Con el texto de la ficha: (nombre, [(precio, existencia, condicion, vendedor)]), como siempre.
+    Con una liga: pide la ficha y devuelve el diccionario de ficha (solo ofertas nuevas; ver confirmar)."""
+    if re.match(r"https?://\S+$", t or ""):
+        e, p = pedir(t, pausa=1.0)
+        if e != 200:
+            raise RuntimeError("Gameplanet respondio %s en la ficha" % e)
+        nombre, ofs = _ficha_gameplanet(p)
+        if not nombre and not ofs:
+            raise RuntimeError("la ficha de Gameplanet no trae sus datos")
+        opciones = [{"titulo": nombre, "precio": precio, "vendedor": vend, "existencia": existe in GP_EN_VENTA,
+                     "importado": False, "url": t} for precio, existe, cond, vend in ofs if cond == "NewCondition"]
+        if not opciones:
+            return {"titulo": nombre, "precio": None, "vendedor": "", "existencia": False, "importado": False, "url": t}
+        return dict(next((o for o in opciones if o["existencia"]), opciones[0]), opciones=opciones)
+    return _ficha_gameplanet(t)
+
+
+def _ficha_gameplanet(t):
     """Nombre y ofertas [(precio, existencia, condicion, vendedor)] del ld+json de una ficha de Gameplanet
     (medido el 24 nov 2026: el catalogo no trae existencia; la ficha si, con el vendedor de cada oferta)."""
     m = re.search(r'<script type="application/ld\+json" data-testid="product-jsonld">(.*?)</script>', t, re.S)
@@ -636,6 +935,391 @@ def leer_gameplanet(prod, cfg, estado):
 # Para sumar una tienda: correr sondeo.py, escribir leer_<tienda>(prod, cfg, estado) y registrarla aqui.
 LECTORES = {"Samsung": leer_samsung, "Amazon": leer_amazon, "Costco": leer_costco,
             "Elektra": leer_elektra, "Liverpool": leer_liverpool, "Gameplanet": leer_gameplanet}
+
+
+# ------------------------------------------------------------------------------- releer la ficha antes de avisar
+SAMSUNG_CATALOGO = ("https://searchapi.samsung.com/v6/front/b2c/product/card/detail/newhybris?siteCode=mx&modelList=%s"
+                    "&commonCodeYN=N&saleSkuYN=N&onlyRequestSkuYN=Y&keySummaryYN=N&shopSiteCode=mx")
+
+
+def ficha_samsung(skus):
+    """La "ficha" de Samsung es su catalogo: precio de pagina y ctaType de cada modelo (uno o varios, separados por coma).
+    El total con cupones ya salio de un carrito real en esta corrida; aqui no se vuelve a armar."""
+    lista = [s for s in re.split(r"[,\s]+", str(skus)) if s]
+    if not lista:
+        raise RuntimeError("sin modelo de Samsung que releer")
+    e, t = pedir(SAMSUNG_CATALOGO % ",".join(lista), pausa=1.0)
+    if e != 200:
+        raise RuntimeError("catalogo de Samsung respondio %s" % e)
+    opciones = []
+    for item in json.loads(t)["response"]["resultData"]["productList"]:
+        for m in item.get("modelList", []):
+            if m.get("modelCode") in lista:
+                precio = m.get("promotionPrice") or m.get("price")
+                opciones.append({"titulo": re.sub(r"<[^>]+>", " ", m.get("displayName") or m.get("modelName") or m["modelCode"]).strip(),
+                                 "precio": float(precio) if precio else None, "vendedor": "Samsung", "importado": False,
+                                 "existencia": m.get("ctaType") in ("inStock", "preOrder", "lowStock"), "sku": m["modelCode"]})
+    if not opciones:
+        raise RuntimeError("el catalogo de Samsung no devolvio %s" % ",".join(lista))
+    return dict(next((o for o in opciones if o["existencia"]), opciones[0]), opciones=opciones)
+
+
+FICHAS_PROPIAS = {"Amazon": ficha_amazon, "Liverpool": ficha_liverpool, "Costco": ficha_costco, "Elektra": ficha_elektra,
+                  "Gameplanet": ficha_gameplanet, "Samsung": ficha_samsung}
+# Contrato para lectores que se dan de alta desde fuera (lectores_nuevos.py, registrar(v)): tienda -> funcion que recibe
+# la url de la oferta y devuelve {"titulo", "precio", "vendedor", "existencia" (True/False/None), "importado"} o lanza
+# RuntimeError. confirmar() la usa para toda tienda sin trato propio, con las mismas tres salidas.
+FICHAS = {}
+CAMPOS_FICHA = ("titulo", "precio", "vendedor", "existencia", "importado")
+TOPE_CONFIRMAR = 6                                   # fichas releidas por corrida (las de menor precio primero)
+SEGUNDOS_CONFIRMAR = 540                             # pasado esto desde el arranque, ya no se relee (el aviso sale igual)
+NIVELES_CONFIRMAR = ("GANGA", "COMPRAR", "SIN CONFIRMAR")
+
+
+def ref_ficha(o, prod):
+    """Con que se pide la ficha de una oferta: su liga; en Samsung, los modelos de esa variante y color."""
+    if o["tienda"] == "Samsung":
+        skus = prod["tiendas"].get("Samsung", {}).get("skus", {})
+        return ",".join(s for s, (vid, color, _) in skus.items() if vid == o["var"] and color.lower() in o["titulo"].lower())
+    return o["url"]
+
+
+def pesos(x):
+    return "sin precio" if x is None else "${:,.0f}".format(x)
+
+
+def confirmar(o, prod, estado):
+    """Relee la ficha de una oferta antes de avisarla. Devuelve (resultado, oferta_final, razon):
+    - "confirmada": la ficha sostiene la oferta (misma variante, con existencia, vendedor que cumple, precio con nivel de
+      aviso); oferta_final trae el precio, el titulo y el vendedor de la ficha.
+    - "no_coincide": la ficha se leyo y no la sostiene; razon lo dice con cifras.
+    - "sin_releer": no se pudo leer (rechazo, tope de tiempo, tienda sin ficha); la oferta queda como estaba.
+    Las tres salidas avisan: releer nunca se traga un aviso. Cuenta las relecturas de la corrida en estado["_confirmaciones"]."""
+    lector = FICHAS_PROPIAS.get(o.get("tienda")) or FICHAS.get(o.get("tienda"))
+    if o.get("foro") or not lector:
+        return "sin_releer", o, "esta tienda no deja releer la ficha"
+    if estado.get("_confirmaciones", 0) >= TOPE_CONFIRMAR:
+        return "sin_releer", o, "sin tiempo"
+    if estado.get("_arranque") is not None and time.monotonic() - estado["_arranque"] > SEGUNDOS_CONFIRMAR:
+        return "sin_releer", o, "sin tiempo"
+    try:
+        return _confirmar(o, prod, estado, lector)
+    except Exception as ex:   # una ficha rara nunca tumba los demas avisos (revisor R1-P1)
+        return "sin_releer", o, "error al revisar la ficha: %s" % str(ex)[:120]
+
+
+def numero(x):
+    """Precio de una ficha como numero: 8499, "8,499.00", "$8,499" -> 8499.0; lo que no se entienda -> None."""
+    if isinstance(x, bool) or x is None:
+        return None
+    if isinstance(x, (int, float)):
+        return float(x)
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", str(x))
+    return float(m.group(0).replace(",", "")) if m else None
+
+
+def _confirmar(o, prod, estado, lector):
+    ref = ref_ficha(o, prod)
+    if not ref:
+        return "sin_releer", o, "no se sabe cuál es su ficha"
+    estado["_confirmaciones"] = estado.get("_confirmaciones", 0) + 1
+    try:
+        fi = lector(ref)
+    except Exception as ex:
+        return "sin_releer", o, "la tienda no la entregó: %s" % str(ex)[:120]
+    if not isinstance(fi, dict) or any(k not in fi for k in CAMPOS_FICHA):
+        return "sin_releer", o, "la ficha llegó incompleta"
+    var = var_por_id(prod, o["var"])
+    buenas, motivos, sin_existencia = [], [], []
+    for op in fi.get("opciones") or [fi]:
+        precio, titulo = numero(op.get("precio")), str(op.get("titulo") or o["titulo"])
+        if o["tienda"] == "Samsung":
+            # el catalogo no dice color ni capacidad (el modelo los fija) y da el precio sin cupones: el total del
+            # carrito de esta corrida manda
+            titulo = "%s (%s)" % (o["titulo"], titulo) if titulo != o["titulo"] else titulo
+            if precio is not None and precio >= o["precio"]:
+                precio = o["precio"]
+        if op.get("existencia") is False:
+            motivos.append("agotado")
+            continue
+        if not op.get("vendedor"):
+            motivos.append("la ficha no dice quién vende")
+            continue
+        of = oferta(prod, o["tienda"], titulo, precio, op.get("url") or o["url"], op["vendedor"], o.get("nota", ""),
+                    importado=bool(op.get("importado")), var=var if o["tienda"] == "Samsung" else None)
+        if not of:
+            if o["tienda"] != "Samsung" and not variante(prod, titulo):
+                motivos.append('es otro artículo: la ficha lo titula "%s"' % titulo[:90])
+            elif precio is None or precio < prod["piso"]:
+                motivos.append("precio %s fuera de lo que se vigila" % pesos(precio))
+            elif not vendedor_oficial(prod, o["tienda"], op["vendedor"]):
+                motivos.append("lo vende %s, no la tienda ni la marca" % op["vendedor"])
+            else:
+                motivos.append("viene importado")
+            continue
+        if of["var"] != o["var"]:
+            motivos.append("es otra variante (%s)" % of["nombre"])
+            continue
+        if not nivel(of["precio"], prod, var):
+            motivos.append("precio fuera de tus topes")
+            continue
+        (buenas if op.get("existencia") is True else sin_existencia).append(of)
+    if buenas:
+        mejor = min(buenas, key=lambda x: x["precio"])
+        final = dict(o)
+        final.update({k: mejor[k] for k in ("precio", "titulo", "vendedor", "url", "nota")})
+        return "confirmada", final, "coincide"
+    if sin_existencia:   # todo lo demas cuadra pero la ficha no dice si hay: se avisa con su nivel y la advertencia
+        return "sin_releer", o, "la ficha no dice si hay existencia"
+    vistos = []
+    for m in motivos:
+        if m not in vistos:
+            vistos.append(m)
+    pf = numero(fi.get("precio"))
+    razon = "el listado decía %s; la ficha dice %s, vendido por %s" % (
+        pesos(o["precio"]), pesos(pf), fi.get("vendedor") or "(sin dato)")
+    return "no_coincide", dict(o, precio_ficha=pf), razon + " (" + "; ".join(vistos or ["no la sostiene"]) + ")"
+
+
+def pasos_compra(o):
+    """Pasos numerados para llegar al precio: cupones en orden (o.get("cupones"), los anade la linea B) o, mientras
+    no existan, los que dice la nota ("con cupones A + B")."""
+    cup = o.get("cupones")
+    if cup:
+        codigos = [c if isinstance(c, str) else str(c.get("codigo") or c.get("code") or c.get("cupon") or c)
+                   if isinstance(c, dict) else str(c) for c in cup]
+    else:
+        m = re.search(r"con cupones ([^;]+)", o.get("nota") or "")
+        codigos = [c.strip() for c in m.group(1).split("+")] if m else []
+    pasos = ["Abre la liga de abajo."] + ["Teclea el cupón %s." % c for c in codigos if c]
+    pasos.append("Revisa que el total sea {} antes de pagar.".format(pesos(o["precio"])))
+    return pasos
+
+
+def notas_compra(o):
+    """Lo que dice la nota y no es un paso: renglones que van debajo de los pasos ("Sin cupones cuesta $N.", "Ojo: ...")."""
+    salida, otras = [], []
+    for x in (o.get("nota") or "").split(";"):
+        x = x.strip()
+        if not x or re.match(r"con cupones|promocion vigente hasta", x):
+            continue
+        m = re.match(r"sin cup[oó]n\s+(\$[\d,]+)", x)
+        if m:
+            salida.append("Sin cupones cuesta %s." % m.group(1))
+        else:
+            otras.append(x)
+    if otras:
+        salida.append("Ojo: " + "; ".join(otras) + ".")
+    return salida
+
+
+def fecha_lego(txt):
+    """'2026-12-01' (o con hora) -> '1 dic'; lo que no sea fecha de ese tipo se deja como viene ('29 nov 23:59')."""
+    m = re.match(r"(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d:\d\d))?", txt or "")
+    if not m:
+        return txt
+    return "%d %s%s" % (int(m.group(3)), MESES[int(m.group(2)) - 1], " " + m.group(4) if m.group(4) else "")
+
+
+def vigencia_de(o):
+    """Renglon de vigencia en lego: la de la oferta, o la que diga la nota, o 'no se sabe'."""
+    if o.get("vigencia"):
+        v = fecha_lego(str(o["vigencia"]))
+        return v if v.startswith("hasta") else "hasta el " + v
+    m = re.search(r"vigente hasta ([\w:-]+)", o.get("nota") or "")
+    return "hasta el %s (lo dice la tienda)" % fecha_lego(m.group(1)) if m else "no se sabe"
+
+
+def razon_a(o, prod, var):
+    """Texto de la linea A (funcion global razon, si existe) o ''; nunca tumba el aviso."""
+    fn = globals().get("razon")
+    if not callable(fn):
+        return ""
+    try:
+        r = fn(o["precio"], prod, var)
+        return str(r) if r else ""
+    except Exception:
+        return ""
+
+
+def linea_razon(o, prod, var):
+    r = razon_a(o, prod, var)
+    return ("- Por qué: " + r) if r else ""
+
+
+def texto_aviso(o, prod, var, niv, resultado, razon_ficha, mejores, hora, niv_listado=None):
+    """(asunto, cuerpo) de un aviso de precio, para leerse en el celular: que es, donde y quien vende, cuanto pagas,
+    como se llega, hasta cuando, la liga sola, que dijo la ficha, tus topes y la tabla al final."""
+    p = pesos(o["precio"])
+    if niv == "SIN CONFIRMAR":
+        asunto = "SIN CONFIRMAR {} · {} · {} · abre la ficha antes de creerlo".format(p, var["nombre"], o["tienda"])
+    elif resultado == "sin_releer":
+        asunto = "{} {} · {} · {} · ficha sin releer".format(niv, p, var["nombre"], o["tienda"])
+    else:
+        asunto = "{} {} · {} · {}".format(niv, p, var["nombre"], o["tienda"])
+    if resultado == "confirmada":
+        conf = "Confirmado: se releyó la ficha a las %s y coincide." % hora
+        if niv == "SIN CONFIRMAR":
+            conf += " Aun así el precio es raro: ábrela antes de creerlo."
+        elif niv_listado and niv_listado != niv:
+            conf += " (El listado lo ponía como %s; con el precio de la ficha es %s.)" % (niv_listado, niv)
+    elif resultado == "no_coincide":
+        conf = "Se releyó la ficha a las %s y no coincide con el listado: ábrela antes de creerlo." % hora
+    elif resultado == "sin_releer":
+        conf = "No se pudo releer la ficha (%s): ábrela antes de comprar." % razon_ficha
+    else:
+        conf = "Aviso de %s: no se releyó la ficha (solo se relee para ganga y comprar)." % niv
+    g, c, t = topes(prod, var)
+    lineas = []
+    if niv == "SIN CONFIRMAR":   # la advertencia va antes de todo
+        if resultado == "no_coincide":
+            lineas += ["Sin confirmar: %s." % razon_ficha, ""]
+        else:
+            ra = razon_a(o, prod, var)
+            lineas += ["Sin confirmar: el precio está muy por debajo de lo que suele costar%s." % ((": " + ra) if ra else ""), ""]
+    lineas += ["**%s**" % o["titulo"], "Variante vigilada: %s" % var["nombre"], "",
+               "- Dónde: %s; lo vende %s" % (o["tienda"], o["vendedor"] or "(sin dato)"),
+               ("- Precio que se vio: **%s**" if niv == "SIN CONFIRMAR" else "- Pagas: **%s**") % p, "- Cómo se llega:"]
+    pasos = pasos_compra(o)
+    if resultado == "no_coincide":   # la ficha ya dijo otro precio: no pedirle que busque el del listado
+        pasos[-1] = "La ficha dice %s: compara antes de pagar." % pesos(o.get("precio_ficha"))
+    lineas += ["    %d. %s" % (i + 1, x) for i, x in enumerate(pasos)]
+    lineas += ["- " + x for x in notas_compra(o)]
+    lineas += ["- Vigencia: %s" % vigencia_de(o), "", o["url"], "", conf, "",
+               "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t)]
+    pq = linea_razon(o, prod, var)
+    if pq:
+        lineas.append(pq)
+    lineas += ["", "Lo mejor de cada tienda ahora:", "", tabla(mejores), "",
+               "No incluye devoluciones de banco (se ven hasta pagar)."]
+    return asunto, "\n".join(lineas)
+
+
+def avisado_de(v):
+    """(precio, nivel) de un valor de avisado: un numero (el formato de siempre) o {"precio", "nivel"} (escrito por la
+    primera version de confirmar, si quedo en algun estado)."""
+    if isinstance(v, dict):
+        return v.get("precio"), v.get("nivel")
+    return v, None
+
+
+def nivel_avisado(niveles, clave, precio):
+    """Nivel con que se aviso la clave, si sigue valiendo para el precio avisado. avisado_nivel guarda [nivel, precio];
+    si avisado[clave] ya no es ese precio (otra version del vigia volvio a avisar en medio), el nivel no vale.
+    Acepta tambien el texto suelto de la ronda 2 (solo el nivel)."""
+    v = niveles.get(clave)
+    if isinstance(v, (list, tuple)) and len(v) >= 2:
+        return v[0] if precio is not None and numero(v[1]) == numero(precio) else None
+    return v if isinstance(v, str) else None
+
+
+def normalizar_avisado(estado):
+    """Deja estado["avisado"] como {clave: precio} (numeros, lo que lee cualquier version anterior del vigia, para poder
+    volver atras sin que truene) y en estado["avisado_nivel"] {clave: [nivel, precio avisado]}; un nivel cuyo precio ya
+    no es el de avisado se descarta."""
+    avisado = estado.setdefault("avisado", {})
+    niveles = estado.setdefault("avisado_nivel", {})
+    for c, v in list(avisado.items()):
+        if isinstance(v, dict):
+            precio, niv = avisado_de(v)
+            if precio is None:
+                avisado.pop(c)
+                niveles.pop(c, None)
+                continue
+            avisado[c] = precio
+            if niv:
+                niveles[c] = [niv, precio]
+    for c in list(niveles):
+        niv = nivel_avisado(niveles, c, avisado.get(c)) if c in avisado else None
+        if niv:
+            niveles[c] = [niv, avisado[c]]
+        else:
+            niveles.pop(c)
+    return avisado, niveles
+
+
+def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
+    """Avisos de precio de esta corrida. Lo que tocaria avisar (regla de avisado y BAJA_MINIMA) y es GANGA, COMPRAR o
+    SIN CONFIRMAR relee su ficha (confirmar), del mas barato al mas caro. Devuelve [dict(clave, asunto, cuerpo, precio,
+    nivel, resultado, razon)] y deja en mejores el precio y vendedor de la ficha cuando se confirmo. No abre nada.
+    El nivel con que se aviso cada clave se lee de estado["avisado_nivel"]. arranque: time.monotonic() del inicio de la
+    corrida; pasado SEGUNDOS_CONFIRMAR ya no se relee ("sin tiempo", el aviso sale igual). Una oferta que truene al
+    revisarla se salta sola, sin tapar a las demas."""
+    niveles = estado.setdefault("avisado_nivel", {})
+    pend = []
+    for clave, o in mejores.items():
+        try:
+            prod = por_id[o["prod"]]
+            var = var_por_id(prod, o["var"])
+            niv = nivel(o["precio"], prod, var)
+            if not niv:
+                avisado.pop(clave, None)   # subio del tope: la proxima baja vuelve a avisar
+                niveles.pop(clave, None)
+                continue
+            ant, niv_ant = avisado_de(avisado[clave]) if clave in avisado else (None, None)
+            niv_ant = niv_ant or nivel_avisado(niveles, clave, ant)
+            if ant is not None and o["precio"] > ant - BAJA_MINIMA and niv_ant != "SIN CONFIRMAR":
+                continue
+            pend.append((clave, o, prod, var, niv, ant, niv_ant))
+        except Exception as ex:
+            print("   aviso de %s no se pudo revisar: %s" % (clave, str(ex)[:120]))
+    pend.sort(key=lambda x: x[1]["precio"])
+    hechos = []
+    if arranque is not None:
+        estado["_arranque"] = arranque
+    try:
+        for clave, o, prod, var, niv, ant, niv_ant in pend:
+            resultado, final, razon_f = None, o, ""
+            if niv in NIVELES_CONFIRMAR:
+                resultado, final, razon_f = confirmar(o, prod, estado)
+            if resultado == "confirmada":
+                niv_f = nivel(final["precio"], prod, var) or niv
+                mejores[clave] = final
+            elif resultado == "no_coincide":
+                niv_f = "SIN CONFIRMAR"
+            else:
+                niv_f = niv
+            if ant is not None and final["precio"] > ant - BAJA_MINIMA:
+                # sin bajar lo bastante de lo ya avisado: solo vuelve a avisar, una vez, si antes salio SIN CONFIRMAR y
+                # ahora la ficha lo confirma (al precio que sea, dentro de su nivel; revisor R1-P3)
+                if not (niv_ant == "SIN CONFIRMAR" and resultado == "confirmada" and niv_f != "SIN CONFIRMAR"):
+                    continue
+            hechos.append({"clave": clave, "o": final, "prod": prod, "var": var, "nivel": niv_f, "listado": niv,
+                           "resultado": resultado, "razon": razon_f})
+    finally:
+        estado.pop("_confirmaciones", None)
+        estado.pop("_arranque", None)
+    hora = ahora.astimezone(MX).strftime("%H:%M")
+    for a in hechos:
+        a["precio"] = a["o"]["precio"]
+        try:
+            a["asunto"], a["cuerpo"] = texto_aviso(a["o"], a["prod"], a["var"], a["nivel"], a["resultado"], a["razon"],
+                                                   mejores, hora, a["listado"])
+        except Exception as ex:   # texto de respaldo: el aviso sale aunque algo del texto falle
+            print("   texto del aviso de %s fallo (%s); sale el texto corto" % (a["clave"], str(ex)[:100]))
+            a["asunto"] = "%s %s · %s · %s" % (a["nivel"], pesos(numero(a["precio"])), a["var"]["nombre"], a["o"].get("tienda"))
+            a["cuerpo"] = "Revisa la liga antes de comprar:\n\n%s\n\n%s" % (a["o"].get("url"), a["razon"] or "")
+    return hechos
+
+
+def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
+    """Abre el aviso y lo marca: avisado[clave] = precio (numero, como siempre) y niveles[clave] = nivel
+    (estado["avisado_nivel"]). En seco o con SIN_AVISOS_PRECIO=1 no abre ni marca."""
+    if seco:
+        return False
+    if sin_avisos:
+        print("   (SIN_AVISOS_PRECIO=1: se habria avisado; no se abre ni se marca)")
+        return False
+    try:
+        if (abrir or abrir_issue)(av["asunto"], av["cuerpo"]) is False:   # sin credenciales: no salio, no se marca
+            return False
+        avisado[av["clave"]] = av["precio"]
+        if niveles is not None:
+            niveles[av["clave"]] = [av["nivel"], av["precio"]]
+        return True
+    except Exception as ex:
+        print("   no se pudo abrir el aviso:", ex)
+        return False
 
 
 # ------------------------------------------------------------------------------- foro (respaldo)
@@ -702,19 +1386,27 @@ def aviso_foro(prods, it):
         return None
     nota, me_aplica = bancos(it["titulo"] + " " + limpio(it["descripcion"], 3000))
     niv = "SIN PRECIO, REVISAR" if precio is None else nivel(precio, prod, var) if me_aplica else "SOLO CON OTRO BANCO"
-    ptxt = "${:,.0f}".format(precio) if precio is not None else "sin precio"
+    ptxt = pesos(precio)
     g, c, t = topes(prod, var)
-    asunto = "[foro] {} {} en {} · {} · {}".format(var["nombre"], ptxt, it["tienda"] or "tienda", niv, nota)
-    cuerpo = "\n".join([
-        "**{}**".format(it["titulo"]), "",
-        "Fuente: publicacion de un usuario en el foro de ofertas (no leida en la tienda; esta tienda no deja leer sus precios a programas).",
-        "", "- Precio publicado: **{}** en {}".format(ptxt, it["tienda"] or "(sin dato)"),
-        "- Veredicto: **{}** ({})".format(niv, nota),
-        "- Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t),
-        "- Publicada: {}".format(it["fecha"]), "- Oferta: {}".format(it["link"]), "",
-        "> " + limpio(it["descripcion"]).replace("\n", "\n> "), "",
-        "Antes de pagar: confirma en la tienda que siga viva y que la venda la marca o la propia tienda, con garantia en "
-        "Mexico. Si la vende un tercero o es importado, revisa si cumple lo que pediste para este producto."])
+    tienda = it["tienda"] or "tienda sin dato"
+    if niv == "SIN CONFIRMAR":
+        asunto = "[foro] SIN CONFIRMAR {} · {} · {} · abre la ficha antes de creerlo".format(ptxt, var["nombre"], tienda)
+    else:
+        asunto = "[foro] {} {} · {} · {} · ficha sin releer".format(niv, ptxt, var["nombre"], tienda)
+    raro = niv == "SIN CONFIRMAR"
+    cuerpo = "\n".join((["Sin confirmar: el precio publicado está muy por debajo de lo que suele costar.", ""] if raro else []) + [
+        "**{}**".format(it["titulo"]), "Variante vigilada: {}".format(var["nombre"]), "",
+        "- Dónde: {}; quién vende: no se sabe (lo publicó un usuario del foro de ofertas)".format(tienda),
+        "- {}: **{}** (precio publicado en el foro, no leído en la tienda)".format("Precio que se vio" if raro else "Pagas", ptxt),
+        "- Cómo se llega:",
+        "    1. Abre la publicación del foro (liga de abajo) y de ahí la tienda.",
+        "    2. Banco: {}.".format(nota),
+        "    3. Confirma que lo venda la marca o la propia tienda, con garantía en México, y que el total sea {}.".format(ptxt),
+        "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
+        it["link"], "",
+        "No se pudo releer la ficha (esta tienda no deja releer la ficha): ábrela antes de comprar.", "",
+        "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t), "",
+        "> " + limpio(it["descripcion"]).replace("\n", "\n> ")])
     return asunto, cuerpo
 
 
@@ -737,10 +1429,15 @@ def abrir_issue(titulo, texto):
 
 
 def tabla(mejores):
-    filas = ["| Producto | Tienda | Precio | Vendedor | Como |", "|---|---|---|---|---|"]
-    for o in sorted(mejores.values(), key=lambda o: (o["prod"], o["nombre"], o["precio"])):
-        filas.append("| {} | [{}]({}) | ${:,.0f} | {} | {} |".format(
-            o["nombre"], o["tienda"], o["url"], o["precio"], o["vendedor"] or "", o["nota"] or ""))
+    """Tres columnas para que quepa en el celular; quien vende y como se llega van debajo, un renglon por oferta."""
+    orden = sorted(mejores.values(), key=lambda o: (o["prod"], o["nombre"], o["precio"]))
+    filas = ["| Producto | Tienda | Precio |", "|---|---|---|"]
+    for o in orden:
+        filas.append("| {} | [{}]({}) | ${:,.0f} |".format(o["nombre"], o["tienda"], o["url"], o["precio"]))
+    filas.append("")
+    for o in orden:
+        filas.append("- {}, {}: lo vende {}{}".format(o["tienda"], o["nombre"], o["vendedor"] or "(sin dato)",
+                                                      "; " + o["nota"] if o.get("nota") else ""))
     return "\n".join(filas)
 
 
@@ -776,8 +1473,33 @@ def sembrar_conocidos(estado, prods, mejores, leidas, ruta=None):
             agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
 
 
-def disponibilidad(estado, prods, mejores, leidas, hoy):
-    """Devuelve avisos [(asunto, cuerpo)] de modelos agotados o de vuelta, y actualiza el estado."""
+def nivel_regreso(c, o, prod, var, fichas):
+    """(texto del nivel para el asunto de "volvio a la venta", renglon extra del cuerpo). GANGA o COMPRAR solo si la
+    ficha se confirmo en esta corrida; si esta corrida ya mando el aviso de precio de esa clave, no se repite el nivel
+    (revisor R1-F2: dos correos que se contradecian)."""
+    info = (fichas or {}).get(c)
+    if info and info.get("salio"):
+        return "mira el aviso de precio de esta corrida", "El aviso de precio de esta misma corrida dice qué encontró la ficha."
+    if info:
+        res, niv = info.get("resultado"), info.get("nivel")
+        if res == "confirmada":
+            return niv, "Se releyó la ficha y coincide."
+        if res == "no_coincide":
+            return "SIN CONFIRMAR · abre la ficha antes de creerlo", "Sin confirmar: %s." % info.get("razon", "")
+        if res == "sin_releer":
+            return "%s · ficha sin releer" % niv, "No se pudo releer la ficha (%s): ábrela antes de comprar." % info.get("razon", "")
+    niv = nivel(o["precio"], prod, var)
+    if niv == "SIN CONFIRMAR":
+        return "SIN CONFIRMAR · abre la ficha antes de creerlo", "Sin confirmar: el precio está muy por debajo de lo que suele costar."
+    if niv in ("GANGA", "COMPRAR"):
+        return "%s · ficha sin releer" % niv, "La ficha no se releyó: ábrela antes de comprar."
+    return niv or "arriba de tus topes", ""
+
+
+def disponibilidad(estado, prods, mejores, leidas, hoy, fichas=None):
+    """Devuelve avisos [(asunto, cuerpo, clave)] de modelos agotados o de vuelta, y actualiza el estado.
+    fichas: {clave: {"resultado", "nivel", "razon", "salio"}} de los avisos de precio de esta corrida (nivel_regreso).
+    Un aviso que truene al armarse se salta y su clave queda como estaba (la corrida siguiente lo reintenta)."""
     por_id = {p["id"]: p for p in prods}
     conocidos = estado.setdefault("conocidos", {})
     agotados = estado.setdefault("agotados", {})
@@ -789,43 +1511,196 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
             if c not in mejores:
                 conocidos.pop(c, None); ausente.pop(c, None); agotados.pop(c, None)
                 estado.get("avisado", {}).pop(c, None)   # y sin aviso de precio pendiente de esa clave
+                estado.get("avisado_nivel", {}).pop(c, None)
     for c, o in mejores.items():
         conocidos[c] = {"producto": o["nombre"], "precio": o["precio"], "url": o["url"], "visto": hoy}
         ausente.pop(c, None)
         if c in agotados:
-            prod = por_id[o["prod"]]
-            var = var_por_id(prod, o["var"])
-            g, cc, t = topes(prod, var)
-            niv = nivel(o["precio"], prod, var) or "arriba de tus topes"
-            avisos.append((
-                "Volvio a la venta: {} en {} a ${:,.0f} · {}".format(o["nombre"], o["tienda"], o["precio"], niv),
-                "\n".join([
-                    "**{}** estaba agotado en {} ({}; ultimo precio ${:,.0f}) y ya se puede comprar otra vez.".format(
-                        o["nombre"], o["tienda"], agotados[c].get("desde", "?"), agotados[c].get("precio", 0)), "",
-                    "- Precio leido ahora: **${:,.0f}**".format(o["precio"]),
-                    "- Como se llega: {}".format(o["nota"] or "precio directo, sin cupon"),
-                    "- Quien vende: {}".format(o["vendedor"] or "sin dato"),
-                    "- Veredicto: **{}**. Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(niv, var["nombre"], g, cc, t),
-                    "- Liga: {}".format(o["url"]), "",
-                    "Lo mejor de cada tienda en este momento:", "", tabla(mejores)])))
-            agotados.pop(c)
+            try:
+                prod = por_id[o["prod"]]
+                var = var_por_id(prod, o["var"])
+                g, cc, t = topes(prod, var)
+                niv, renglon = nivel_regreso(c, o, prod, var, fichas)
+                avisos.append((
+                    "Volvio a la venta: {} en {} a ${:,.0f} · {}".format(o["nombre"], o["tienda"], o["precio"], niv),
+                    "\n".join(([renglon, ""] if renglon.startswith("Sin confirmar") else []) + [
+                        "**{}** estaba agotado en {} ({}; ultimo precio ${:,.0f}) y ya se puede comprar otra vez.".format(
+                            o["nombre"], o["tienda"], agotados[c].get("desde", "?"), agotados[c].get("precio", 0)), "",
+                        "- Qué es: {}".format(o.get("titulo") or o["nombre"]),
+                        "- Dónde: {}; lo vende {}".format(o["tienda"], o["vendedor"] or "(sin dato)"),
+                        "- Precio leído ahora en la tienda: **${:,.0f}**".format(o["precio"]),
+                        "- Cómo se llega: {}".format(o["nota"] or "precio directo, sin cupón"),
+                        "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, cc, t), "",
+                        o["url"], ""] + ([renglon, ""] if renglon and not renglon.startswith("Sin confirmar") else []) + [
+                        "Lo mejor de cada tienda ahora:", "", tabla(mejores)]), c))
+                agotados.pop(c)
+            except Exception as ex:
+                print("   aviso de regreso de %s no se pudo armar: %s" % (c, str(ex)[:120]))
     for c, info in conocidos.items():
         if c in mejores or c.split("|")[0] not in leidas or c in agotados:
             continue
         ausente[c] = ausente.get(c, 0) + 1
         if ausente[c] >= AUSENCIAS_AGOTADO:
-            tienda = c.split("|")[0]
-            avisos.append((
-                "Agotado: {} ya no esta a la venta en {}".format(info["producto"], tienda),
-                "\n".join([
-                    "{} no aparece a la venta en {} desde hace {} corridas seguidas (cerca de una hora), aunque la tienda "
-                    "si se leyo.".format(info["producto"], tienda, ausente[c]), "",
-                    "- Ultima vez a la venta: {} a ${:,.0f}".format(info["visto"], info["precio"]),
-                    "- Liga: {}".format(info["url"]), "",
-                    "Te aviso en cuanto vuelva a estar a la venta, con su precio."])))
-            agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
-            ausente.pop(c)
+            try:
+                tienda = c.split("|")[0]
+                avisos.append((
+                    "Agotado: {} ya no esta a la venta en {}".format(info["producto"], tienda),
+                    "\n".join([
+                        "{} no aparece a la venta en {} desde hace {} corridas seguidas (cerca de una hora), aunque la "
+                        "tienda si se leyo.".format(info["producto"], tienda, ausente[c]), "",
+                        "- Ultima vez a la venta: {} a ${:,.0f}".format(info["visto"], info["precio"]),
+                        "- Liga: {}".format(info["url"]), "",
+                        "Te aviso en cuanto vuelva a estar a la venta, con su precio."]), c))
+                agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
+                ausente.pop(c)
+            except Exception as ex:
+                print("   aviso de agotado de %s no se pudo armar: %s" % (c, str(ex)[:120]))
     return avisos
+
+
+# Reloj general: pasado este tiempo desde el arranque, las tiendas que faltan se saltan como "no leidas esta corrida"
+# (el trabajo de GitHub tiene 12 min; asi queda margen para escribir la memoria y lanzar la siguiente corrida).
+SEGUNDOS_CORRIDA = 420
+
+
+def reloj_vencido(arranque, ahora=None):
+    return (time.monotonic() if ahora is None else ahora) - arranque > SEGUNDOS_CORRIDA
+
+
+def recortar_vistos(vistos, tope=400):
+    """Los `tope` guids del foro vistos mas recientemente (el valor es la fecha del hilo, RFC 2822 o ISO);
+    una fecha ilegible cuenta como la mas vieja."""
+    def cuando(fecha):
+        try:
+            d = email.utils.parsedate_to_datetime(fecha)
+        except Exception:
+            try:
+                d = dt.datetime.fromisoformat(str(fecha))
+            except Exception:
+                return float("-inf")
+        return (d if d.tzinfo else d.replace(tzinfo=dt.timezone.utc)).timestamp()
+    return dict(sorted(vistos.items(), key=lambda kv: cuando(kv[1]), reverse=True)[:tope])
+
+
+def avisar_disponibilidad(estado, prods, mejores, leidas, hoy, abrir=None, callar=False, fichas=None):
+    """Corre disponibilidad() y abre un aviso por cada resultado (abrir=None: solo imprime, para --seco).
+    Si un aviso no se pudo abrir, se deshace lo que disponibilidad() marco para esa clave, para que la proxima
+    corrida lo vuelva a intentar: un "agotado" vuelve a quedar a una ausencia de avisar; un "volvio" sigue agotado.
+    callar=True (SIN_AVISOS_PRECIO=1): se calcula sobre una copia, se imprime lo que se habria avisado y el estado de
+    disponibilidad no se toca, para que la siguiente corrida con pruebas en verde lo mande."""
+    if callar:
+        avisos = disponibilidad(json.loads(json.dumps(estado)), prods, mejores, leidas, hoy, fichas)
+        for asunto, _, _ in avisos:
+            print(" * DISPONIBILIDAD (SIN_AVISOS_PRECIO=1: se habria avisado; no se abre ni se marca)", asunto)
+        return avisos
+    antes_ag = dict(estado.get("agotados", {}))
+    avisos = disponibilidad(estado, prods, mejores, leidas, hoy, fichas)
+    ag = estado.get("agotados", {})
+    for asunto, cuerpo, c in avisos:
+        print(" * DISPONIBILIDAD", asunto)
+        if abrir is None:
+            continue
+        try:
+            if abrir(asunto, cuerpo) is False:
+                raise RuntimeError("sin credenciales de GitHub")
+        except Exception as ex:
+            print("   no se pudo abrir el aviso:", ex)
+            if c in antes_ag:
+                ag[c] = antes_ag[c]
+            else:
+                ag.pop(c, None)
+                estado.setdefault("ausente", {})[c] = AUSENCIAS_AGOTADO - 1
+    return avisos
+
+
+def _partes(regex):
+    """Alternativas de primer nivel de una regla (lo separado por | fuera de parentesis y corchetes)."""
+    partes, prof, act, i = [], 0, "", 0
+    while i < len(regex):
+        ch = regex[i]
+        if ch == "\\" and i + 1 < len(regex):
+            act += regex[i:i + 2]
+            i += 2
+            continue
+        if ch in "([":
+            prof += 1
+        elif ch in ")]":
+            prof -= 1
+        if ch == "|" and prof == 0:
+            partes.append(act)
+            act = ""
+        else:
+            act += ch
+        i += 1
+    return [p for p in partes + [act] if p]
+
+
+def _legible(regex):
+    """Una regla de titulos dicha con palabras ('estaci[oó]n\\s+de' -> 'estacion de')."""
+    m = re.match(r"^\^\(\?!\.\*\((.*?)\)\)\.\*\((.*)\)$", regex)
+    if m:
+        return "si el titulo no dice %s: %s" % (" ni ".join(_legible(x) for x in _partes(m.group(1))),
+                                                 ", ".join(_legible(x) for x in _partes(m.group(2))))
+    s = re.sub(r"\\b|\(\?:|\^|\$|®\??", "", regex)
+    s = re.sub(r"\\s[*+?]?", " ", s)
+    s = re.sub(r"\[([^\]])[^\]]*\]", r"\1", s)
+    s = s.replace("\\d", "#").replace("\\", "").replace("?", "").replace("*", "").replace("+", "")
+    s = s.replace("|", " o ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def cobertura(prods=None):
+    """Que se vigila, en palabras, para leer en una pantalla. No usa red."""
+    prods = prods or cargar_config()
+    pesos = lambda n: "${:,}".format(n)
+    print("QUE VIGILA EL VIGIA (segun productos.json)")
+    glob = EXCLUIR[3:-3] if EXCLUIR.startswith(r"\b(") and EXCLUIR.endswith(r")\b") else EXCLUIR
+    print("Nunca entran, en ningun producto: " + ", ".join(_legible(x) for x in _partes(glob)))
+    for p in prods:
+        print("")
+        print("== %s ==" % p["nombre"])
+        colores = {}
+        for sku, (vid, color, _pag) in p["tiendas"].get("Samsung", {}).get("skus", {}).items():
+            colores.setdefault(vid, []).append(color)
+        print("Se vigila (topes: ganga / comprar / mirar):")
+        for v in p["variantes"]:
+            g, c, t = topes(p, v)
+            print("  - %s: %s / %s / %s (precio de lista %s)" % (v["nombre"], pesos(g), pesos(c), pesos(t), pesos(v["lista"])))
+            pide = [_legible(x) for x in v.get("todas", [])]
+            no = [_legible(x) for x in v.get("ninguna", [])]
+            if pide or no:
+                print("      el titulo debe decir: %s%s" % (" y ".join(pide) or "(nada mas)",
+                                                         ("; y no decir: " + ", ".join(no)) if no else ""))
+            if colores.get(v["id"]):
+                print("      colores en Samsung: " + ", ".join(colores[v["id"]]))
+        print("Queda fuera:")
+        if p.get("excluir"):
+            print("  - titulos que digan: " + ", ".join(_legible(x) for x in _partes(p["excluir"])))
+        print("  - precios por debajo de %s (no pueden ser el aparato)" % pesos(p["piso"]))
+        print("  - cualquier otra version del producto que no este en la lista de arriba")
+        if colores:
+            sin = [v["nombre"] for v in p["variantes"] if v["id"] not in colores]
+            if sin:
+                print("  - en Samsung no se piden estas versiones (no tienen codigo de modelo): " + ", ".join(sin))
+        req = p["requisitos"]
+        if req.get("solo_vendedor_oficial"):
+            print("  - lo que venda un tercero: solo cuenta la marca o la tienda misma")
+        for tienda, regla in sorted(req.get("vendedor_oficial", {}).items()):
+            print("      en %s solo cuenta si vende: %s" % (tienda, _legible(regla)))
+        if not req.get("permite_importados"):
+            print("  - importados")
+        for k in sorted(p):
+            if k in ("_regla", "_comentario", "_variantes") and isinstance(p[k], str):
+                print("  nota: " + p[k])
+        for k in ("_regla", "_comentario"):
+            if isinstance(req.get(k), str):
+                print("  nota: " + req[k])
+        directas = [t for t in LECTORES if t in p["tiendas"]]
+        print("Tiendas que se leen directo: " + ", ".join(directas))
+        foro = [x for x in (_legible(a) for a in _partes(TIENDAS_FORO))
+                if not any(re.search(re.escape(x), t, re.I) for t in directas)]
+        print("Tiendas que solo entran por el foro Promodescuentos: " + ", ".join(foro))
+    return 0
 
 
 def selftest():
@@ -968,17 +1843,114 @@ def selftest():
              "cupones_reprobados": {"fold8|VIEJO5": int(time.time())}}
     cand = cupones_candidatos(prods[0], est_c)
     assert cand[0] == "NUEVO10" and "VIEJO5" not in cand, cand
+    # --- robustez (25 nov 2026)
+    import io
+    import contextlib
+    import importlib.util
+    import subprocess
+    # pedir(): un corte de red se reintenta una vez; si sigue, RuntimeError con el host; HTTPError sigue dando su codigo
+    class Abridor:
+        def __init__(self, fallas, error):
+            self.fallas, self.error, self.veces = fallas, error, 0
+
+        def open(self, req, timeout=None):
+            self.veces += 1
+            if self.veces <= self.fallas:
+                raise self.error
+            raise urllib.error.HTTPError(req.full_url, 404, "no", {}, io.BytesIO(b"nada"))
+    for err in (urllib.error.URLError("dns caido"), TimeoutError("tope"), ConnectionResetError("cortada")):
+        a = Abridor(1, err)
+        assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 2, (err, a.veces)
+        a = Abridor(2, err)
+        try:
+            pedir("https://x.example/a", abridor=a, reintento=0)
+            raise AssertionError("pedir no lanzo tras dos cortes")
+        except RuntimeError as ex:
+            assert str(ex).startswith("sin respuesta: x.example: ") and a.veces == 2, ex
+    a = Abridor(0, None)
+    assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 1
+    # avisos de disponibilidad: si el aviso no se abre, la proxima corrida lo vuelve a intentar
+    def falla(asunto, cuerpo):
+        raise RuntimeError("GitHub no responde")
+    abiertos = []
+    est_d = {"conocidos": {"Samsung|fold8|ultra-512": {"producto": "Fold8 Ultra 512 GB", "precio": 34199.2, "url": "u",
+                                                       "visto": "h"}}}
+    with contextlib.redirect_stdout(io.StringIO()):
+        for _ in range(AUSENCIAS_AGOTADO):
+            avisar_disponibilidad(est_d, prods, {}, {"Samsung"}, "h", falla)
+        assert not est_d["agotados"] and est_d["ausente"]["Samsung|fold8|ultra-512"] == AUSENCIAS_AGOTADO - 1, est_d
+        av = avisar_disponibilidad(est_d, prods, {}, {"Samsung"}, "h", lambda a, c: abiertos.append(a))
+        assert len(av) == 1 and abiertos == [av[0][0]] and "Samsung|fold8|ultra-512" in est_d["agotados"], est_d
+        assert avisar_disponibilidad(est_d, prods, vuelta, {"Samsung"}, "h", falla)[0][0].startswith("Volvio")
+        assert "Samsung|fold8|ultra-512" in est_d["agotados"], est_d                 # fallo: sigue agotado
+        av = avisar_disponibilidad(est_d, prods, vuelta, {"Samsung"}, "h", lambda a, c: abiertos.append(a))
+        assert av[0][0].startswith("Volvio") and not est_d["agotados"] and len(abiertos) == 2, est_d
+    # recorte del foro: se quedan los mas recientes por fecha, no por orden alfabetico del guid
+    vis = {"a-viejo": "Mon, 02 Nov 2026 10:00:00 -0600", "z-nuevo": "Wed, 25 Nov 2026 10:00:00 -0600",
+           "m-medio": "Fri, 20 Nov 2026 10:00:00 -0600", "b-iso": "2026-11-24T09:00:00+00:00", "c-roto": "sin fecha"}
+    assert list(recortar_vistos(vis, 3)) == ["z-nuevo", "b-iso", "m-medio"], recortar_vistos(vis, 3)
+    # reloj general: vencido solo pasado SEGUNDOS_CORRIDA
+    assert not reloj_vencido(100.0, 100.0 + SEGUNDOS_CORRIDA) and reloj_vencido(100.0, 101.0 + SEGUNDOS_CORRIDA)
+    # --cobertura: corre sin red y nombra cada variante, sus topes y las tiendas
+    salida = io.StringIO()
+    with contextlib.redirect_stdout(salida):
+        assert cobertura(prods) == 0
+    texto = salida.getvalue()
+    for x in prods:
+        for v in x["variantes"]:
+            assert v["nombre"] in texto and "{:,}".format(topes(x, v)[0]) in texto, v["nombre"]
+    assert "Grafito" in texto and "foro" in texto and "Gameplanet" in texto, texto[:300]
+    # pruebas\casos_*.py con correr(v), en orden alfabetico; durante ellas la red y las pausas quedan prohibidas
+    def sin_red(*a, **k):
+        raise AssertionError("una prueba quiso usar la red o dormir")
+    yo = sys.modules[__name__]
+    guardados = (yo.pedir, urllib.request.urlopen, time.sleep)
+    carpeta = os.path.join(AQUI, "pruebas")
+    corridos = []
+    try:
+        yo.pedir = urllib.request.urlopen = time.sleep = sin_red
+        for nombre in sorted(os.listdir(carpeta)) if os.path.isdir(carpeta) else []:
+            if not (nombre.startswith("casos_") and nombre.endswith(".py")):
+                continue
+            spec = importlib.util.spec_from_file_location("prueba_" + nombre[:-3], os.path.join(carpeta, nombre))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            if hasattr(mod, "correr"):
+                mod.correr(yo)
+                corridos.append(nombre)
+    finally:
+        yo.pedir, urllib.request.urlopen, time.sleep = guardados
+    # modulos de las lineas A y B (si existen junto a vigia.py), cada uno en su propio proceso
+    if os.environ.get("SELFTEST_SOLO_NUCLEO") != "1":
+        for mod in ("prospectiva.py", "promos.py"):
+            ruta = os.path.join(AQUI, mod)
+            if not os.path.exists(ruta):
+                continue
+            try:
+                r = subprocess.run([sys.executable, "-X", "utf8", ruta, "--selftest"], capture_output=True, text=True,
+                                   encoding="utf-8", errors="replace", timeout=60, cwd=AQUI)
+            except subprocess.TimeoutExpired:
+                raise AssertionError("%s --selftest no termino en 60 s" % mod)
+            assert r.returncode == 0, "%s --selftest fallo (codigo %s): %s" % (mod, r.returncode,
+                                                                             (r.stdout + r.stderr)[-600:])
+            corridos.append(mod)
     print("selftest OK: %d titulos Fold8, %d PS5 y %d Gameplanet, topes, vendedor oficial, importacion y agotado/regreso"
           % (len(casos), len(casos_ps5), len(casos_gp)))
+    print("selftest OK: red cortada, avisos de disponibilidad que fallan, recorte del foro, reloj, --cobertura; "
+          "pruebas aparte: %s" % (", ".join(corridos) or "ninguna"))
     return 0
 
 
 def main():
     if "--selftest" in sys.argv:
         return selftest()
+    if "--cobertura" in sys.argv:
+        return cobertura()
     seco = "--seco" in sys.argv
     prueba = os.environ.get("PRUEBA", "").lower() in ("1", "true", "yes")
     ahora = dt.datetime.now(dt.timezone.utc)
+    arranque = time.monotonic()   # reloj general de la corrida (SEGUNDOS_CORRIDA)
+    LIVERPOOL_LEIDAS.clear()
     prods = cargar_config()
     por_id = {p["id"]: p for p in prods}
     try:
@@ -987,7 +1959,8 @@ def main():
     except Exception:
         estado = {}
     antes = json.dumps(estado, sort_keys=True)
-    fallos, avisado = estado.setdefault("fallos_fuente", {}), estado.setdefault("avisado", {})
+    fallos = estado.setdefault("fallos_fuente", {})
+    avisado, avisado_nivel = normalizar_avisado(estado)   # avisado: solo numeros (vuelta atras segura)
     vistos = estado.setdefault("vistos", {})
 
     caidas, avisadas = estado.setdefault("caida_desde", {}), estado.setdefault("caida_avisada", [])
@@ -1033,6 +2006,10 @@ def main():
         usan = [p for p in prods if tienda in p["tiendas"]]
         if not usan:
             continue
+        if reloj_vencido(arranque):   # se trata como "no leida esta corrida": ni leidas, ni ausencias, ni falla
+            print("tienda saltada %-10s se acabo el tiempo de la corrida (%d s): no se lee esta vez"
+                  % (tienda, SEGUNDOS_CORRIDA))
+            continue
 
         def todas(lector=lector, usan=usan, tienda=tienda):
             r = []
@@ -1050,72 +2027,61 @@ def main():
         if clave not in mejores or o["precio"] < mejores[clave]["precio"]:
             mejores[clave] = o
     for clave, o in sorted(mejores.items()):
-        print("  %-34s $%9.0f  %-7s %s | %s" % (clave, o["precio"], nivel(o["precio"], por_id[o["prod"]], var_por_id(por_id[o["prod"]], o["var"])) or "", o["vendedor"], o["nota"]))
+        print("  %-34s $%9.0f  %-13s %s | %s" % (clave, o["precio"], nivel(o["precio"], por_id[o["prod"]], var_por_id(por_id[o["prod"]], o["var"])) or "", o["vendedor"], o["nota"]))
 
-    # --- avisos por precio leido en tienda
-    for clave, o in mejores.items():
-        prod = por_id[o["prod"]]
-        var = var_por_id(prod, o["var"])
-        niv = nivel(o["precio"], prod, var)
-        if not niv:
-            avisado.pop(clave, None)   # subio del tope: la proxima baja vuelve a avisar
-            continue
-        if clave in avisado and o["precio"] > avisado[clave] - BAJA_MINIMA:
-            continue
-        g, c, t = topes(prod, var)
-        asunto = "{} ${:,.0f} en {} · {} · leido en la tienda".format(var["nombre"], o["precio"], o["tienda"], niv)
-        cuerpo = "\n".join([
-            "**{}**".format(o["titulo"]), "",
-            "- Precio leido ahora en la tienda: **${:,.0f}** ({})".format(o["precio"], o["tienda"]),
-            "- Como se llega: {}".format(o["nota"] or "precio directo, sin cupon"),
-            "- Quien vende: {}".format(o["vendedor"] or "sin dato"),
-            "- Veredicto: **{}**. Topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(niv, var["nombre"], g, c, t),
-            "- Liga: {}".format(o["url"]), "",
-            "Lo mejor de cada tienda en este momento:", "", tabla(mejores), "",
-            "No incluye devoluciones de banco (se ven hasta pagar)."])
-        print(" * AVISO", asunto)
-        if not seco:
-            try:
-                abrir_issue(asunto, cuerpo)
-                avisado[clave] = o["precio"]
-            except Exception as ex:
-                print("   no se pudo abrir el aviso:", ex)
+    # --- avisos por precio leido en tienda: GANGA, COMPRAR y SIN CONFIRMAR releen antes su ficha (confirmar)
+    # Cada bloque de avisos va en su propio try: uno roto no tapa a los demas ni impide escribir visto.json y precios.json.
+    sin_avisos = os.environ.get("SIN_AVISOS_PRECIO", "").lower() in ("1", "true", "yes")
+    fichas = {}   # clave -> que dijo la ficha en esta corrida (para el aviso de "volvio a la venta")
+    try:
+        hechos = avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque)
+    except Exception as ex:
+        print("   los avisos de precio fallaron:", str(ex)[:200])
+        hechos = []
+    for av in hechos:
+        try:
+            print(" * AVISO", av["asunto"], "|", av["resultado"] or "sin releer (mirar)", av["razon"])
+            salio = publicar_aviso(av, avisado, seco, sin_avisos, niveles=avisado_nivel)
+            fichas[av["clave"]] = {"resultado": av["resultado"], "nivel": av["nivel"], "razon": av["razon"], "salio": salio}
+        except Exception as ex:
+            print("   aviso de precio roto:", str(ex)[:200])
 
     # --- avisos de modelo agotado o de vuelta a la venta (solo cuenta tiendas leidas en esta corrida)
-    if "conocidos" not in estado:
-        sembrar_conocidos(estado, prods, mejores, leidas)
-        print("   disponibilidad sembrada; agotados de arranque:", ", ".join(estado["agotados"]) or "ninguno")
-    for asunto, cuerpo in disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")):
-        print(" * DISPONIBILIDAD", asunto)
-        if not seco:
-            try:
-                abrir_issue(asunto, cuerpo)
-            except Exception as ex:
-                print("   no se pudo abrir el aviso:", ex)
+    try:
+        if "conocidos" not in estado:
+            sembrar_conocidos(estado, prods, mejores, leidas)
+            print("   disponibilidad sembrada; agotados de arranque:", ", ".join(estado["agotados"]) or "ninguno")
+        avisar_disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
+                              None if seco else abrir_issue, callar=sin_avisos, fichas=fichas)
+    except Exception as ex:
+        print("   los avisos de disponibilidad fallaron:", str(ex)[:200])
 
     # --- avisos del foro (tiendas que no se dejan leer, y recetas con banco)
     sembrar = not estado.get("sembrado")
     for it in foro or []:
-        av = aviso_foro(prods, it)
-        if not av or it["guid"] in vistos:
-            continue
         try:
-            fresco = (ahora - email.utils.parsedate_to_datetime(it["fecha"])) <= dt.timedelta(days=DIAS_FRESCO)
-        except Exception:
-            fresco = True
-        if not fresco:
-            continue
-        print(" * FORO", av[0])
-        if seco:
-            continue
-        if not sembrar:
-            try:
-                abrir_issue(av[0], av[1])
-            except Exception as ex:
-                print("   no se pudo abrir el aviso:", ex)
+            av = aviso_foro(prods, it)
+            if not av or it["guid"] in vistos:
                 continue
-        vistos[it["guid"]] = it["fecha"]
-    if foro is not None and not seco:
+            try:
+                fresco = (ahora - email.utils.parsedate_to_datetime(it["fecha"])) <= dt.timedelta(days=DIAS_FRESCO)
+            except Exception:
+                fresco = True
+            if not fresco:
+                continue
+            print(" * FORO", av[0])
+            if seco:
+                continue
+            if sin_avisos:   # ni se abre ni se marca como visto: saldra cuando vuelvan los avisos, si sigue fresca
+                print("   (SIN_AVISOS_PRECIO=1: se habria avisado; no se abre ni se marca)")
+                continue
+            if not sembrar:
+                if abrir_issue(av[0], av[1]) is False:   # sin credenciales: no salio, no se marca
+                    continue
+            vistos[it["guid"]] = it["fecha"]
+        except Exception as ex:
+            print("   aviso del foro roto:", str(ex)[:200])
+    if foro is not None and not seco and not sin_avisos:
         estado["sembrado"] = True
 
     if prueba and not seco:
@@ -1161,7 +2127,7 @@ def main():
         with open(PRECIOS, "w", encoding="utf-8") as f:
             json.dump(actuales, f, ensure_ascii=False, indent=1, sort_keys=True)
     if len(vistos) > 600:
-        estado["vistos"] = dict(list(vistos.items())[-400:])
+        estado["vistos"] = recortar_vistos(vistos, 400)
     if json.dumps(estado, sort_keys=True) != antes:
         with open(ESTADO, "w", encoding="utf-8") as f:
             json.dump(estado, f, ensure_ascii=False, indent=1, sort_keys=True)
