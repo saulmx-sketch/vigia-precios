@@ -1441,7 +1441,7 @@ def aviso_foro(prods, it):
         "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
         it["link"], "",
         "No se pudo releer la ficha (esta tienda no deja releer la ficha): ábrela antes de comprar.", "",
-        *["- Por qué: " + r for r in [razon(precio, prod, var) if precio is not None else ""] if r],   # linea A
+        *["- Por qué: " + r for r in [(globals().get("razon") or (lambda *a: ""))(precio, prod, var) if precio is not None else ""] if r],   # linea A (si falta razon, el aviso sale sin ese renglon)
         "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t), "",
         "> " + limpio(it["descripcion"]).replace("\n", "\n> ")])
     return asunto, cuerpo
