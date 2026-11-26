@@ -3806,5 +3806,59 @@
   "vendedor": "Liverpool",
   "espera": null,
   "origen": "ficha de Liverpool 1186785793 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785793.html): Tipo de consola 'Fija', Lector integrado 'CD'"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado - Caja Abierta",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado (Exhibición)",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado Empaque Dañado",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Preventa Samsung Galaxy Z Fold8 512GB Morado",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Consola PlayStation 5 Digital Slim Caja Abierta",
+  "precio": 8000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Garantía Extendida AIG 1 Año(s) - $ 9001 a $ 10000 (home - Consolas PlayStation 5 Digital)",
+  "precio": 7000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H5, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
  }
 ]
