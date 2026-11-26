@@ -180,6 +180,7 @@ class Banco:
         self.v = v
         self.dir = tempfile.mkdtemp(prefix="vigia_corrida_")
         self.config = os.path.join(self.dir, "productos.json")
+        # siempre productos.json de la raiz, aunque VIGIA_CONFIG apunte a otro archivo (ver correr: v.CONFIG)
         with open(os.path.join(RAIZ, "productos.json"), encoding="utf-8") as f:
             cfg = json.load(f)
         self.quitadas = set()
@@ -236,9 +237,12 @@ class Banco:
         dt_falso.datetime = Ahora
 
         srv = Servidor(mapa)
-        env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None}, **(env or {}))
+        env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None, "VIGIA_CONFIG": None}, **(env or {}))
+        # VIGIA_CONFIG se lee al importar (v.CONFIG): si quedo puesta, main() se negaria a escribir estado y avisar.
+        # Durante cada corrida v.CONFIG es la copia de la escena (que cargar_config lee de todos modos).
         guardado = (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
-                    list(sys.argv), {k: os.environ.get(k) for k in env}, v.urllib.request.build_opener)
+                    list(sys.argv), {k: os.environ.get(k) for k in env}, v.urllib.request.build_opener,
+                    getattr(v, "CONFIG", None), getattr(v, "CONFIG_PRINCIPAL", None))
         original_config = v.cargar_config
         n0 = len(self.issues)
         salida = io.StringIO()
@@ -246,6 +250,9 @@ class Banco:
             v.pedir, v.abrir_issue = srv, self._abrir
             v.cargar_config = lambda ruta=None: original_config(self.config)
             v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt = self.estado, self.precios, self.historial, dt_falso
+            v.CONFIG = self.config
+            if hasattr(v, "CONFIG_PRINCIPAL"):
+                v.CONFIG_PRINCIPAL = self.config
             time.sleep = lambda *a, **k: None
             # el carrito de Samsung arma un abridor con cookies (carga los certificados de Windows: 30 ms cada vez);
             # el servidor falso no lo usa, asi que basta un objeto vacio
@@ -262,6 +269,9 @@ class Banco:
             (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
              sys.argv) = guardado[:9]
             v.urllib.request.build_opener = guardado[10]
+            v.CONFIG = guardado[11]
+            if guardado[12] is not None:
+                v.CONFIG_PRINCIPAL = guardado[12]
             for k, x in guardado[9].items():
                 if x is None:
                     os.environ.pop(k, None)
@@ -374,15 +384,38 @@ def e4_ficha_caida(v):
         afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco · ficha sin releer"], ("4b", asuntos(avs)), b)
         afirma("No se pudo releer la ficha (la tienda no la entregó: Costco respondio 503 en la ficha 648324)" in avs[0][1],
                avs[0][1][:700], b)
+        afirma(b.json()["avisado_nivel"][K_COS] == ["GANGA", 19000.0, "releer"], b.json()["avisado_nivel"], b)
+        afirma(b.json()["avisado"][K_COS] == 19000.0, b.json()["avisado"], b)       # lo que lee la version vieja: numero
+        # 4c: la ficha sigue caida cinco corridas: se relee cada vez (queda pendiente) y no se repite ningun correo
+        for i in range(5):
+            c, avs, srv, _ = b.correr(costco_a(19000.0, respuesta=(503, "Service Unavailable")))
+            afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 1, ("4c%d" % i, asuntos(avs), srv.cuantas(COSTCO_FICHA)), b)
+        # 4d: la ficha se deja leer y coincide: un solo correo mas, "Confirmado", y ya no se relee
         c, avs, srv, _ = b.correr(costco_a(19000.0))
-        # Lo que hace el programa (afirmado tal cual): calla. La clave quedo avisada a $19,000 como GANGA; solo un
-        # SIN CONFIRMAR previo da derecho a un segundo correo "confirmado" al mismo precio. Ver "Dudas" de la salida.
-        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4c", asuntos(avs)), b)
-        # 4d (tal cual): si despues la ficha desmiente (un tercero), tambien calla: no se relee ni se corrige el aviso
-        c, avs, srv, _ = b.correr(costco_a(19000.0, externo=True))
-        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4d", asuntos(avs)), b)
-        return ("4 corridas: 1 GANGA 'ficha sin releer' con la razon; despues, con la ficha arriba, calla (0 avisos, "
-                "no la relee) tanto si coincide como si la desmiente")
+        afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco"], ("4d", asuntos(avs)), b)
+        afirma(avs[0][1].startswith("Confirmación del aviso anterior") and "Confirmado: se releyó la ficha" in avs[0][1],
+               avs[0][1][:400], b)
+        afirma(b.json()["avisado_nivel"][K_COS] == ["GANGA", 19000.0, "hecho"], b.json()["avisado_nivel"], b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4e: repitio o releyo", asuntos(avs)), b)
+        # 4f (banco nuevo): sin releer y luego la ficha dice tercero: un correo de correccion, SIN CONFIRMAR, y ya no mas
+        b2 = Banco(v)
+        try:
+            b2.correr(mundo_base())
+            b2.correr(costco_a(19000.0, respuesta=(503, "Service Unavailable")))
+            c, avs, srv, _ = b2.correr(costco_a(19000.0, externo=True))
+            afirma(asuntos(avs) == ["SIN CONFIRMAR $19,000 · Fold8 512 GB · Costco · abre la ficha antes de creerlo"],
+                   ("4f", asuntos(avs)), b2)
+            afirma(avs[0][1].startswith("Corrección del aviso anterior") and "vendedor externo en Costco" in avs[0][1],
+                   avs[0][1][:500], b2)
+            for i in range(2):
+                c, avs, srv, _ = b2.correr(costco_a(19000.0, externo=True))
+                afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4g%d: repitio la correccion" % i, asuntos(avs)), b2)
+        finally:
+            b2.borrar()
+        return ("4 corridas: 1 GANGA 'ficha sin releer'; cinco corridas con la ficha caida: 0 correos (se relee, queda "
+                "pendiente); al leerse: 1 'Confirmacion del aviso anterior' y ya no se relee; y con tercero: 1 correccion "
+                "SIN CONFIRMAR y nada mas")
     finally:
         b.borrar()
 
