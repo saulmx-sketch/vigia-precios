@@ -1,8 +1,8 @@
 {
  "samsung_pagina": {
   "estado": 200,
-  "bytes": 3358543,
-  "fold8": 1408,
+  "bytes": 3360876,
+  "fold8": 1410,
   "ps5": 0,
   "precios_vistos": [
    20000,
@@ -16,7 +16,7 @@
    22386,
    22434,
    22438,
-   22568
+   22828
   ],
   "precios_ps5": [
    6000,
@@ -40,8 +40,8 @@
    "hybris"
   ],
   "cabeceras": {
-   "x-akamai-transformed": "9 306052 0 pmb=mRUM,3",
-   "content-type": "text/html; charset=UTF-8"
+   "x-akamai-transformed": "9 - 0 pmb=mRUM,3",
+   "content-type": "text/html;charset=utf-8"
   },
   "inicio": "<!DOCTYPE html> <html lang=\"es-MX\" itemscope=\"\"> <head> <!-- PWA - manifest <link rel=\"manifest\" href=\"/etc.clientlibs/samsung/clientlibs/consumer/global/clientlib-common/resources/pwa/manifest/mx.json\"> --> <!-- PWA - Browser Compatible <script async src=\"/etc.clientlibs/"
  },
@@ -126,7 +126,7 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=9e3ca43b-e939-11f1-9c01-946a3823e325\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"9e3ca43b-e939-11f1-9c01-946a3823e325\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=019da619-e93a-11f1-8c2b-51a33de0440f\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"019da619-e93a-11f1-8c2b-51a33de0440f\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
  },
  "walmart_ficha": {
   "estado": 412,
@@ -134,9 +134,7 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [],
-  "precios_ps5": [
-   8333
-  ],
+  "precios_ps5": [],
   "bloqueo": true,
   "final": "https://www.walmart.com.mx/ip/Smartphone-Samsung-Galaxy-ZFold8-Ultra-512GB-Grafito-Desbloqueado/00880609919959",
   "vendedor_pistas": [],
@@ -145,7 +143,7 @@
    "x-akamai-transformed": "0 - 0 -",
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=9e97073b-e939-11f1-8333-96b0fff13d07\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"9e97073b-e939-11f1-8333-96b0fff13d07\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=01c0f6cd-e93a-11f1-b1de-6232884bd302\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"01c0f6cd-e93a-11f1-b1de-6232884bd302\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
  },
  "sams_busca": {
   "estado": 412,
@@ -161,7 +159,7 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=9ec9e394-e939-11f1-a06a-51a33de0440f\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"9ec9e394-e939-11f1-a06a-51a33de0440f\",\"hostUrl\":\"/px/PX87wpO5aK/xhr\",\"blockScript\":\"/px/PX87wpO5a"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=0223321b-e93a-11f1-8af0-157c7c379688\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"0223321b-e93a-11f1-8af0-157c7c379688\",\"hostUrl\":\"/px/PX87wpO5aK/xhr\",\"blockScript\":\"/px/PX87wpO5a"
  },
  "bodega_busca": {
   "estado": 412,
@@ -177,40 +175,40 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=9ef8f383-e939-11f1-955a-7d1fd7fb5f8f\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"9ef8f383-e939-11f1-955a-7d1fd7fb5f8f\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=02583425-e93a-11f1-97eb-51a33de0440f\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"02583425-e93a-11f1-97eb-51a33de0440f\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
  },
  "amazon_ficha": {
   "estado": 200,
-  "bytes": 871039,
+  "bytes": 869672,
   "fold8": 13,
   "ps5": 0,
   "precios_vistos": [
    20000,
+   20115,
    20200,
    20512,
    21063,
    21875,
    21999,
-   29752,
    30000,
    32767,
    34394,
    35798,
-   40000
+   36365
   ],
   "precios_ps5": [
    6000,
    6048,
    6200,
+   6579,
    6780,
-   6821,
    7326,
    7511,
    8250,
    8558,
-   8725,
-   8804,
-   9124
+   8608,
+   8704,
+   8725
   ],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
@@ -227,103 +225,73 @@
   ],
   "cabeceras": {
    "server": "Server",
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "NotCacheable from child",
    "content-type": "text/html;charset=UTF-8"
   },
   "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</script><meta charset=\"utf-8\"/> <!-- sp:end-feature:head-start --> <!-- sp:feature:csm:head-open-part1 --> <script type='text/javascript'>va"
  },
  "amazon_busca": {
-  "estado": 503,
-  "bytes": 1669,
-  "fold8": 0,
+  "estado": 200,
+  "bytes": 2342,
+  "fold8": 1,
   "ps5": 0,
-  "precios_vistos": [],
+  "precios_vistos": [
+   37732
+  ],
   "precios_ps5": [],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/s?k=samsung+galaxy+z+fold8+ultra+512",
   "vendedor_pistas": [],
   "plataforma": [],
   "cabeceras": {
-   "server": "Server",
-   "x-cache": "Error from cloudfront",
+   "server": "AkamaiGHost",
+   "x-cache": "NotCacheable from child",
    "content-type": "text/html"
   },
-  "inicio": "<!doctype html><html><head><meta charset=\"utf-8\"><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"><title>Amazon.com.mx Algo falló</title><style>html,body{padding:0;margin:0}img{border:0}#a,#b{background:#232f3e"
+  "inicio": "<!DOCTYPE html><html><head> <meta charset=\"utf-8\"> <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\"> <meta http-equiv=\"refresh\" content=\"5; URL='/s?k=samsung+galaxy+z+fold8+ultra+512&bm-verify=AAQAAAAO_____yVmPQfEqddeaU6cbmO1SV6RdQR8HbfpaIHwaX72kF7jaSxa3bacwTlz6C"
  },
  "ml_producto": {
   "estado": 200,
-  "bytes": 120515,
-  "fold8": 2,
+  "bytes": 26509,
+  "fold8": 6,
   "ps5": 0,
   "precios_vistos": [
-   22208,
-   23000,
-   23535,
-   28146,
-   28270,
-   28414
+   29142
   ],
   "precios_ps5": [
-   6000,
-   7096,
-   7439,
-   8340,
-   8364,
-   9437,
-   9999,
-   10000,
-   14914,
-   15523
+   6226,
+   8541
   ],
-  "bloqueo": true,
-  "final": "https://www.mercadolibre.com.mx/captcha/wall/web-risk-verification?go_url=https%3A%2F%2Fwww.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold8-ultra-grafito-512gb%2Fp",
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Fwww.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold8-ultra-grafito-512gb%2Fp%2FMLM73221955&",
   "vendedor_pistas": [],
-  "plataforma": [
-   "magento"
-  ],
+  "plataforma": [],
   "cabeceras": {
    "server": "nginx",
    "content-type": "text/html; charset=utf-8"
   },
-  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/abuse-captcha-mobile-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cr"
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cros"
  },
  "ml_listado": {
   "estado": 200,
-  "bytes": 120461,
-  "fold8": 2,
+  "bytes": 26373,
+  "fold8": 6,
   "ps5": 0,
-  "precios_vistos": [
-   22208,
-   23000,
-   23535,
-   28146,
-   28270,
-   28414
-  ],
+  "precios_vistos": [],
   "precios_ps5": [
-   6000,
-   7096,
-   7439,
-   7897,
-   8340,
-   8475,
-   9437,
-   9999,
-   10000,
-   14914,
-   15523
+   6091,
+   7568,
+   8015
   ],
-  "bloqueo": true,
-  "final": "https://www.mercadolibre.com.mx/captcha/wall/web-risk-verification?go_url=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold8-ultra-512gb&tid=482",
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold8-ultra-512gb&tid=da03519d-e4cb-429f",
   "vendedor_pistas": [],
-  "plataforma": [
-   "magento"
-  ],
+  "plataforma": [],
   "cabeceras": {
    "server": "nginx",
    "content-type": "text/html; charset=utf-8"
   },
-  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/abuse-captcha-mobile-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cr"
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cros"
  },
  "ml_api_producto": {
   "estado": 401,
@@ -361,8 +329,8 @@
  },
  "liverpool_busca": {
   "estado": 200,
-  "bytes": 700565,
-  "fold8": 101,
+  "bytes": 691015,
+  "fold8": 98,
   "ps5": 0,
   "precios_vistos": [
    20279,
@@ -374,9 +342,9 @@
    22147,
    22499,
    22564,
-   22568,
    22999,
-   23125
+   23125,
+   23178
   ],
   "precios_ps5": [
    6075,
@@ -542,7 +510,9 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [],
-  "precios_ps5": [],
+  "precios_ps5": [
+   8024
+  ],
   "bloqueo": true,
   "final": "https://www.coppel.com/search?q=galaxy%20z%20fold8",
   "vendedor_pistas": [],
@@ -550,11 +520,11 @@
   "cabeceras": {
    "content-type": "text/html"
   },
-  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;c672cd17&#46;1795656919&#46;5f5c87d3 <P>https&#58;&#47;&#47;errors&#46;edgesui"
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;ac37cb17&#46;1795657086&#46;f8024e1a <P>https&#58;&#47;&#47;errors&#46;edgesui"
  },
  "sears_busca": {
   "estado": 200,
-  "bytes": 764432,
+  "bytes": 764570,
   "fold8": 1,
   "ps5": 1,
   "precios_vistos": [
@@ -604,11 +574,10 @@
   "fold8": 3,
   "ps5": 0,
   "precios_vistos": [
-   60527
+   24315
   ],
   "precios_ps5": [
-   6246,
-   7325
+   6052
   ],
   "bloqueo": true,
   "final": "https://www.elpalaciodehierro.com/buscar?q=galaxy+z+fold8",
@@ -616,7 +585,7 @@
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60527eb0c3ff2f7-SEA",
+   "cf-ray": "a6052c045b7db9a9-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
@@ -627,9 +596,7 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [],
-  "precios_ps5": [
-   6685
-  ],
+  "precios_ps5": [],
   "bloqueo": true,
   "final": "https://www.telcel.com/tienda/buscar?q=fold8",
   "vendedor_pistas": [],
@@ -638,7 +605,7 @@
    "server": "AkamaiGHost",
    "content-type": "text/html"
   },
-  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;telcel&#46;com&#47;tienda&#47;buscar&#63;\" on this server.<P> Reference&#32;&#35;18&#46;c737cb17&#46;1795656920&#46;6685a0fe <P>https&#58;&#47;&#47;errors&"
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;telcel&#46;com&#47;tienda&#47;buscar&#63;\" on this server.<P> Reference&#32;&#35;18&#46;cf37cb17&#46;1795657088&#46;73e27af9 <P>https&#58;&#47;&#47;errors&"
  },
  "gameplanet_ps5": {
   "estado": 200,
@@ -802,46 +769,31 @@
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60527fdab80f6d8-SEA",
+   "cf-ray": "a6052c159d2c6c91-SEA",
    "content-type": "text/xml; charset=utf-8"
   },
   "inicio": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <rss xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:sy=\"http://purl.org/rss/1.0/modules/syndication/\" xmlns:sla"
  },
  "ml_listado_ps5": {
   "estado": 200,
-  "bytes": 120451,
+  "bytes": 26343,
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [
-   22208,
-   23000,
-   23535,
-   28146,
-   28270,
-   28414
+   45701
   ],
   "precios_ps5": [
-   6000,
-   7096,
-   7439,
-   8340,
-   9437,
-   9999,
-   10000,
-   14914,
-   15523
+   9016
   ],
-  "bloqueo": true,
-  "final": "https://www.mercadolibre.com.mx/captcha/wall/web-risk-verification?go_url=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fconsola-playstation-5-digital&tid=c56fedc6",
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fconsola-playstation-5-digital&tid=688447a8-be03-4e10-8e4b",
   "vendedor_pistas": [],
-  "plataforma": [
-   "magento"
-  ],
+  "plataforma": [],
   "cabeceras": {
    "server": "nginx",
    "content-type": "text/html; charset=utf-8"
   },
-  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/abuse-captcha-mobile-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cr"
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cros"
  },
  "ml_tienda_samsung": {
   "estado": 200,
@@ -919,7 +871,7 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=a76389ae-e939-11f1-9fc2-157c7c379688\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"a76389ae-e939-11f1-9fc2-157c7c379688\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=0b4902a1-e93a-11f1-a4ed-946a3823e325\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"0b4902a1-e93a-11f1-a4ed-946a3823e325\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
  },
  "sams_ps5": {
   "estado": 412,
@@ -927,9 +879,7 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [],
-  "precios_ps5": [
-   6410
-  ],
+  "precios_ps5": [],
   "bloqueo": true,
   "final": "https://www.sams.com.mx/search?q=consola+playstation+5",
   "vendedor_pistas": [],
@@ -937,7 +887,7 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=a780b44f-e939-11f1-94bb-4180fdcb6410\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"a780b44f-e939-11f1-94bb-4180fdcb6410\",\"hostUrl\":\"/px/PX87wpO5aK/xhr\",\"blockScript\":\"/px/PX87wpO5a"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=0b692fa9-e93a-11f1-8de8-6b2be996f9e1\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"0b692fa9-e93a-11f1-8de8-6b2be996f9e1\",\"hostUrl\":\"/px/PX87wpO5aK/xhr\",\"blockScript\":\"/px/PX87wpO5a"
  },
  "bodega_ps5": {
   "estado": 412,
@@ -953,7 +903,7 @@
   "cabeceras": {
    "content-type": "application/json; charset=UTF-8"
   },
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=a79e5214-e939-11f1-acd7-6b2be996f9e1\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"a79e5214-e939-11f1-acd7-6b2be996f9e1\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=0b91f28b-e93a-11f1-befd-b680f1ffd7ff\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\",\"firstPartyEnabled\":true,\"vid\":\"\",\"uuid\":\"0b91f28b-e93a-11f1-befd-b680f1ffd7ff\",\"hostUrl\":\"/px/PXAFlYiz9n/xhr\",\"blockScript\":\"/px/PXAFlYiz9"
  },
  "coppel_ps5": {
   "estado": 403,
@@ -969,7 +919,7 @@
   "cabeceras": {
    "content-type": "text/html"
   },
-  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;c372cd17&#46;1795656926&#46;7963107d <P>https&#58;&#47;&#47;errors&#46;edgesui"
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;b337cb17&#46;1795657093&#46;1089cb35 <P>https&#58;&#47;&#47;errors&#46;edgesui"
  },
  "coppel_vtex": {
   "estado": 403,
@@ -985,7 +935,7 @@
   "cabeceras": {
    "content-type": "text/html"
   },
-  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;api&#47;catalog&#95;system&#47;pub&#47;products&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;c372cd17&#46;1795656926&#4"
+  "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;coppel&#46;com&#47;api&#47;catalog&#95;system&#47;pub&#47;products&#47;search&#63;\" on this server.<P> Reference&#32;&#35;18&#46;b337cb17&#46;1795657093&#4"
  },
  "palacio_ps5": {
   "estado": 403,
@@ -993,21 +943,23 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [],
-  "precios_ps5": [],
+  "precios_ps5": [
+   6052
+  ],
   "bloqueo": true,
   "final": "https://www.elpalaciodehierro.com/buscar?q=consola+playstation+5",
   "vendedor_pistas": [],
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605280c8dc6c723-SEA",
+   "cf-ray": "a6052c25ac69ebca-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
  },
  "sears_ps5": {
   "estado": 200,
-  "bytes": 764439,
+  "bytes": 764576,
   "fold8": 0,
   "ps5": 2,
   "precios_vistos": [
@@ -1157,7 +1109,7 @@
  },
  "liverpool_ps5": {
   "estado": 200,
-  "bytes": 844490,
+  "bytes": 844584,
   "fold8": 0,
   "ps5": 463,
   "precios_vistos": [
@@ -1170,9 +1122,9 @@
    21725,
    22147,
    22564,
-   22568,
    23125,
-   23178
+   23178,
+   23202
   ],
   "precios_ps5": [
    6075,
@@ -1218,9 +1170,9 @@
    21725,
    22147,
    22564,
-   22569,
    22681,
-   22785
+   22785,
+   22804
   ],
   "precios_ps5": [
    6075,
@@ -1390,6 +1342,7 @@
    63780
   ],
   "precios_ps5": [
+   6052,
    6154,
    6344,
    6389,
@@ -1400,8 +1353,7 @@
    7294,
    7295,
    7485,
-   7499,
-   7560
+   7499
   ],
   "bloqueo": false,
   "final": "https://tienda.movistar.com.mx/",
@@ -1411,7 +1363,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605284b0fc505ac-SEA",
+   "cf-ray": "a6052c816ecf75e0-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!doctype html> <html lang=\"es\"> <head > <script> var BASE_URL = 'https\\u003A\\u002F\\u002Ftienda.movistar.com.mx\\u002F'; var require = { 'baseUrl': 'https\\u003A\\u002F\\u002Ftienda.movistar.com.mx\\u002Fstatic\\u002Fversion17943304500\\u002Ffrontend\\u002FMovistar\\u002Feshop\\u00"
@@ -1438,7 +1390,7 @@
  },
  "sony_inicio": {
   "estado": 200,
-  "bytes": 2016285,
+  "bytes": 2016362,
   "fold8": 0,
   "ps5": 9,
   "precios_vistos": [
@@ -1494,11 +1446,11 @@
    26985,
    27199,
    28343,
+   28372,
    28870,
    33805,
-   34384,
-   34399,
-   40170
+   34313,
+   34384
   ],
   "precios_ps5": [
    6112,
@@ -1508,11 +1460,11 @@
    8017,
    8345,
    8499,
-   8979,
    9372,
-   9795,
-   9815,
-   10999
+   10999,
+   11228,
+   11229,
+   11799
   ],
   "bloqueo": true,
   "final": "https://www.officedepot.com.mx/officedepot/en/search/?text=consola+playstation+5",
@@ -1524,7 +1476,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528569c063399-SEA",
+   "cf-ray": "a6052c88390e7639-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html> <html lang=\"en\"> <head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'GTM-56PS9J8','google_tags_first_party');</script><script>(function(w,d,s,l){w[l]=w[l]||[];(function(){w[l].push(arguments);})('set', 'developer_id.dYzg1YT', true); "
@@ -1541,7 +1493,7 @@
   "vendedor_pistas": [],
   "plataforma": [],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[]"
@@ -1552,9 +1504,9 @@
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [
-   25252,
    33805,
    40709,
+   45454,
    51293,
    52671,
    53851,
@@ -1581,7 +1533,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605285edff997e3-SEA",
+   "cf-ray": "a6052c8e6a9776eb-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html> <html lang=\"en\"> <head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'GTM-56PS9J8','google_tags_first_party');</script><script>(function(w,d,s,l){w[l]=w[l]||[];(function(){w[l].push(arguments);})('set', 'developer_id.dYzg1YT', true); "
@@ -1607,13 +1559,13 @@
   ],
   "precios_ps5": [
    6024,
+   6052,
    6064,
    6119,
    6175,
    6282,
    6472,
    6631,
-   6668,
    6774,
    7136,
    7262,
@@ -1630,7 +1582,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528616d87c8b7-SEA",
+   "cf-ray": "a6052c91e863100a-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"es\"><head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'AW-1042767485','google_tags_first_party');</script><script async src=\"/nxl1/\"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){"
@@ -1642,7 +1594,7 @@
   "ps5": 0,
   "precios_vistos": [],
   "precios_ps5": [
-   8118
+   6052
   ],
   "bloqueo": true,
   "final": "https://ddtech.mx/buscar/consola%20playstation%205",
@@ -1650,14 +1602,14 @@
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528659a3b4b76-SEA",
+   "cf-ray": "a6052c966a6f7de4-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
  },
  "soriana_ps5": {
   "estado": 200,
-  "bytes": 592922,
+  "bytes": 593611,
   "fold8": 0,
   "ps5": 196,
   "precios_vistos": [
@@ -1680,13 +1632,13 @@
    6012,
    6019,
    6039,
+   6052,
    6060,
    6066,
    6076,
    6084,
    6097,
-   6131,
-   6133
+   6131
   ],
   "bloqueo": true,
   "final": "https://www.soriana.com/buscar?q=consola+playstation+5",
@@ -1698,10 +1650,10 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605286618aa2321-SEA",
+   "cf-ray": "a6052c96ff35849c-SEA",
    "content-type": "text/html;charset=utf-8"
   },
-  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"cc2faba24e95ba944e089bb7-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
+  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"2ee0ca613170c7002b35af04-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
  },
  "chedraui_vtex": {
   "estado": 206,
@@ -1817,7 +1769,7 @@
   "cabeceras": {
    "server": "cloudflare",
    "powered-by": "Shopify",
-   "cf-ray": "a60528985f8683bf-SEA",
+   "cf-ray": "a6052ca57b31ec02-SEA",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "{\"resources\":{\"results\":{\"products\":[{\"available\":true,\"body\":\"\",\"compare_at_price_max\":\"0.00\",\"compare_at_price_min\":\"0.00\",\"handle\":\"lector-de-disco-ps5-digital-slim\",\"id\":8181843951705,\"image\":\"https:\\/\\/cdn.shopify.com\\/s\\/files\\/1\\/0604\\/4339\\/4137\\/files\\/00071171957910l_jpg.jpg?v=1775171822\","
@@ -1848,7 +1800,7 @@
   "vendedor_pistas": [],
   "plataforma": [],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[]"
@@ -1858,11 +1810,10 @@
   "bytes": 5897,
   "fold8": 0,
   "ps5": 0,
-  "precios_vistos": [
-   60528
-  ],
+  "precios_vistos": [],
   "precios_ps5": [
-   7801
+   6052,
+   8457
   ],
   "bloqueo": true,
   "final": "https://pcel.com/index.php?route=product/search&search=playstation%205",
@@ -1870,43 +1821,43 @@
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528dad982f7ff-SEA",
+   "cf-ray": "a6052cca8a8457bf-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA-Compatible\" content=\"IE=Edge\"><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"viewport\" content=\"width=device-width,initial-scal"
  },
  "intercompras_inicio": {
   "estado": 200,
-  "bytes": 467736,
+  "bytes": 466926,
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [
+   22059,
    22686,
-   24729,
+   24251,
+   25989,
    26329,
-   27325,
+   26339,
    27724,
-   28019,
+   28909,
    30039,
-   33959,
    35055,
    35501,
-   36812,
-   37183
+   36812
   ],
   "precios_ps5": [
-   6000,
-   6329,
+   6052,
    6419,
-   6500,
    6868,
-   7279,
+   7269,
    7294,
+   7551,
    8200,
    8421,
    8514,
-   9169,
-   9323
+   9323,
+   9962,
+   9979
   ],
   "bloqueo": false,
   "final": "https://intercompras.com/",
@@ -1914,14 +1865,14 @@
   "plataforma": [],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528db7ce5649b-SEA",
+   "cf-ray": "a6052ccb1e9d7551-SEA",
    "content-type": "text/html; charset=windows-1252"
   },
   "inicio": "<!DOCTYPE html> <html xmlns=\"http://www.w3.org/1999/xhtml\" dir=\"ltr\" lang=\"es\"> <head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'AW-1069847169','google_tags_first_party');</script><script async src=\"/z4kb/\"></script> <script> window.dataLaye"
  },
  "zegucom_inicio": {
   "estado": 200,
-  "bytes": 133631,
+  "bytes": 133618,
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [
@@ -1948,7 +1899,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528e0dc3eec80-SEA",
+   "cf-ray": "a6052cd098b73956-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!DOCTYPE html> <html lang=\"es-MX\"> <head> <link rel=\"shortcut icon\" href=\"/favicon.ico?v=7fd49866\" type=\"image/x-icon\" /> <meta charset=\"UTF-8\"> <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\"> <meta name=\"theme-color\" content=\"#002c85\" /> <meta name=\"author\" content=\"Zegu"
@@ -1975,7 +1926,7 @@
    "vtex"
   ],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[{\"productId\":\"1302051914\",\"productName\":\"Samsung Galaxy Z Fold8 12+512GB Grafito\",\"brand\":\"SAMSUNG\",\"brandId\":6,\"brandImageUrl\":null,\"linkText\":\"samsung-galaxy-z-fold8-12512gb-grafito-1302051914\",\"productReference\":\"1302051914\",\"productReferenceCode\":\"1302051914\",\"categoryId\":\"1372134\",\"productTitl"
@@ -2018,7 +1969,7 @@
    "vtex"
   ],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[{\"productId\":\"1300795032\",\"productName\":\"Consola PlayStation 5 Slim Disco Blanca\",\"brand\":\"PLAYSTATION\",\"brandId\":1598,\"brandImageUrl\":null,\"linkText\":\"consola-playstation-5-slim-disco-blanca-1300795032\",\"productReference\":\"1300795032\",\"productReferenceCode\":\"1300795032\",\"categoryId\":\"4754783\",\"pro"
@@ -2051,7 +2002,7 @@
  },
  "ml_tienda_sony": {
   "estado": 200,
-  "bytes": 473809,
+  "bytes": 473810,
   "fold8": 0,
   "ps5": 2,
   "precios_vistos": [
@@ -2096,7 +2047,7 @@
  },
  "ml_tienda_playstation": {
   "estado": 200,
-  "bytes": 409075,
+  "bytes": 409076,
   "fold8": 0,
   "ps5": 95,
   "precios_vistos": [
@@ -2118,10 +2069,10 @@
    6086,
    6221,
    6337,
-   6449,
    6486,
    6624,
    6655,
+   6664,
    6678,
    6811,
    6852,
@@ -2227,7 +2178,7 @@
    "vtex"
   ],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[{\"productId\":\"3879487\",\"productName\":\"Bundle Consola Playstation 5 Edición Digital de 825 Gb: Astro Bot y Gran Turismo 7\",\"brand\":\"Play Station\",\"brandId\":5064,\"brandImageUrl\":null,\"linkText\":\"bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487\",\"productReferen"
@@ -2244,7 +2195,7 @@
   "vendedor_pistas": [],
   "plataforma": [],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[]"
@@ -2274,7 +2225,7 @@
   "cabeceras": {
    "server": "cloudflare",
    "powered-by": "Shopify",
-   "cf-ray": "a60528fb1eeb83bf-SEA",
+   "cf-ray": "a6052cdf9b49ec02-SEA",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "{\"resources\":{\"results\":{\"products\":[{\"available\":true,\"body\":\"\",\"compare_at_price_max\":\"0.00\",\"compare_at_price_min\":\"0.00\",\"handle\":\"lector-de-disco-ps5-digital-slim\",\"id\":8181843951705,\"image\":\"https:\\/\\/cdn.shopify.com\\/s\\/files\\/1\\/0604\\/4339\\/4137\\/files\\/00071171957910l_jpg.jpg?v=1775171822\","
@@ -2309,7 +2260,7 @@
   "cabeceras": {
    "server": "cloudflare",
    "powered-by": "Shopify",
-   "cf-ray": "a60528fd7d53274e-SEA",
+   "cf-ray": "a6052ce09b7ad245-SEA",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "{\"resources\":{\"results\":{\"products\":[{\"available\":true,\"body\":\"\\u003cp\\u003e\\u003cstrong\\u003eSamsung Galaxy Z Fold8 – Smartphone Plegable 5G con 256GB y 12GB RAM\\u003c\\/strong\\u003e\\u003c\\/p\\u003e\\n\\n\\u003cp\\u003eEl \\u003cstrong\\u003eSamsung Galaxy Z Fold8\\u003c\\/strong\\u003e es el smartphone plega"
@@ -2359,14 +2310,14 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60528feee3d21ab-SEA",
+   "cf-ray": "a6052ce15993849c-SEA",
    "content-type": "text/html;charset=UTF-8"
   },
-  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"2e97238135eb5ba7b692ce3d-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/mai"
+  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"311f6c453af25e70e5898f20-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/mai"
  },
  "soriana_fold8": {
   "estado": 200,
-  "bytes": 224454,
+  "bytes": 224455,
   "fold8": 64,
   "ps5": 0,
   "precios_vistos": [
@@ -2388,14 +2339,14 @@
    6008,
    6019,
    6039,
+   6052,
    6060,
    6066,
    6076,
    6084,
    6097,
    6131,
-   6133,
-   6158
+   6133
   ],
   "bloqueo": true,
   "final": "https://www.soriana.com/buscar?q=galaxy+z+fold8",
@@ -2407,10 +2358,10 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60529082ca5f492-SEA",
+   "cf-ray": "a6052cea5b1c6cc2-SEA",
    "content-type": "text/html;charset=utf-8"
   },
-  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"2a25dc66f96d8f8a8dc2b5e7-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
+  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"6cc1f37fccf98cb6d6750cd3-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
  },
  "claroshop_consolas": {
   "estado": 200,
@@ -2477,6 +2428,7 @@
   ],
   "precios_ps5": [
    6024,
+   6052,
    6175,
    6282,
    6472,
@@ -2485,9 +2437,8 @@
    6720,
    6774,
    7136,
-   7262,
-   7317,
-   7319
+   7152,
+   7262
   ],
   "bloqueo": false,
   "final": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8",
@@ -2500,14 +2451,14 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605290f09c6a60c-SEA",
+   "cf-ray": "a6052cf0ff42100a-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"es\"><head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'AW-1042767485','google_tags_first_party');</script><script async src=\"/nxl1/\"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){"
  },
  "officedepot_fold8": {
   "estado": 200,
-  "bytes": 1434527,
+  "bytes": 1434512,
   "fold8": 768,
   "ps5": 0,
   "precios_vistos": [
@@ -2548,7 +2499,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a6052912cea33399-SEA",
+   "cf-ray": "a6052cf46b6076eb-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html> <html lang=\"en\"> <head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'GTM-56PS9J8','google_tags_first_party');</script><script>(function(w,d,s,l){w[l]=w[l]||[];(function(){w[l].push(arguments);})('set', 'developer_id.dYzg1YT', true); "
@@ -2560,10 +2511,10 @@
   "ps5": 0,
   "precios_vistos": [
    30000,
-   44139,
    50535
   ],
   "precios_ps5": [
+   6052,
    6154,
    6344,
    6389,
@@ -2574,8 +2525,7 @@
    7485,
    7560,
    7699,
-   7767,
-   7836
+   7767
   ],
   "bloqueo": false,
   "final": "https://tienda.movistar.com.mx/catalogsearch/result/?q=fold8",
@@ -2585,7 +2535,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a60529157a3690e0-SEA",
+   "cf-ray": "a6052cf88cf175e0-SEA",
    "content-type": "text/html; charset=UTF-8"
   },
   "inicio": "<!doctype html> <html lang=\"es\"> <head > <script> var BASE_URL = 'https\\u003A\\u002F\\u002Ftienda.movistar.com.mx\\u002F'; var require = { 'baseUrl': 'https\\u003A\\u002F\\u002Ftienda.movistar.com.mx\\u002Fstatic\\u002Fversion17943304500\\u002Ffrontend\\u002FMovistar\\u002Feshop\\u00"
@@ -2609,7 +2559,7 @@
  },
  "heb_busca_ps5": {
   "estado": 404,
-  "bytes": 53528,
+  "bytes": 53529,
   "fold8": 0,
   "ps5": 1,
   "precios_vistos": [
@@ -2749,7 +2699,6 @@
   "ps5": 0,
   "precios_vistos": [
    27796,
-   34726,
    68025
   ],
   "precios_ps5": [
@@ -2802,21 +2751,21 @@
    46297
   ],
   "precios_ps5": [
-   6151,
    6463,
    6540,
    6686,
    6948,
    6955,
    7096,
-   7292,
    7439,
    7468,
    7495,
-   7733
+   7733,
+   7837,
+   8178
   ],
   "bloqueo": false,
-  "final": "https://www.mercadolibre.com.mx/login/identification?challenge_id=390c578a-ccdf-4192-aaa5-bf6ca2474060&platform_id=ml&redirect_url=https%3A%2F%2Fwww.mercadolibr",
+  "final": "https://www.mercadolibre.com.mx/login/identification?challenge_id=edb1f228-2387-4ad9-ad23-1d6ec8647ad0&platform_id=ml&redirect_url=https%3A%2F%2Fwww.mercadolibr",
   "vendedor_pistas": [],
   "plataforma": [
    "magento"
@@ -2829,7 +2778,7 @@
  },
  "ml_form_alta": {
   "estado": 200,
-  "bytes": 98761,
+  "bytes": 98966,
   "fold8": 0,
   "ps5": 0,
   "precios_vistos": [
@@ -2859,46 +2808,26 @@
    "server": "GSE",
    "content-type": "text/html; charset=utf-8"
   },
-  "inicio": "<!DOCTYPE html><html lang=\"es\" class=\"HB1eCd-UMrnmb PHOcVb\"><head><style nonce=\"_HIXWFB0TZVu41PQ0LyRaQ\">.iPj4P { background-color: #5746e3 !important; }</style><link rel=\"shortcut icon\" sizes=\"16x16\" href=\"https://www.gstatic.com/images/branding/productlogos/forms_2026q3/v1/web-16dp/logo_forms_2026q"
+  "inicio": "<!DOCTYPE html><html lang=\"es\" class=\"HB1eCd-UMrnmb PHOcVb\"><head><style nonce=\"GQC_ifpctFgMhXQ65m0yfw\">.iPj4P { background-color: #5746e3 !important; }</style><link rel=\"shortcut icon\" sizes=\"16x16\" href=\"https://www.gstatic.com/images/branding/productlogos/forms_2026q3/v1/web-16dp/logo_forms_2026q"
  },
  "ml_articulo_fold8": {
   "estado": 200,
-  "bytes": 120423,
+  "bytes": 26259,
   "fold8": 0,
   "ps5": 0,
-  "precios_vistos": [
-   22208,
-   23000,
-   23535,
-   28146,
-   28270,
-   28414,
-   58062
-  ],
+  "precios_vistos": [],
   "precios_ps5": [
-   6000,
-   7096,
-   7302,
-   7439,
-   7607,
-   8340,
-   9437,
-   9999,
-   10000,
-   14914,
-   15523
+   7745
   ],
-  "bloqueo": true,
-  "final": "https://www.mercadolibre.com.mx/captcha/wall/web-risk-verification?go_url=https%3A%2F%2Farticulo.mercadolibre.com.mx%2FMLM-3166627273&tid=b04473fb-7607-4265-b23",
+  "bloqueo": false,
+  "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Farticulo.mercadolibre.com.mx%2FMLM-3166627273&tid=71036dba-982e-450f-86f0-0541db218383",
   "vendedor_pistas": [],
-  "plataforma": [
-   "magento"
-  ],
+  "plataforma": [],
   "cabeceras": {
    "server": "nginx",
    "content-type": "text/html; charset=utf-8"
   },
-  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/abuse-captcha-mobile-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cr"
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-frontend/\" data-framework=\"nordic\" data-loadable=\"true\"><head><meta charSet=\"utf-8\"/><link rel=\"preconnect\" href=\"https://http2.mlstatic.com\" cros"
  },
  "cyberpuerta_ps5_digital": {
   "estado": 200,
@@ -2921,6 +2850,7 @@
   ],
   "precios_ps5": [
    6024,
+   6052,
    6074,
    6175,
    6282,
@@ -2930,8 +2860,7 @@
    7136,
    7262,
    7317,
-   7319,
-   7735
+   7319
   ],
   "bloqueo": false,
   "final": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital",
@@ -2944,7 +2873,7 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a6052936c949d90f-SEA",
+   "cf-ray": "a6052d1a3c5169e8-SEA",
    "content-type": "text/html; charset=utf-8"
   },
   "inicio": "<!DOCTYPE html><html lang=\"es\"><head><script>(function(w,i,g){w[g]=w[g]||[];if(typeof w[g].push=='function')w[g].push(i)}) (window,'AW-1042767485','google_tags_first_party');</script><script async src=\"/nxl1/\"></script> <script> window.dataLayer = window.dataLayer || []; function gtag(){"
@@ -2964,23 +2893,23 @@
    20596,
    20657,
    21182,
+   21213,
    21247,
-   21276,
-   21392
+   21276
   ],
   "precios_ps5": [
    6003,
    6008,
    6019,
    6039,
+   6052,
    6060,
    6066,
    6076,
    6084,
    6097,
    6131,
-   6133,
-   6158
+   6133
   ],
   "bloqueo": false,
   "final": "https://www.soriana.com/buscar?q=samsung+galaxy+z+fold",
@@ -2992,10 +2921,60 @@
   ],
   "cabeceras": {
    "server": "cloudflare",
-   "cf-ray": "a605293ab8b02321-SEA",
+   "cf-ray": "a6052d1d9828a2d2-SEA",
    "content-type": "text/html;charset=utf-8"
   },
-  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"965172ff7808dbc5fcfdac00-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
+  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"cf88b3550acbda6599bf5903-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/main.js\"> <script defer=\"de"
+ },
+ "soriana_ficha_fold8": {
+  "estado": 200,
+  "bytes": 561541,
+  "fold8": 115,
+  "ps5": 0,
+  "precios_vistos": [
+   20002,
+   20124,
+   20162,
+   20227,
+   20237,
+   20244,
+   20314,
+   20347,
+   20348,
+   20352,
+   20354,
+   20373
+  ],
+  "precios_ps5": [
+   6003,
+   6019,
+   6026,
+   6031,
+   6035,
+   6038,
+   6039,
+   6052,
+   6053,
+   6057,
+   6066,
+   6076
+  ],
+  "bloqueo": true,
+  "final": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
+  "vendedor_pistas": [
+   "\"seller\": {\"@type\":\"Organization\",\"name\":\"Soriana\"}}} "
+  ],
+  "plataforma": [
+   "magento",
+   "sfcc",
+   "ldjson"
+  ],
+  "cabeceras": {
+   "server": "cloudflare",
+   "cf-ray": "a6052d232b894224-SEA",
+   "content-type": "text/html;charset=UTF-8"
+  },
+  "inicio": " <!DOCTYPE html> <html lang=\"es\"> <head> <!--[if gt IE 9]><!--> <script type=\"7e4168cd141c4862b881f45e-text/javascript\">//common/scripts.isml</script> <link rel=\"preload\" as=\"script\" href=\"/on/demandware.static/Sites-Soriana-Site/-/default/v1795649594908/js/mai"
  },
  "chedraui_ficha_ps5": {
   "estado": 200,
@@ -3020,7 +2999,7 @@
    "vtex"
   ],
   "cabeceras": {
-   "x-cache": "Miss from cloudfront",
+   "x-cache": "Hit from cloudfront",
    "content-type": "application/json; charset=utf-8"
   },
   "inicio": "[{\"productId\":\"3879487\",\"productName\":\"Bundle Consola Playstation 5 Edición Digital de 825 Gb: Astro Bot y Gran Turismo 7\",\"brand\":\"Play Station\",\"brandId\":5064,\"brandImageUrl\":null,\"linkText\":\"bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487\",\"productReferen"
