@@ -1,18 +1,19 @@
 name: sondeo
+# TEMPORAL (linea C, encargo 04): corre relevo.sh en seco contra la cadena real. Se revierte en el commit siguiente.
 on:
   workflow_dispatch:
 permissions:
-  contents: write
+  actions: read
+  issues: read
+  contents: read
 jobs:
   sondear:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - run: python3 sondeo.py
-      - run: |
-          git config user.name "vigia"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "sondeo" || true
-          git push
+      - name: Relevo en seco
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+        run: bash .github/scripts/relevo.sh
