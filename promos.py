@@ -161,6 +161,13 @@ CONDICION = (r"\bprime\b|primera compra|primer pedido|cliente nuevo|nuevos clien
              r"young adult|estudiante|con tarjeta|con tu tarjeta|kueski|quincenas|\bapp\b|aplicaci[oó]n|"
              r"\bbbva\b|bancomer|banamex|santander|banorte|hsbc|\bnu\b|\bamex\b|american express|mercado\s*pago|paypal")
 TOPE_CUPON = 0.5   # un cupon que quitaria mas de la mitad del precio es error de lectura: no se resta
+# E13 (C6/C6): lista blanca. Un cupon solo se resta si su literal es la frase limpia medida el 25 nov 2026; cualquier otra
+# palabra (meses, al comprar 2, efectivo, OXXO, app, Prime, banco, primera compra, seleccionados...) va a la nota.
+_CIFRA_CUPON = r"(?:\$\s?[\d,]+(?:\.\d\d)?|\d{1,2}(?:[.,]\d+)?\s?%)"
+CUPON_FICHA_LIMPIO = re.compile(r"^Aplicar? (?:el )?cup[oó]n de " + _CIFRA_CUPON + r"$")
+DETALLE_INOCUO = re.compile(r"^(?:Oferta por tiempo limitado|(?:Ver )?T[eé]rminos(?: y condiciones)?)?$", re.I)
+CUPON_BUSQUEDA_LIMPIO = re.compile(r"^Paga \$[\d,]+\.\d\d(?: Se aplic[oó] el cup[oó]n de descuento de " + _CIFRA_CUPON +
+                                   r")?(?: Paga \$[\d,]+\.\d\d)?(?: con cup[oó]n)?$")
 
 
 def _condiciones(literal):
@@ -192,11 +199,12 @@ def amazon_busqueda(bloque):
     """Cupon de un bloque de resultado de /s?k= (el mismo corte que vigia._leer_amazon). Devuelve dict:
     cupon_pesos, cupon_pct, paga_con_cupon ('Paga $X con cupon'), literal, condiciones, condicionado, codigos."""
     r = {"cupon_pesos": None, "cupon_pct": None, "paga_con_cupon": None, "literal": "", "condiciones": [],
-         "condicionado": False, "codigos": []}
+         "condicionado": False, "codigos": [], "limpio": False}
     c = re.search(r'data-component-type="s-coupon-component"(.*?)</span></span></span>', bloque or "", re.S)
     if c:
         lit = _plano(c.group(1).split(">", 1)[1] if ">" in c.group(1) else c.group(1))
         r["literal"] = lit
+        r["limpio"] = bool(CUPON_BUSQUEDA_LIMPIO.match(lit.strip()))
         paga = re.search(r"Paga \$([\d,]+\.\d\d)", lit)
         r["paga_con_cupon"] = _num(paga.group(1)) if paga else None
         d = re.search(r"cup[oó]n de descuento de ([^ ]+(?: %)?)", lit) or re.search(r"Ahorra ([\d.,]+ ?%)", lit)
@@ -212,7 +220,7 @@ def amazon_ficha(texto):
     la oferta 'Usado' o de Amazon Remates de Almacen: solo informativo, NO cuenta como precio)."""
     texto = texto or ""
     r = {"precio": None, "cupon_pesos": None, "cupon_pct": None, "literal": "", "condiciones": [],
-         "condicionado": False, "promo_id": "", "codigos": [], "usado": None}
+         "condicionado": False, "promo_id": "", "codigos": [], "usado": None, "limpio": False}
     pr = re.search(r'apex-pricetopay-value.{0,800}?a-price-whole">([\d,]+).{0,200}?a-price-fraction">(\d\d)', texto, re.S)
     if pr:
         r["precio"] = _num(pr.group(1) + "." + pr.group(2))
@@ -224,6 +232,7 @@ def amazon_ficha(texto):
         pid = re.search(r"/promotion/details/popup/([A-Z0-9]+)", cola)
         detalle = _plano(det.group(1)) if det else ""
         r["literal"] = lit + (" | " + detalle if detalle else "")
+        r["limpio"] = bool(CUPON_FICHA_LIMPIO.match(lit.strip()) and DETALLE_INOCUO.match(detalle.strip()))
         r["cupon_pesos"], r["cupon_pct"] = _cupon_de(lit)
         r["condiciones"] = _condiciones(r["literal"])
         r["condicionado"] = bool(r["condiciones"])
@@ -252,6 +261,10 @@ def amazon_precio(precio, promo):
         return precio, _une("cupon en la ficha sin cifra clara", extra)
     if promo.get("condicionado"):
         return precio, _une("cupon de ficha sin restar (pide %s)" % ", ".join(promo.get("condiciones") or []), extra)
+    if not promo.get("limpio"):   # E13: fuera de la lista blanca: no se resta, el literal va a la nota
+        lit = re.sub(r"\s+", " ", promo.get("literal") or "").strip()
+        return precio, _une('cupon de ficha sin restar: dice "%s" (revisa si pide algo)'
+                            % (lit if len(lit) <= 90 else lit[:89].rstrip() + "…"), extra)
     paga = promo.get("paga_con_cupon")
     if pct and paga is None:   # E6/A5: Amazon suele topar el % en Terminos (no se lee): solo con "Paga $X" que cuadre
         return precio, _une("cupon de ficha de {:g} % sin restar: revisa el tope en la pagina".format(pct), extra)
@@ -573,16 +586,16 @@ def _fecha_utc(s):
 
 def costco_promos(texto_ficha, ahora=None, url=""):
     """Filas (formato de bancos, mas 'codigo') de las promociones de pago de una ficha de Costco. La cifra solo sale
-    de la propia ficha (categoria ahorrosPaypalNNNN) y va a la promocion PayPal mas reciente; las demas promociones de
-    pago quedan con valor None (solo nota). Las vencidas contra `ahora` se descartan."""
+    de la propia ficha (una sola categoria ahorrosPaypalNNNN) y solo si hay una sola promocion PayPal viva (E13); las
+    demas promociones de pago quedan con valor None (solo nota). Las vencidas contra `ahora` se descartan."""
     d = json.loads(texto_ficha) if isinstance(texto_ficha, str) else (texto_ficha or {})
     ahora = ahora or dt.datetime.now(dt.timezone.utc)
-    monto = None
+    montos = []
     for c in d.get("categories") or []:
         m = re.match(r"ahorrosPaypal(\d+)$", c.get("code") or "", re.I)
         if m:
-            monto = (float(m.group(1)), c.get("name") or "Ahorros Paypal de $%s" % m.group(1))
-            break
+            montos.append((float(m.group(1)), c.get("name") or "Ahorros Paypal de $%s" % m.group(1)))
+    monto = montos[0] if len(montos) == 1 else None   # E13 (C6/C1): dos categorias = no se sabe cual vale
     vivas = []
     for p in d.get("potentialPromotions") or []:
         cod, medio = p.get("code") or "", p.get("allowedPaymentMethod") or ""
@@ -593,11 +606,15 @@ def costco_promos(texto_ficha, ahora=None, url=""):
             continue
         vivas.append((ini or ahora, cod, medio, p))
     paypal = [v for v in vivas if v[2].lower() == "paypal"]
-    con_cifra = max(paypal, key=lambda v: v[0])[1] if (paypal and monto) else None
+    # E13 (C6/C1): la cifra de la categoria solo se da si hay una sola promocion PayPal viva (con dos, o con una nueva
+    # y la categoria vieja de otra, se pegaba a la mas reciente: aviso falso). Si no, valor None: solo nota.
+    con_cifra = paypal[0][1] if (len(paypal) == 1 and monto) else None
     filas = []
     for ini, cod, medio, p in sorted(vivas, key=lambda v: v[1]):
         banco = "PayPal" if medio.lower() == "paypal" else (medio or "forma de pago sin nombre")
-        vig = "%s a %s" % ((p.get("startDate") or "")[:10], (p.get("endDate") or "")[:10])
+        # E13 (C6/C2): fechas en hora de Mexico (endDate 2026-12-02T05:59Z es el 1 dic a las 23:59 en Mexico)
+        vig = "%s a %s" % tuple((lambda x: x.astimezone(MX).date().isoformat() if x else "")(_fecha_utc(p.get(k)))
+                                for k in ("startDate", "endDate"))
         if cod == con_cifra:
             f = _fila(banco, "%s (codigo %s, solo pagando con %s)" % (monto[1], cod, banco), "descuento", url,
                       valor=monto[0], unidad="$", vigencia=vig)
@@ -1217,7 +1234,20 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
     if orden and _vencido(previo.get("leido"), ahora, MINUTOS_CERRADAS):
         leidos, errores, incompleto = lector_costco(pedir, orden, hay_tiempo, dormir, ahora, urls)
         productos = dict(previo.get("productos") or {}) if isinstance(previo.get("productos"), dict) else {}
-        productos.update(leidos)   # un articulo que fallo conserva sus filas anteriores
+        pares = caja.get("costco_pares") if isinstance(caja.get("costco_pares"), dict) else {}
+        for cod, v in leidos.items():
+            v["leido"] = _hora(ahora)   # E13 (C6/C2): hora de lectura por articulo
+            for f in v.get("filas") or []:
+                # E13 (C6/C1): la misma cifra con otra promocion PayPal = la categoria puede ser de la anterior: sin cifra
+                if f.get("banco") == "PayPal" and f.get("valor") is not None:
+                    antes = pares.get(cod)
+                    if isinstance(antes, list) and len(antes) == 2 and antes[1] == f["valor"] and antes[0] != f.get("codigo"):
+                        f["valor"], f["unidad"] = None, None
+                        f["beneficio"] = (f.get("beneficio") or "") + " (cifra quizá de %s, la anterior)" % antes[0]
+                    else:
+                        pares[cod] = [f.get("codigo"), f["valor"]]
+        caja["costco_pares"] = pares
+        productos.update(leidos)   # un articulo que fallo conserva sus filas anteriores (con su hora vieja: solo nota)
         caja["costco"] = {"leido": previo.get("leido", "") if incompleto else _hora(ahora), "productos": productos,
                           "error": "; ".join(errores)[:300]}
     prod_costco = (caja.get("costco") or {}).get("productos") or {}
@@ -1251,7 +1281,15 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
         precio = float(o["precio"])
         propias = list(filas.get(tienda, [])) + [f for f in filas.get("BBVA", []) if f.get("tienda") == tienda]
         if tienda == "Costco":
-            de_ficha = (prod_costco.get(_codigo_costco(o.get("url"))) or {}).get("filas") or []
+            art = prod_costco.get(_codigo_costco(o.get("url"))) or {}
+            de_ficha = art.get("filas") or []
+            if de_ficha and _vencido(art.get("leido"), ahora, MINUTOS_CERRADAS):
+                # E13 (C6/C2): el articulo no se pudo releer y su lectura tiene 60 min o mas: solo nota, nunca aviso
+                for f in de_ficha:
+                    if f.get("banco") and vigente(f, ahora) is not False:
+                        _anade(extras, o, "Costco anunciaba promoción al pagar con %s (%s), visto el %s; no se pudo "
+                                          "releer" % (f["banco"], f.get("codigo") or "?", art.get("leido") or "?"))
+                de_ficha = []
             for f in de_ficha:
                 if f.get("codigo") and f.get("valor") is None and vigente(f, ahora) is not False:
                     _anade(extras, o, "Costco anuncia otra promoción al pagar (%s) sin decir de cuánto" % f["codigo"])
@@ -1341,6 +1379,8 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                 if list(variantes.get(sku) or []) != [pid, vid]:
                     continue
                 nuevo = float(d["precio"])
+                if nuevo < precio * 0.5:   # E13 (C6/C4): menos de la mitad del precio normal es lectura dudosa: nada
+                    continue
                 viejo = _vencido(cer.get("precios_leido"), ahora, HORAS_CERRADA_AVISO * 60)
                 cuenta = "pide cuenta con correo institucional" if tc == "estudiantes_mx" else "pide cuenta de empleado"
                 if viejo and nuevo < precio - MARGEN:   # E6/A6: precio viejo (relectura fallida): nota, nunca aviso
@@ -1797,8 +1837,8 @@ def selftest():
         assert len(globals()[nombre]) <= 600, (nombre, len(globals()[nombre]))
     cf = costco_promos(COSTCO_648324, ahora, "uc")
     assert [(x["banco"], x["codigo"], x["valor"], x["unidad"], x["vigencia"]) for x in cf] == [
-        ("PayPal", "PP177", 6000.0, "$", "2026-11-23 a 2026-12-02"),
-        ("forma de pago sin nombre", "VS178", None, None, "2026-11-25 a 2026-12-13")], cf   # PAYPAL100 (2021) fuera
+        ("PayPal", "PP177", 6000.0, "$", "2026-11-23 a 2026-12-01"),
+        ("forma de pago sin nombre", "VS178", None, None, "2026-11-25 a 2026-12-12")], cf   # PAYPAL100 (2021) fuera
     assert cf[0]["beneficio"].startswith("Ahorros Paypal de $6,000") and cf[0]["url"] == "uc" and len(cf[0]["beneficio"]) <= 160
     assert precio_con_fila(37999, cf[0]) == 31999.0
     assert [x["codigo"] for x in costco_promos(COSTCO_648321, ahora)] == ["VS178"]          # sin PayPal
@@ -2056,17 +2096,21 @@ def selftest():
     av = mejorar(ofertas_falsas(), est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
     assert sorted(a["clave"] for a in av) == ["Amazon|fold8|normal-512|Banorte", "Samsung|fold8|ultra-512|estudiantes_mx"], av
     assert est["promos_avisado"]["Amazon|fold8|normal-512|Banorte"] == {"precio": 30757.34, "fecha": "2026-11-27"}
-    # E6/A7: la relectura de confirmacion de vigia resta el mismo cupon de ficha
-    guardado = v_mod.pedir
-    try:
-        v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' + FICHA_CUPON)
-        fa = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
-        v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' +
-                                            FICHA_CUPON.replace("$220.01", "10%"))
-        fp = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
-    finally:
-        v_mod.pedir = guardado
-    assert (fa["precio"], fp["precio"]) == (34174.82, 34394.83), (fa, fp)   # pesos se resta; % sin cuadre no
+    # E6/A7: la relectura de confirmacion de vigia resta el mismo cupon de ficha. Solo con el cupon prendido en vigia
+    # (RESTAR_CUPON_FICHA_AMAZON; si vigia o la constante faltan, cuenta como prendido): linea C lo apago el 25 nov 2026
+    if getattr(v_mod, "RESTAR_CUPON_FICHA_AMAZON", True):
+        guardado = v_mod.pedir
+        try:
+            v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' + FICHA_CUPON)
+            fa = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
+            v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' +
+                                                FICHA_CUPON.replace("$220.01", "10%"))
+            fp = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
+        finally:
+            v_mod.pedir = guardado
+        assert (fa["precio"], fp["precio"]) == (34174.82, 34394.83), (fa, fp)   # pesos se resta; % sin cuadre no
+    else:
+        print("cupon de ficha de Amazon apagado el 25 nov 2026: caso saltado", file=sys.__stdout__)
     # frase del aviso de tienda cerrada: no dice "se ve al pagar"
     av = mejorar(ofertas_falsas(), estado_fresco(), prods, ahora, True, _pedir_falso({}), abrir, reloj=_Reloj(),
                  dormir=lambda s: None)
@@ -2111,7 +2155,7 @@ def selftest():
                  dormir=lambda s: None)
     assert len(llamadas) == 3 and est["promos"]["costco"]["leido"] == "2026-11-27 12:00", (llamadas, est["promos"])
     assert [o["precio"] for o in of_c] == [o["precio"] for o in base_c]
-    assert "pagando con PayPal quedaría en $31,999, hasta 2026-12-02; se aplica sola al elegir PayPal (no probado)" \
+    assert "pagando con PayPal quedaría en $31,999, hasta 2026-12-01; se aplica sola al elegir PayPal (no probado)" \
         in of_c[0]["nota"], of_c[0]["nota"]
     assert "Costco anuncia otra promoción al pagar (VS178) sin decir de cuánto" in of_c[0]["nota"] and "VS178" in of_c[2]["nota"]
     assert all("Costco pide ser socio: membresía Dorada $600 al año si no lo eres" in o["nota"] for o in of_c), of_c
@@ -2178,6 +2222,66 @@ def selftest():
     assert nota.index("con BBVA:") < nota.index("anuncia promoción con", nota.index("con BBVA:") + 1) and \
         "Santander" not in nota, nota                                   # propios primero; lo que no empieza, fuera
     assert all(len(x.split('"')[1]) <= 90 for x in nota.split("; ") if "anuncia" in x), nota
+
+    # --- E13 (cola\6_tercer_lector_avisos.md): C1/C2 Costco PayPal, C6 cupon por lista blanca, C4 tienda cerrada
+    def ficha_cc(cats, proms):
+        return json.dumps({"code": "648324", "categories": [{"code": c, "name": "Ahorros Paypal de $%s" % c[13:]}
+                                                             for c in cats], "potentialPromotions": proms})
+
+    def pp(cod, ini, fin):
+        return {"allowedPaymentMethod": "paypal", "code": cod, "startDate": ini, "endDate": fin}
+    pp177 = pp("PP177", "2026-11-23T13:00:00.000Z", "2026-12-02T05:59:59.000Z")
+    pp190 = pp("PP190", "2026-11-27T13:00:00.000Z", "2026-12-10T05:59:59.000Z")
+    cc = lambda cats, proms: [(x["codigo"], x["valor"]) for x in costco_promos(ficha_cc(cats, proms), a29)]  # noqa: E731
+    assert cc(["ahorrosPaypal6000"], [pp177, pp190]) == [("PP177", None), ("PP190", None)]       # dos promociones
+    assert cc(["ahorrosPaypal3000", "ahorrosPaypal6000"], [pp190]) == [("PP190", None)]           # dos categorias
+    assert cc(["ahorrosPaypal6000"], [pp177]) == [("PP177", 6000.0)]
+    assert costco_promos(ficha_cc(["ahorrosPaypal6000"], [pp177]), a29)[0]["vigencia"] == "2026-11-23 a 2026-12-01"
+    url_e = "https://www.costco.com.mx/x/p/648324"
+    of_e = lambda: [{"prod": "fold8", "var": "normal-512", "nombre": "Fold8 512 GB", "tienda": "Costco",  # noqa: E731
+                     "precio": 37999.0, "url": url_e, "vendedor": "Costco", "nota": "", "titulo": "t"}]
+    pc_e = [{"id": "fold8", "tiendas": {"Costco": {}}}]
+    est_e, of = {}, of_e()
+    av = mejorar(of, est_e, pc_e, a29, True, _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp177]))}),
+                 abrir, reloj=_Reloj(), dormir=lambda s: None)
+    assert [a["clave"] for a in av] == ["Costco|fold8|normal-512|PayPal|PP177"], av
+    # dos horas despues PP177 ya no esta y llega PP190 con la misma categoria de $6,000: sin cifra, sin aviso
+    of = of_e()
+    av = mejorar(of, est_e, pc_e, a29 + dt.timedelta(hours=2), True,
+                 _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp190]))}), abrir, reloj=_Reloj(),
+                 dormir=lambda s: None)
+    assert av == [] and "Costco anuncia otra promoción al pagar (PP190)" in of[0]["nota"], (av, of[0]["nota"])
+    # el articulo no se pudo releer y su lectura tiene mas de 60 min: solo nota
+    est_e, of = {}, of_e()
+    mejorar(of, est_e, pc_e, a29, True, _pedir_falso({"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp177]))}),
+            abrir, reloj=_Reloj(), dormir=lambda s: None)
+    of = of_e()
+    av = mejorar(of, est_e, pc_e, a29 + dt.timedelta(hours=2), True, _pedir_falso({"/648324?": (403, "no")}), abrir,
+                 reloj=_Reloj(), dormir=lambda s: None)
+    assert av == [] and "no se pudo releer" in of[0]["nota"] and "quedaría" not in of[0]["nota"], (av, of[0]["nota"])
+    # cupon de ficha: solo la frase limpia se resta (la real sigue restando arriba: $34,394.83 -> $34,174.82)
+    for raro in ("cup&oacute;n de $1,000 pagando a meses sin intereses", "cup&oacute;n de $500 al comprar 2 o m&aacute;s",
+                 "cup&oacute;n de $800 pagando en efectivo en OXXO", "cup&oacute;n de $300 en la app",
+                 "cup&oacute;n de $500 en art&iacute;culos seleccionados"):
+        fin, nota = amazon_precio(34394.83, amazon_ficha(FICHA_CUPON.replace("cup&oacute;n de $220.01", raro)))
+        assert fin == 34394.83 and "sin restar" in nota, (raro, fin, nota)
+    fin, nota = amazon_precio(34394.83, amazon_ficha(FICHA_CUPON.replace("Oferta por tiempo limitado",
+                                                                         "Solo con tarjetas Nu")))
+    assert fin == 34394.83 and "sin restar" in nota, nota                              # detalle con condicion
+    fin, nota = amazon_precio(34394.83, amazon_ficha(FICHA_CUPON.replace("Oferta por tiempo limitado", "Envío en 2 días")))
+    assert fin == 34394.83 and 'dice "Aplica el cupón de $220.01 | Envío en 2 días"' in nota, nota   # detalle no conocido
+    sin_paga = ('<span data-component-type="s-coupon-component"><span class="s-coupon-clipped"><span class="a-color-base">'
+                'Se aplicó el cupón de descuento de $800.00</span></span></span></span>')
+    assert amazon_precio(34394.83, amazon_busqueda(sin_paga))[0] == 34394.83                    # busqueda sin "Paga"
+    # tienda cerrada: menos de la mitad del precio normal no da aviso ni nota
+    sku_e = "SM-F976BZKMLTM"
+    ps_e = [{"id": "fold8", "tiendas": {"Samsung": {"skus": {sku_e: ["ultra-512", "Grafito", "u"]}}}}]
+    for pr_e, espera in (("1999", 0), ("0.01", 0), ("34999", 1)):
+        of = [{"prod": "fold8", "var": "ultra-512", "nombre": "Fold8 Ultra 512 GB", "tienda": "Samsung", "precio": 41999.0,
+               "url": "u", "vendedor": "Samsung", "nota": "con cupones X", "cupones": ["X"], "titulo": "t"}]
+        av = mejorar(of, {}, ps_e, a29, True, _pedir_falso({"estudiantes_mx/pd.%s" % sku_e: (200, CERRADA_PD % (sku_e, pr_e))}),
+                     abrir, reloj=_Reloj(), dormir=lambda s: None)
+        assert len(av) == espera and (espera or "estudiantes" not in of[0]["nota"]), (pr_e, av, of[0]["nota"])
     silencio.__exit__(None, None, None)
 
     # --- vigia: cupones_candidatos deja fuera los codigos de tienda cerrada (EPP)
