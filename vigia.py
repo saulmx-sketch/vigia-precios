@@ -1725,7 +1725,9 @@ def leer_foro(prods, estado):
     return list(items.values())
 
 
-DEVOLUCION = re.compile(r"bonificaci[oó]n|cashback", re.I)
+DEVOLUCION = re.compile(r"bonificaci[oó]n|cashback|cash\s+back", re.I)
+# frases con bonificacion que no es devolucion del banco (revisor D, 26 nov: monedero de la tienda, Mercado Pago, negacion)
+NO_ES_DEVOLUCION = re.compile(r"monedero|mercado\s*pago|no\s+aplica|sin\s+bonificaci", re.I)
 
 
 def devolucion_de_banco(texto):
@@ -1733,7 +1735,9 @@ def devolucion_de_banco(texto):
     cashback); '' si no. Saul, 26 nov 2026 (respuesta 3, 'si, obviamente'): una oferta con devolucion de BBVA si
     cuenta como precio, pero el aviso dice que se paga completo y que la devolucion tiene tope al mes."""
     for f in re.split(r"(?<=[.!?;])\s+|\n", texto or ""):
-        if DEVOLUCION.search(f):
+        if DEVOLUCION.search(f) and not NO_ES_DEVOLUCION.search(f):
+            if any(re.search(p, f, re.I) for p in BANCOS_AJENOS.values()):
+                continue   # la frase nombra otro banco: no se sabe de quien es la devolucion (revisor D, H1)
             for nombre, pat in BANCOS_PROPIOS.items():
                 if re.search(pat, f, re.I):
                     return nombre
@@ -1755,7 +1759,7 @@ def aviso_foro(prods, it):
     texto_hilo = it["titulo"] + " " + limpio(it["descripcion"], 3000)
     nota, me_aplica = bancos(texto_hilo)
     niv = "SIN PRECIO, REVISAR" if precio is None else nivel(precio, prod, var) if me_aplica else "SOLO CON OTRO BANCO"
-    dev = devolucion_de_banco(texto_hilo) if me_aplica and precio is not None else ""
+    dev = devolucion_de_banco(it["titulo"] + "\n" + limpio(it["descripcion"], 3000)) if me_aplica and precio is not None else ""
     ptxt = pesos(precio)
     g, c, t = topes(prod, var)
     tienda = it["tienda"] or "tienda sin dato"
@@ -1770,7 +1774,8 @@ def aviso_foro(prods, it):
                         "en la tienda se cobra más)").format(dev, ptxt)
         linea_banco = ("    2. Banco: {}. Es devolución, no descuento: en la tienda pagas el precio completo y {} te regresa "
                        "una parte después, en tu estado de cuenta. Esa devolución tiene tope al mes: si ya lo llenaste con "
-                       "otra compra (como el 13 nov), no te regresa nada y pagas el precio completo.").format(nota, dev)
+                       "otra compra{}, no te regresa nada y pagas el precio completo.").format(
+                           nota, dev, " (como el 13 nov)" if dev == "BBVA" else "")
     else:
         linea_precio = "- {}: **{}** (precio publicado en el foro, no leído en la tienda)".format(
             "Precio que se vio" if raro else "Pagas", ptxt)
@@ -1782,7 +1787,9 @@ def aviso_foro(prods, it):
         "- Cómo se llega:",
         "    1. Abre la publicación del foro (liga de abajo) y de ahí la tienda.",
         linea_banco,
-        "    3. Confirma que lo venda la marca o la propia tienda, con garantía en México, y que el total sea {}.".format(ptxt),
+        ("    3. Confirma que lo venda la marca o la propia tienda, con garantía en México, y que tras la devolución "
+         "quede en {}.".format(ptxt) if dev else
+         "    3. Confirma que lo venda la marca o la propia tienda, con garantía en México, y que el total sea {}.".format(ptxt)),
         "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
         it["link"], "",
         "No se pudo releer la ficha (esta tienda no deja releer la ficha): ábrela antes de comprar.", "",
