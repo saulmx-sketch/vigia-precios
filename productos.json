@@ -44,7 +44,8 @@
     "Amazon": {"consultas": ["samsung+galaxy+z+fold8+ultra", "samsung+galaxy+z+fold8+512"]},
     "Costco": {"consulta": "galaxy z fold"},
     "Elektra": {"consulta": "galaxy z fold8"},
-    "Liverpool": {"consulta": "galaxy+z+fold8"}
+    "Liverpool": {"consulta": "galaxy+z+fold8"},
+    "Soriana": {"consulta": "galaxy z fold8"}
    },
    "foro": {
     "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]
@@ -80,7 +81,8 @@
     "Costco": {"consulta": "playstation 5"},
     "Elektra": {"consulta": "consola playstation 5"},
     "Liverpool": {"consulta": "playstation+5"},
-    "Gameplanet": {"consulta": "consola playstation 5"}
+    "Gameplanet": {"consulta": "consola playstation 5"},
+    "Soriana": {"consulta": "playstation 5 digital"}
    },
    "foro": {
     "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]
