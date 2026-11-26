@@ -932,13 +932,17 @@ def confirmar(o, prod, estado):
     try:
         fi = lector(ref)
     except Exception as ex:
-        return "sin_releer", o, "la tienda no la entrego: %s" % str(ex)[:120]
+        return "sin_releer", o, "la tienda no la entregó: %s" % str(ex)[:120]
     var = var_por_id(prod, o["var"])
     buenas, motivos = [], []
     for op in fi.get("opciones") or [fi]:
         precio, titulo = op.get("precio"), op.get("titulo") or o["titulo"]
-        if o["tienda"] == "Samsung" and precio is not None and precio >= o["precio"]:
-            precio = o["precio"]   # el catalogo da el precio sin cupones; el total del carrito de esta corrida manda
+        if o["tienda"] == "Samsung":
+            # el catalogo no dice color ni capacidad (el modelo los fija) y da el precio sin cupones: el total del
+            # carrito de esta corrida manda
+            titulo = "%s (%s)" % (o["titulo"], titulo) if titulo != o["titulo"] else titulo
+            if precio is not None and precio >= o["precio"]:
+                precio = o["precio"]
         if op.get("existencia") is not True:
             motivos.append("agotado" if op.get("existencia") is False else "la ficha no dice si hay existencia")
             continue
@@ -949,7 +953,7 @@ def confirmar(o, prod, estado):
                     importado=bool(op.get("importado")), var=var if o["tienda"] == "Samsung" else None)
         if not of:
             if o["tienda"] != "Samsung" and not variante(prod, titulo):
-                motivos.append('es otro artículo (la ficha lo titula "%s")' % titulo[:90])
+                motivos.append('es otro artículo: la ficha lo titula "%s"' % titulo[:90])
             elif precio is None or precio < prod["piso"]:
                 motivos.append("precio %s fuera de lo que se vigila" % pesos(precio))
             elif not vendedor_oficial(prod, o["tienda"], op["vendedor"]):
@@ -989,7 +993,8 @@ def pasos_compra(o):
         m = re.search(r"con cupones ([^;]+)", o.get("nota") or "")
         codigos = [c.strip() for c in m.group(1).split("+")] if m else []
     pasos = ["Abre la liga de abajo."] + ["Teclea el cupón %s." % c for c in codigos if c]
-    resto = [x.strip() for x in (o.get("nota") or "").split(";") if x.strip() and not x.strip().startswith("con cupones")]
+    resto = [x.strip() for x in (o.get("nota") or "").split(";")
+             if x.strip() and not re.match(r"con cupones|promocion vigente hasta", x.strip())]
     if resto and not cup:
         pasos.append("Ojo: " + "; ".join(resto) + ".")
     pasos.append("Revisa que el total sea {} antes de pagar.".format(pesos(o["precio"])))
@@ -1035,7 +1040,11 @@ def texto_aviso(o, prod, var, niv, resultado, razon_ficha, mejores, hora, niv_li
               "- Dónde: %s; lo vende %s" % (o["tienda"], o["vendedor"] or "(sin dato)"),
               "- Pagas: **%s**" % p, "- Cómo se llega:"]
     lineas += ["    %d. %s" % (i + 1, x) for i, x in enumerate(pasos_compra(o))]
-    lineas += ["- Vigencia: %s" % (o.get("vigencia") or "no se sabe"), "", o["url"], "", conf, "",
+    vig = o.get("vigencia")
+    if not vig:   # mientras la oferta no traiga vigencia, la que diga la nota (Samsung: "promocion vigente hasta ...")
+        m = re.search(r"vigente hasta ([\w-]+)", o.get("nota") or "")
+        vig = "hasta %s (lo dice la tienda)" % m.group(1) if m else "no se sabe"
+    lineas += ["- Vigencia: %s" % vig, "", o["url"], "", conf, "",
                "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t)]
     pq = linea_razon(o, prod, var)
     if pq:

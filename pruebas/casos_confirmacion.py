@@ -179,6 +179,10 @@ def _correr(v):
     sam_demo["topes_fijos"] = {"normal-512": [39000, 40000, 41000]}
     r, final, _ = v.confirmar(sam, sam_demo, {})
     assert r == "confirmada" and final["precio"] == 38999.0, (r, final)    # manda el total del carrito, no la pagina
+    assert "Lavanda" in final["titulo"], final["titulo"]                     # el catalogo no trae el color: se conserva
+    a = v.texto_aviso(dict(final, nota=final["nota"] + "; promocion vigente hasta 2026-12-01"), sam_demo,
+                      v.var_por_id(sam_demo, "normal-512"), "GANGA", "confirmada", "", {}, "07:05")
+    assert "- Vigencia: hasta 2026-12-01" in a[1] and "2. Teclea el cupón BF1000." in a[1], a[1]
 
     # --- 7. memoria de lo avisado: compatible con lo viejo {clave: precio}
     clave = "Liverpool|fold8|normal-512"
@@ -222,7 +226,7 @@ def _correr(v):
     assert nc["asunto"] == "SIN CONFIRMAR $5,999 · PS5 Digital (sin lector) · Liverpool · abre la ficha antes de creerlo", nc["asunto"]
     assert "el listado decía $5,999; la ficha dice $5,999, vendido por Liverpool" in nc["cuerpo"], nc["cuerpo"]
     assert sr["asunto"] == "GANGA $44,999 · Fold8 512 GB · Liverpool · ficha sin releer", sr["asunto"]
-    assert "No se pudo releer la ficha (la tienda no la entrego: Liverpool respondio 503" in sr["cuerpo"], sr["cuerpo"]
+    assert "No se pudo releer la ficha (la tienda no la entregó: Liverpool respondio 503" in sr["cuerpo"], sr["cuerpo"]
     for a in (conf, nc, sr):
         c = a["cuerpo"]
         assert ("\n%s\n" % a["o"]["url"]) in c, ("liga no va sola en su renglon", c)
