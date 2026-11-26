@@ -42,6 +42,17 @@ jobs:
           mkdir -p "$RUNNER_TEMP/sim"
           TMPDIR_SIM="$RUNNER_TEMP/sim" bash pruebas/simular_relevo.sh 2>&1 | grep -v '^      |'; c=${PIPESTATUS[0]}
           echo "codigo=$c"; exit $c
+      - name: relevo_en_seco
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: '1'
+          TERMINO_CONCLUSION: failure
+        run: |
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
       - name: seco
         continue-on-error: true
         timeout-minutes: 7
