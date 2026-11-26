@@ -5,6 +5,7 @@
 #   lanza=ok|falla    resultado de "gh workflow run"
 #   abiertos=Titulo   titulo de un issue ya abierto (puede repetirse el renglon)
 #   ultima=ID<TAB>URL<TAB>CONCLUSION<TAB>HORA   ultima corrida terminada de la cadena
+#   vista=ESTADO<TAB>CONCLUSION<TAB>URL<TAB>HORA<TAB>EVENTO   "gh run view" de la corrida (plan B); x o ausente = falla
 #   estado=active|disabled_manually|x   estado del flujo vigia.yml (x = la consulta falla; active si falta)
 # Nota: ignora --jq (en esta laptop no hay jq); el filtro real se prueba en el corredor de GitHub.
 valor() { grep -m1 "^$1=" "$ESCENARIO" | cut -d= -f2-; }
@@ -22,6 +23,11 @@ case "$1 $2" in
     r="${1:-x}"
     if [ "$r" = "x" ]; then echo "HTTP 500: Server Error" >&2; exit 1; fi
     echo "$r"
+    ;;
+  "run view")
+    v=$(valor vista)
+    if [ -z "$v" ] || [ "$v" = "x" ]; then echo "HTTP 500: Server Error" >&2; exit 1; fi
+    printf '%b\n' "$v"
     ;;
   "api repos/"*)
     e=$(valor estado); e="${e:-active}"
