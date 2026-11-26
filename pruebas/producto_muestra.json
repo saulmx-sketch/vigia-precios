@@ -1,0 +1,41 @@
+{
+ "_como_usar": "Producto de MUESTRA para probar que el vigia sirve para cualquier producto sin editar vigia.py. No se publica: solo se usa con VIGIA_CONFIG=pruebas/producto_muestra.json y --seco o --cobertura, y en pruebas/casos_producto_muestra.py. Mismo esquema que productos.json.",
+ "productos": [
+  {
+   "id": "ipad-air",
+   "nombre": "iPad Air 11",
+   "marca": "apple",
+   "marca_titulo": "apple|ipad",
+   "patron": "ipad\\s*air",
+   "excluir": "\\b13\\s*(\"|”|''|-?\\s*pulgadas|pulg)|cellular|celular|\\b5g\\b|teclado|keyboard|l[aá]piz|pencil|stylus|folio|\\bpara\\s+(el\\s+)?ipad|renovad|premium\\s+renewed",
+   "piso": 9000,
+   "_variantes": "Se pidio el iPad Air 11 (M3) 128 GB Wi-Fi. Medido el 25 nov 2026: Apple Mexico, Liverpool y Costco ya solo venden el M4 (el M3 de 128 GB solo aparece en Amazon, y en Wi-Fi + Cellular); por eso va tambien la variante M4, que es la que hoy se puede comprar.",
+   "variantes": [
+    {"id": "m3-128-wifi", "nombre": "iPad Air 11 M3 128 GB Wi-Fi",
+     "todas": ["\\b11\\s*(\"|”|''|-?\\s*pulgadas|pulg)", "\\bm3\\b", "\\b128\\s*gb"], "ninguna": ["\\bm4\\b"], "lista": 18799},
+    {"id": "m4-128-wifi", "nombre": "iPad Air 11 M4 128 GB Wi-Fi",
+     "todas": ["\\b11\\s*(\"|”|''|-?\\s*pulgadas|pulg)", "\\bm4\\b", "\\b128\\s*gb"], "ninguna": ["\\bm3\\b"], "lista": 18799}
+   ],
+   "_lista": "18,799 = precio de contado del iPad Air de 11 pulgadas 128 GB Wi-Fi en apple.com/mx/shop/buy-ipad/ipad-air, leido el 25 nov 2026 (ya es el M4; Apple no vende el M3). Para el M3 no hay lista propia leida: se usa la misma.",
+   "fracciones": [0.70, 0.78, 0.85],
+   "_fracciones": "provisionales, sin historial: los calcula la linea A",
+   "topes_fijos": {},
+   "requisitos": {
+    "_regla": "Solo vende la tienda misma o Apple; sin importados (misma regla que pidio Saul para sus aparatos, 19 nov 2026)",
+    "solo_vendedor_oficial": true,
+    "permite_importados": false,
+    "importacion_estimada": 0.2,
+    "vendedor_oficial": {"Amazon": "^\\s*(amazon(\\s+m[eé]xico)?|apple)\\s*$"}
+   },
+   "tiendas": {
+    "Amazon": {"consultas": ["ipad+air+11", "ipad+air+m3+128gb"]},
+    "Liverpool": {"consulta": "ipad+air+11"},
+    "Costco": {"consulta": "ipad air"},
+    "Elektra": {"consulta": "ipad air 11", "_sin_probar": true, "_nota": "su busqueda respondio 403 desde casa el 25 nov 2026"},
+    "Soriana": {"consulta": "ipad air 11", "_sin_probar": true},
+    "Cyberpuerta": {"consulta": "ipad air 11", "_sin_probar": true},
+    "Chedraui": {"consulta": "ipad air 11", "_sin_probar": true}
+   }
+  }
+ ]
+}

@@ -97,9 +97,11 @@ def _correr(v):
     assert fi["titulo"] == "Consola PS5 Blanco" and fi["precio"] == 6999.0 and v.variante(ps, fi["titulo"]) is None, fi
     v.pedir = Red(LIV_OK)
     fi = v.ficha_liverpool(LIV + "/pdp/p/1186785793")
-    assert fi["titulo"].endswith(" con lector de disco") and "igital" not in fi["titulo"], fi["titulo"]
-    assert v.consola_de_ficha({"Tipo de consola": "Fija/portátil", "Lector integrado": "Sin lector"}) == ""
-    assert v.consola_de_ficha({"Lector integrado": "Sin lector"}) == ""
+    t = v.titulo_con_atributos(ps, "Liverpool", fi["titulo"], fi["atributos"])   # reglas de productos.json (ps5)
+    assert t.endswith(" con lector de disco") and "igital" not in t, t
+    agrega = lambda attrs: v.titulo_con_atributos(ps, "Liverpool", "X", attrs)[1:]
+    assert agrega({"Tipo de consola": "Fija/portátil", "Lector integrado": "Sin lector"}) == ""
+    assert agrega({"Lector integrado": "Sin lector"}) == ""
     fi = v.ficha_liverpool(LIV + "/pdp/p/1156059630")
     assert fi["titulo"] == "Consola PS5 Blanco" and fi["precio"] == 5999.0, fi
     assert fi["vendedor"] == "Liverpool" and fi["existencia"] is True, fi
