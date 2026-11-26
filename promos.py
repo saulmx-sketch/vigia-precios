@@ -1125,6 +1125,25 @@ LECTORES_BANCOS["Liverpool"] = lector_bancos_liverpool
 LECTORES_BANCOS["BBVA"] = lector_bancos_bbva
 
 
+def fuera_de_buen_fin(ahora):
+    """True fuera de la ventana en que cae el Buen Fin (del 8 al 22 de noviembre, hora de Mexico; sus fechas cambian
+    cada anio pero siempre caen ahi)."""
+    hoy = ahora.astimezone(MX).date()
+    return not (hoy.month == 11 and 8 <= hoy.day <= 22)
+
+
+def recorte_banco(lit, banco, antes=40, despues=110):
+    """N1 de la linea B (26 nov): el literal de un banco se recortaba a sus primeros 90 caracteres y se comia la
+    condicion ("solo en laptops y tablets"). Ahora: de 40 caracteres antes del nombre del banco a 110 despues; sin
+    nombre a la vista, los primeros 150."""
+    lit = re.sub(r"\s+", " ", lit or "").strip()
+    m = re.search(re.escape(banco or ""), lit, re.I) if banco else None
+    ini = max(0, m.start() - antes) if m else 0
+    fin = (m.end() + despues) if m else antes + despues
+    corte = lit[ini:fin].strip()
+    return ("…" if ini > 0 else "") + corte + ("…" if fin < len(lit) else "")
+
+
 def _que(o):
     """Como se nombra el articulo en los pasos de un aviso (pendiente 8: decia "el teléfono" tambien para la consola)."""
     return (o or {}).get("nombre") or "el artículo"
@@ -1453,7 +1472,11 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
         dichos = []
         for f in anuncios:
             lit = re.sub(r"\s+", " ", f.get("beneficio") or "").strip()
-            lit = lit if len(lit) <= 90 else lit[:89].rstrip() + "…"
+            if re.search(CATEGORIA_AJENA, lit, re.I):
+                continue   # N2 de la linea B (26 nov): "12 % ... en Moda y Hogar" no es de este articulo
+            if re.search(r"buen\s*fin", lit, re.I) and fuera_de_buen_fin(ahora):
+                continue   # N3: "Buen Fin: 15 % con Santander" heredaba la fecha de la pagina; fuera de su ventana, vencida
+            lit = recorte_banco(lit, f.get("banco"))
             texto = '%s anuncia promoción con %s: "%s" (sin probar; revísala en la página)' % (tienda, f["banco"], lit)
             if texto not in dichos and len(dichos) < 2:
                 dichos.append(texto)
@@ -1833,6 +1856,14 @@ def selftest():
     assert _repartir(_skus_cerradas(tres[:1]), 3) == ["A1", "A2", "A3"]
     assert _repartir(_skus_cerradas(tres), 9) == ["A1", "B1", "D1", "A2", "D2", "A3"]
     assert _que({"nombre": "Producto X"}) == "Producto X" and _que({}) == "el artículo"
+    # N1 (26 nov): el recorte guarda la condicion que sigue al banco
+    largo = "Ofertas de la semana en tecnologia y mas: " * 3 + "15% de descuento con Banorte solo en laptops y tablets."
+    r_b = recorte_banco(largo, "Banorte")
+    assert "solo en laptops y tablets" in r_b and r_b.startswith("…") and len(r_b) <= 155, r_b
+    assert recorte_banco("corto con BBVA", "BBVA") == "corto con BBVA"
+    # N3 (26 nov): fuera del 8 al 22 de noviembre, un literal del Buen Fin no se cita
+    assert fuera_de_buen_fin(dt.datetime(2026, 11, 27, 18, tzinfo=dt.timezone.utc))
+    assert not fuera_de_buen_fin(dt.datetime(2026, 11, 15, 18, tzinfo=dt.timezone.utc))
     # P5' (26 nov): la cifra de la categoria de Costco no pasa de la cuarta parte del precio del articulo
     cat = {"tipo": "descuento", "valor": 6000, "unidad": "$", "tope_relativo": TOPE_CATEGORIA_COSTCO}
     assert precio_con_fila(44999, cat) == 38999 and precio_con_fila(12499, cat) is None
