@@ -162,7 +162,7 @@ class Servidor:
     def __init__(self, mapa):
         self.mapa, self.pedidas = mapa, []
 
-    def __call__(self, url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
+    def __call__(self, url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0, intentos=2):
         self.pedidas.append(url)
         for patron, r in self.mapa.items():
             if re.search(patron, url):
