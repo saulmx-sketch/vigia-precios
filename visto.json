@@ -4,7 +4,9 @@
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {},
+ "caida_desde": {
+  "Amazon": "2026-11-26T20:56+00:00"
+ },
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|ps5|digital": {
@@ -17,19 +19,19 @@
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-26 14:42"
+   "visto": "2026-11-26 14:56"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-26 14:42"
+   "visto": "2026-11-26 14:56"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-26 14:42"
+   "visto": "2026-11-26 14:56"
   }
  },
  "cupones_cosechados": {
@@ -214,7 +216,6 @@
   }
  },
  "diag_amazon": [
-  "11-26 05:43 busqueda ok; busqueda ok",
   "11-26 05:43 busqueda ok",
   "11-26 05:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 05:59 busqueda 503 de 1669 bytes, reintento ok",
@@ -273,11 +274,12 @@
   "11-26 14:00 busqueda ok",
   "11-26 14:14 busqueda ok",
   "11-26 14:28 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
-  "11-26 14:42 busqueda ok"
+  "11-26 14:42 busqueda ok",
+  "11-26 14:57 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX 503 de 322 bytes"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 0,
+  "Amazon": 1,
   "Chedraui": 0,
   "Costco": 0,
   "Cupones": 0,
@@ -1529,7 +1531,9 @@
   }
  },
  "sembrado": true,
- "ultimo_error": {},
+ "ultimo_error": {
+  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B09SYJ9NNX"
+ },
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    7499.0,
