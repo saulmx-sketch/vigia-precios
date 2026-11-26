@@ -62,6 +62,14 @@ jobs:
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v5
+      # Plan B del relevo: lanza ya el relevo de esta corrida; pasa 13 min en el entorno "espera" y revisa
+      # que esta corrida haya dejado sucesora. Si este paso falla, la cadena sigue igual (queda el salvavidas).
+      - name: Lanzar el relevo de esta corrida
+        continue-on-error: true
+        timeout-minutes: 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run relevo.yml --repo "$GITHUB_REPOSITORY" --ref main -f corrida="$GITHUB_RUN_ID"
       # Pruebas antes de revisar. Si una falla se apaga solo su parte y la revision de precios sigue:
       # un vigia ciego en Black Friday por una prueba fragil es peor que el fallo que evita.
       - name: Pruebas del nucleo

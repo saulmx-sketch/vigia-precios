@@ -15,10 +15,18 @@ TITULO_RELANZADA="La cadena del vigía se detuvo y se relanzó sola"
 TITULO_DETENIDA="El vigía está detenido: no se pudo relanzar"
 
 : "${ESPERA_REINTENTO:=15}"
+# Esperas de los reintentos del aviso: mas cortas que las de contar y lanzar, para que todo quepa en el tope
+# del trabajo (12 min) aun con GitHub fallando. Mismo numero de reintentos.
+: "${ESPERA_AVISO:=5}"
+# Tope por llamada a gh (gh no trae uno propio): una llamada colgada no se come el tope del trabajo.
+: "${GH_TOPE:=25}"
+gh() { timeout "$GH_TOPE" gh "$@"; }
 
 # Hora de la Ciudad de Mexico (UTC-6 fijo: sin horario de verano desde 2022).
 hora_mx() {
   local iso="$1" s
+  # Sin hora: decirlo (date -d "" daria la medianoche de hoy, una hora inventada).
+  [ -z "$iso" ] && { echo "a una hora que GitHub no informó"; return; }
   s=$(date -u -d "$iso" +%s 2>/dev/null) || { echo "$iso"; return; }
   date -u -d "@$((s - 21600))" '+%d-%m-%Y a las %H:%M (hora de la Ciudad de México)'
 }
@@ -36,7 +44,8 @@ conclusion_en_lego() {
 
 # Llena TERMINO_* con la ultima corrida terminada de la cadena (no de horario) si no vinieron dados.
 completar_termino() {
-  if [ -n "$TERMINO_ID" ] && [ "$TERMINO_EVENTO" != "schedule" ]; then
+  # Con id y liga ya dados no hace falta buscar; sin liga (plan B con "gh run view" fallido) se busca.
+  if [ -n "$TERMINO_ID" ] && [ -n "$TERMINO_URL" ] && [ "$TERMINO_EVENTO" != "schedule" ]; then
     return 0
   fi
   local linea i
@@ -45,7 +54,7 @@ completar_termino() {
       --json databaseId,url,conclusion,updatedAt,event \
       --jq '[.[] | select(.event != "schedule")][0] | select(. != null) | "\(.databaseId)\t\(.url)\t\(.conclusion)\t\(.updatedAt)"') && break
     linea=""
-    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_AVISO))
   done
   if [ -n "$linea" ] && [ "${linea%%$'\t'*}" != "null" ]; then
     IFS=$'\t' read -r TERMINO_ID TERMINO_URL TERMINO_CONCLUSION TERMINO_HORA <<< "$linea"
@@ -56,7 +65,9 @@ completar_termino() {
 
 parrafo_termino() {
   if [ -n "$TERMINO_ID" ]; then
-    echo "La última corrida de la cadena, la número $TERMINO_ID, $(conclusion_en_lego "$TERMINO_CONCLUSION") el $(hora_mx "$TERMINO_HORA"). Liga: $TERMINO_URL"
+    local cuando="a una hora que GitHub no informó"
+    [ -n "$TERMINO_HORA" ] && cuando="el $(hora_mx "$TERMINO_HORA")"
+    echo "La última corrida de la cadena, la número $TERMINO_ID, $(conclusion_en_lego "$TERMINO_CONCLUSION") $cuando. Liga: ${TERMINO_URL:-GitHub no la informó; está en Actions > vigia}"
   else
     echo "No pude saber cuál fue la última corrida de la cadena (GitHub no respondió la consulta)."
   fi
@@ -75,7 +86,7 @@ $cuerpo"
     abiertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --search "\"$titulo\" in:title" \
       --json title --jq '.[].title') && break
     abiertos=""
-    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_AVISO))
   done
   if printf '%s\n' "$abiertos" | grep -Fxq -- "$titulo"; then
     echo "aviso ya abierto, no se repite: $titulo"
@@ -91,7 +102,7 @@ $cuerpo"
       echo "aviso abierto: $titulo"
       return 0
     fi
-    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_AVISO))
   done
   echo "no se pudo abrir el aviso: $titulo"
   return 1
