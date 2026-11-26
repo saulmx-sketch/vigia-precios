@@ -8,10 +8,13 @@
    "patron": "fold\\s*-?\\s*8|zfold8|fold\\s*ultra\\s*8",
    "excluir": "",
    "_olvidar": "25 nov 2026: Liverpool se lee por ficha y la ficha siempre da la capacidad; sus claves sin capacidad ya no salen de ninguna tienda (el mismo telefono es ahora Liverpool|fold8|normal-512) y mandaban un Agotado falso",
-   "olvidar": ["Liverpool|fold8|normal", "Liverpool|fold8|ultra"],
+   "_olvidar_cyberpuerta": "Saul 2026-11-26 (respuesta 4, 'no'): Cyberpuerta fuera para el Fold8; no quiere sus Fold8 con nota de confirmar version Mexico (regla del 19 nov: ventas con garantia y de samsung mx). Sus claves se olvidan para que no salga un Agotado falso. La PS5 en Cyberpuerta sigue",
+   "olvidar": ["Liverpool|fold8|normal", "Liverpool|fold8|ultra", "Cyberpuerta|fold8|normal-512", "Cyberpuerta|fold8|ultra-512",
+               "Cyberpuerta|fold8|ultra-1tb", "Cyberpuerta|fold8|ultra", "Cyberpuerta|fold8|normal", "Cyberpuerta|fold8|normal-1tb"],
    "piso": 12000,
    "fracciones": [0.411, 0.449, 0.486],
-   "topes_fijos": {},
+   "_topes_fijos": "Saul 2026-11-26 (respuesta 2: 'si, obviamente'): el Fold8 normal de 512 GB si le interesa; su aviso de comprar sube de 21,800 a 22,600. Ganga y mirar se dejan como estaban ese dia (19,900 y 25,600). La variante 'normal' (capacidad sin dato) usa la misma terna",
+   "topes_fijos": {"normal-512": [19900, 22600, 25600], "normal": [19900, 22600, 25600]},
    "requisitos": {
     "_regla": "Saul 2026-11-19: deben ser ventas con garantia y de samsung mx, no me sirve un tercero que vende importados",
     "solo_vendedor_oficial": true,
@@ -50,8 +53,7 @@
     "Costco": {"consulta": "galaxy z fold"},
     "Elektra": {"consulta": "galaxy z fold8"},
     "Liverpool": {"consulta": "galaxy+z+fold8"},
-    "Soriana": {"consulta": "galaxy z fold8"},
-    "Cyberpuerta": {"consulta": "galaxy z fold8"}
+    "Soriana": {"consulta": "galaxy z fold8"}
    },
    "foro": {
     "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]

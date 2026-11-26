@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-25T21:24:09-06:00",
+ "generado": "2026-11-26T08:14:10-06:00",
  "metodo": "Precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos (lecturas del vigia y historia/). El piso esperado repite lo que hizo el modelo anterior (o la misma consola el anio pasado) en las mismas fechas, a la escala del precio de hoy; los topes salen de ese piso y del minimo de los ultimos 120 dias.",
  "variantes": {
   "fold8|normal": {
@@ -10,17 +10,17 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 19128,
-      "7": 28580,
-      "horizonte": 19128
+      "30": 18986,
+      "7": 28367,
+      "horizonte": 18986
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 19128,
+     "piso": 18986,
      "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
@@ -28,17 +28,17 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
-      "30": 25192,
-      "7": 35000,
-      "horizonte": 25192
+      "30": 25005,
+      "7": 34740,
+      "horizonte": 25005
      },
      "nivel": 35010,
      "nombre": "Fold6",
-     "piso": 25192,
+     "piso": 25005,
      "rastro": "historia/foro_fold6.csv:1012383",
      "usado": true
     }
@@ -60,14 +60,14 @@
    "nombre": "Fold8 (capacidad sin dato)",
    "percentiles": null,
    "piso": {
-    "bajo": 19128,
+    "bajo": 18986,
     "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 22160,
+    "precio": 21995,
     "rango": [
-     19128,
-     25192
+     18986,
+     25005
     ],
     "rastros": [
      "historia/foro_fold7.csv:1115196",
@@ -81,10 +81,10 @@
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 31790,
+     "piso": 31554,
      "rango": [
-      28580,
-      35000
+      28367,
+      34740
      ],
      "rastros": [
       "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
@@ -97,10 +97,10 @@
      "evento": "Navidad 2026",
      "fin": "2027-01-06",
      "inicio": "2026-12-16",
-     "piso": 29308,
+     "piso": 29090,
      "rango": [
-      19128,
-      39489
+      18986,
+      39195
      ],
      "rastros": [
       "historia/foro_fold7.csv:1117346",
@@ -113,10 +113,10 @@
      "evento": "Cuesta de enero 2027",
      "fin": "2027-01-31",
      "inicio": "2027-01-07",
-     "piso": 32987,
+     "piso": 32742,
      "rango": [
-      23006,
-      42968
+      22835,
+      42649
      ],
      "rastros": [
       "historia/antecedentes.csv:RA-49",
@@ -127,24 +127,24 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 15300,
+   "sin_confirmar_bajo": 15100,
    "tipico": null,
    "topes": [
     19900,
-    21800,
+    22600,
     25600
    ],
    "topes_calculados": [
-    19500,
-    22600,
-    25600
+    19300,
+    22400,
+    25500
    ],
    "topes_manual": [
     19900,
     21800,
     23600
    ],
-   "topes_origen": "a mano; mirar ampliado por proporcion de normal-512"
+   "topes_origen": "topes_fijos"
   },
   "fold8|normal-1tb": {
    "ajeno": null,
@@ -154,17 +154,17 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 22717,
-      "7": 33943,
-      "horizonte": 22717
+      "30": 22549,
+      "7": 33690,
+      "horizonte": 22549
      },
      "nivel": 40725,
      "nombre": "Fold7",
-     "piso": 22717,
+     "piso": 22549,
      "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
@@ -172,17 +172,17 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
-      "30": 29919,
-      "7": 41568,
-      "horizonte": 29919
+      "30": 29697,
+      "7": 41259,
+      "horizonte": 29697
      },
      "nivel": 41580,
      "nombre": "Fold6",
-     "piso": 29919,
+     "piso": 29697,
      "rastro": "historia/foro_fold6.csv:1012383",
      "usado": true
     }
@@ -202,14 +202,14 @@
    "nombre": "Fold8 1 TB",
    "percentiles": null,
    "piso": {
-    "bajo": 22717,
+    "bajo": 22549,
     "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 26318,
+    "precio": 26122,
     "rango": [
-     22717,
-     29919
+     22549,
+     29697
     ],
     "rastros": [
      "historia/foro_fold7.csv:1115196",
@@ -223,10 +223,10 @@
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 37756,
+     "piso": 37475,
      "rango": [
-      33943,
-      41568
+      33690,
+      41259
      ],
      "rastros": [
       "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
@@ -239,10 +239,10 @@
      "evento": "Navidad 2026",
      "fin": "2027-01-06",
      "inicio": "2026-12-16",
-     "piso": 34808,
+     "piso": 34549,
      "rango": [
-      22717,
-      46899
+      22549,
+      46550
      ],
      "rastros": [
       "historia/foro_fold7.csv:1117346",
@@ -255,10 +255,10 @@
      "evento": "Cuesta de enero 2027",
      "fin": "2027-01-31",
      "inicio": "2027-01-07",
-     "piso": 39177,
+     "piso": 38886,
      "rango": [
-      27323,
-      51031
+      27120,
+      50652
      ],
      "rastros": [
       "historia/antecedentes.csv:RA-49",
@@ -269,17 +269,17 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 18100,
+   "sin_confirmar_bajo": 17900,
    "tipico": null,
    "topes": [
     23700,
     25900,
-    30400
+    30200
    ],
    "topes_calculados": [
-    23100,
-    26800,
-    30400
+    22900,
+    26600,
+    30200
    ],
    "topes_manual": [
     23700,
@@ -304,17 +304,17 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 19128,
-      "7": 28580,
-      "horizonte": 19128
+      "30": 18986,
+      "7": 28367,
+      "horizonte": 18986
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 19128,
+     "piso": 18986,
      "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
@@ -322,17 +322,17 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
-      "30": 25192,
-      "7": 35000,
-      "horizonte": 25192
+      "30": 25005,
+      "7": 34740,
+      "horizonte": 25005
      },
      "nivel": 35010,
      "nombre": "Fold6",
-     "piso": 25192,
+     "piso": 25005,
      "rastro": "historia/foro_fold6.csv:1012383",
      "usado": true
     }
@@ -345,22 +345,22 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
-       "hasta": 19128,
-       "hasta_fecha": "2026-12-25",
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,986",
+       "hasta": 18986,
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
-       "hasta": 19128,
+       "dias": 66,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,986",
+       "hasta": 18986,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -375,27 +375,27 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
-       "hasta": 19128,
-       "hasta_fecha": "2026-12-25",
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,986",
+       "hasta": 18986,
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
-       "hasta": 19128,
+       "dias": 66,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,986",
+       "hasta": 18986,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
      ],
-     "precio": 21800,
+     "precio": 22600,
      "tope": "comprar"
     },
     {
@@ -405,24 +405,24 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
-       "hasta": 19128,
-       "hasta_fecha": "2026-12-25",
-       "veces": 1
+       "frase": "en 2 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,986",
+       "hasta": 18986,
+       "hasta_fecha": "2026-12-26",
+       "veces": 2
       },
       {
        "de": 2,
-       "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
-       "hasta": 19128,
+       "dias": 66,
+       "frase": "en 2 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,986",
+       "hasta": 18986,
        "hasta_fecha": "2027-01-31",
-       "veces": 1
+       "veces": 2
       }
      ],
      "precio": 25600,
@@ -468,12 +468,12 @@
      "antecedente": 6,
      "foro": 1,
      "keepa": 81,
-     "propio": 26
+     "propio": 31
     }
    },
    "nivel": {
     "n": 30,
-    "precio": 35000
+    "precio": 34740
    },
    "nombre": "Fold8 512 GB",
    "percentiles": {
@@ -483,14 +483,14 @@
     "p50": 36780
    },
    "piso": {
-    "bajo": 19128,
+    "bajo": 18986,
     "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 22160,
+    "precio": 21995,
     "rango": [
-     19128,
-     25192
+     18986,
+     25005
     ],
     "rastros": [
      "historia/foro_fold7.csv:1115196",
@@ -504,10 +504,10 @@
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 31790,
+     "piso": 31554,
      "rango": [
-      28580,
-      35000
+      28367,
+      34740
      ],
      "rastros": [
       "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
@@ -520,10 +520,10 @@
      "evento": "Navidad 2026",
      "fin": "2027-01-06",
      "inicio": "2026-12-16",
-     "piso": 29308,
+     "piso": 29090,
      "rango": [
-      19128,
-      39489
+      18986,
+      39195
      ],
      "rastros": [
       "historia/foro_fold7.csv:1117346",
@@ -536,10 +536,10 @@
      "evento": "Cuesta de enero 2027",
      "fin": "2027-01-31",
      "inicio": "2027-01-07",
-     "piso": 32987,
+     "piso": 32742,
      "rango": [
-      23006,
-      42968
+      22835,
+      42649
      ],
      "rastros": [
       "historia/antecedentes.csv:RA-49",
@@ -550,27 +550,27 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 15300,
+   "sin_confirmar_bajo": 15100,
    "tipico": {
     "n": 19,
     "precio": 36000
    },
    "topes": [
     19900,
-    21800,
+    22600,
     25600
    ],
    "topes_calculados": [
-    19500,
-    22600,
-    25600
+    19300,
+    22400,
+    25500
    ],
    "topes_manual": [
     19900,
     21800,
     23600
    ],
-   "topes_origen": "a mano; mirar ampliado por pronostico"
+   "topes_origen": "topes_fijos"
   },
   "fold8|ultra": {
    "ajeno": null,
@@ -580,7 +580,7 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
@@ -598,7 +598,7 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
@@ -732,7 +732,7 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
@@ -750,7 +750,7 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
@@ -777,12 +777,12 @@
     "tienda": "Samsung"
    },
    "minimo_30d": {
-    "condicion": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
-    "fecha": "2026-11-19",
+    "condicion": "con cupones FOLD8_25CLUB + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01; hasta 24 meses sin intereses con BBVA",
+    "fecha": "2026-11-25",
     "fuente": "propio",
     "garantia": "si",
-    "precio": 56149.1,
-    "rastro": "historial_precios.csv:2026-11-19 20:09|Samsung|ultra-1tb",
+    "precio": 46624.25,
+    "rastro": "historial_precios.csv:2026-11-25 22:57|Samsung|ultra-1tb",
     "tienda": "Samsung"
    },
    "minimo_ciclo": null,
@@ -795,15 +795,15 @@
     "validas": {
      "antecedente": 2,
      "foro": 2,
-     "propio": 10
+     "propio": 11
     }
    },
    "nivel": null,
    "nombre": "Fold8 Ultra 1 TB",
    "percentiles": {
-    "n": 8,
-    "p10": 25851.1,
-    "p25": 48631.82,
+    "n": 9,
+    "p10": 25927.4,
+    "p25": 46624.25,
     "p50": 56149.1
    },
    "piso": {
@@ -875,7 +875,10 @@
    "s": 0.12,
    "sesgo": 0.15,
    "sin_confirmar_bajo": 18600,
-   "tipico": null,
+   "tipico": {
+    "n": 5,
+    "precio": 56149.1
+   },
    "topes": [
     26100,
     28500,
@@ -909,7 +912,7 @@
      "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 55,
+     "dias_futuro": 54,
      "fecha": "2026-12-09",
      "fecha_analogo": "2025-12-10",
      "minimos": {
@@ -927,7 +930,7 @@
      "base": "el Fold6 llegó a $25,199 en Mercado Libre el 7 dic 2024, 28 % debajo de su nivel de noviembre",
      "desfase": 728,
      "dias_antes": 27,
-     "dias_futuro": 66,
+     "dias_futuro": 65,
      "fecha": "2026-12-05",
      "fecha_analogo": "2024-12-07",
      "minimos": {
@@ -950,7 +953,7 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
@@ -958,12 +961,12 @@
        "dias": 30,
        "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
        "hasta": 19680,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
        "hasta": 19680,
        "hasta_fecha": "2027-01-31",
@@ -980,7 +983,7 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
@@ -988,12 +991,12 @@
        "dias": 30,
        "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
        "hasta": 19680,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
        "hasta": 19680,
        "hasta_fecha": "2027-01-31",
@@ -1010,7 +1013,7 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
@@ -1018,12 +1021,12 @@
        "dias": 30,
        "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
        "hasta": 19680,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
        "hasta": 19680,
        "hasta_fecha": "2027-01-31",
@@ -1073,7 +1076,7 @@
      "foro": 5,
      "keepa": 46,
      "prensa": 2,
-     "propio": 12
+     "propio": 13
     }
    },
    "nivel": {
@@ -1193,7 +1196,7 @@
      "base": "la misma consola llegó a $6,675 en Walmart el 1 dic 2025, 16 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 67,
+     "dias_futuro": 66,
      "fecha": "2026-11-30",
      "fecha_analogo": "2025-12-01",
      "minimos": {
@@ -1210,18 +1213,18 @@
     {
      "base": "la misma consola llegó a $7,919 en Amazon el 1 ene 2025, 3 % arriba de su nivel de noviembre",
      "desfase": 728,
-     "dias_antes": 18,
+     "dias_antes": 17,
      "dias_futuro": 39,
      "fecha": "2026-12-30",
      "fecha_analogo": "2025-01-01",
      "minimos": {
-      "30": 13003,
-      "7": null,
-      "horizonte": 12904
+      "30": 13012,
+      "7": 14985,
+      "horizonte": 12912
      },
-     "nivel": 7665,
+     "nivel": 7660,
      "nombre": "PS5 Digital dos años antes",
-     "piso": 12904,
+     "piso": 12912,
      "rastro": "historia/prensa2.csv:A6-14",
      "usado": true
     }
@@ -1234,7 +1237,7 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
@@ -1242,12 +1245,12 @@
        "dias": 30,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 30 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 0
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en ninguno de los 2 años parecidos bajó más de aquí al 31 ene 2027",
        "hasta": null,
        "hasta_fecha": "2027-01-31",
@@ -1264,7 +1267,7 @@
        "dias": 7,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 0
       },
       {
@@ -1272,12 +1275,12 @@
        "dias": 30,
        "frase": "en ninguno de los 2 años parecidos bajó más en los 30 días siguientes",
        "hasta": null,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 0
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en ninguno de los 2 años parecidos bajó más de aquí al 31 ene 2027",
        "hasta": null,
        "hasta_fecha": "2027-01-31",
@@ -1294,7 +1297,7 @@
        "dias": 7,
        "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $10,434",
        "hasta": 10434,
-       "hasta_fecha": "2026-12-02",
+       "hasta_fecha": "2026-12-03",
        "veces": 1
       },
       {
@@ -1302,12 +1305,12 @@
        "dias": 30,
        "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $10,434",
        "hasta": 10434,
-       "hasta_fecha": "2026-12-25",
+       "hasta_fecha": "2026-12-26",
        "veces": 1
       },
       {
        "de": 2,
-       "dias": 67,
+       "dias": 66,
        "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $10,434",
        "hasta": 10434,
        "hasta_fecha": "2027-01-31",
@@ -1358,7 +1361,7 @@
      "foro": 8,
      "keepa": 434,
      "prensa": 4,
-     "propio": 4
+     "propio": 7
     }
    },
    "nivel": {
@@ -1367,7 +1370,7 @@
    },
    "nombre": "PS5 Digital (sin lector)",
    "percentiles": {
-    "n": 382,
+    "n": 383,
     "p10": 7990,
     "p25": 8920,
     "p50": 9990
@@ -1377,10 +1380,10 @@
     "fecha": "2026-11-30",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 11669,
+    "precio": 11673,
     "rango": [
      10434,
-     12904
+     12912
     ],
     "rastros": [
      "historia/foro_ps5.csv:1112722",
@@ -1409,10 +1412,10 @@
      "evento": "Navidad 2026",
      "fin": "2027-01-06",
      "inicio": "2026-12-16",
-     "piso": 12194,
+     "piso": 12198,
      "rango": [
       11483,
-      12904
+      12912
      ],
      "rastros": [
       "historia/foro_ps5.csv:1118032",
@@ -1441,8 +1444,8 @@
    "sesgo": 0.15,
    "sin_confirmar_bajo": 6100,
    "tipico": {
-    "n": 8,
-    "precio": 11710
+    "n": 9,
+    "precio": 11870
    },
    "topes": [
     7500,
@@ -1463,6 +1466,6 @@
    "topes_origen": "fracciones"
   }
  },
- "vence": "2026-12-25",
+ "vence": "2026-12-26",
  "version": 1
 }
