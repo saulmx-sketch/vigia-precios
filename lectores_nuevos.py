@@ -9,6 +9,11 @@ Soriana (medido el 25 nov 2026, desde casa y desde la nube de GitHub, peticion s
   tarjeta viene en <a class="link plp-link ..." href="/<nombre>/<id>.html">titulo</a>.
   ficha https://www.soriana.com/<nombre>/<id>.html -> ld+json Product: name, offers.price ("11990.00"),
   offers.availability ("http://schema.org/InStock"), offers.seller.name ("Soriana").
+
+Cyberpuerta (medido el 25 nov 2026; nube 200 segun TIENDAS_2026-11-25.md):
+  busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=<consulta> -> ld+json @graph -> ItemList ->
+  itemListElement[].item (Product): name, url, offers.price (numero), offers.availability, offers.itemCondition,
+  offers.seller.name ("Cyberpuerta"). La ficha trae Product con los mismos offers, pero name = modelo; titulo en <h1>.
 """
 import html
 import json
@@ -18,6 +23,8 @@ import urllib.parse
 SORIANA = "https://www.soriana.com"
 SORIANA_MAX_FICHAS = 6
 SORIANA_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas"}
+CYBERPUERTA = "https://www.cyberpuerta.mx"
+CP_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas"}
 LD = r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>'
 
 
@@ -33,10 +40,38 @@ def _bloques(t):
 
 
 def _del_tipo(t, tipo):
+    """El primer nodo ld+json del tipo pedido, suelto o dentro de un @graph."""
     for d in _bloques(t):
-        if isinstance(d, dict) and d.get("@type") == tipo:
-            return d
+        nodos = d.get("@graph") if isinstance(d, dict) and isinstance(d.get("@graph"), list) else [d]
+        for n in nodos:
+            if isinstance(n, dict) and n.get("@type") == tipo:
+                return n
     return None
+
+
+EN_EXISTENCIA = ("InStock", "LimitedAvailability", "OnlineOnly", "InStoreOnly")
+SIN_EXISTENCIA = ("OutOfStock", "SoldOut", "Discontinued")
+
+
+def existencia_si_no(texto):
+    """schema.org availability ("http://schema.org/InStock" o "InStock") a True/False/None (no se sabe)."""
+    fin = (texto or "").rsplit("/", 1)[-1]
+    return True if fin in EN_EXISTENCIA else False if fin in SIN_EXISTENCIA else None
+
+
+def _precio(x, donde):
+    if x in (None, ""):
+        return None
+    try:
+        return float(str(x).replace(",", ""))
+    except ValueError:
+        raise RuntimeError("precio ilegible en %s: %r" % (donde, x))
+
+
+def _oferta_ld(o):
+    o = o or {}
+    o = o[0] if isinstance(o, list) and o else o
+    return o if isinstance(o, dict) else None
 
 
 def registrar(v):
@@ -100,9 +135,70 @@ def registrar(v):
                 salida.append(of)
         return salida
 
-    lectores = {"Soriana": leer_soriana}
-    vendedores = {"Soriana": r"^\s*soriana\s*$"}       # solo Soriana misma; sin terceros
-    fichas = {"Soriana": ficha_soriana}
+    def ficha_soriana_si_no(url):
+        """Para v.FICHAS: la ficha de Soriana con existencia True/False/None (lo usado no cuenta como existencia)."""
+        f = dict(ficha_soriana(url))
+        nuevo = f.pop("condicion", "") in ("", "NewCondition")
+        f["existencia"] = existencia_si_no(f["existencia"]) if nuevo else False
+        f["url"] = url
+        return f
+
+    # ------------------------------------------------------------------ Cyberpuerta
+    def _cp_productos(t):
+        """[(titulo, precio, existencia_texto, condicion, vendedor, url)] del ItemList del ld+json de la busqueda."""
+        lista = _del_tipo(t, "ItemList")
+        if lista is None:
+            return None
+        salida = []
+        for it in lista.get("itemListElement") or []:
+            p = (it or {}).get("item") or it or {}
+            o = _oferta_ld(p.get("offers")) or {}
+            salida.append((html.unescape(p.get("name") or "").strip(), _precio(o.get("price"), "Cyberpuerta"),
+                           (o.get("availability") or "").rsplit("/", 1)[-1],
+                           (o.get("itemCondition") or "").rsplit("/", 1)[-1],
+                           html.unescape(((o.get("seller") or {}).get("name") or "")).strip(),
+                           urllib.parse.urljoin(CYBERPUERTA, p.get("url") or o.get("url") or "")))
+        return salida
+
+    def leer_cyberpuerta(prod, cfg, estado):
+        """Todo sale del ld+json de la busqueda (titulo, precio, existencia, condicion, vendedor, liga): sin fichas.
+        Solo lo nuevo y en existencia; sin vendedor leido no se publica."""
+        e, t = v.pedir(CYBERPUERTA + "/index.php?cl=search&searchparam=" + urllib.parse.quote_plus(cfg["consulta"]))
+        prods = _cp_productos(t) if e == 200 else None
+        if prods is None:
+            raise RuntimeError("Cyberpuerta respondio %s (%d bytes) sin el bloque ld+json ItemList" % (e, len(t)))
+        salida = []
+        for titulo, precio, existe, cond, vend, url in prods:
+            if existe not in CP_EN_VENTA or cond not in ("", "NewCondition") or not vend:
+                continue
+            of = v.oferta(prod, "Cyberpuerta", titulo, precio, url, vend, CP_EN_VENTA[existe])
+            if of:
+                salida.append(of)
+        return salida
+
+    def ficha_cyberpuerta(url):
+        """Para v.FICHAS. La ficha trae su ld+json Product (precio, existencia, condicion, vendedor), pero su "name" es
+        el modelo ("Samsung SM-F971B 7.6...", medido el 25 nov): el titulo sale del <h1>, que es el de la busqueda."""
+        e, t = v.pedir(url, pausa=1.0)
+        if e != 200:
+            raise RuntimeError("Cyberpuerta respondio %s en la ficha %s" % (e, url))
+        d = _del_tipo(t, "Product")
+        o = _oferta_ld(d.get("offers")) if d else None
+        if not o:
+            raise RuntimeError("Cyberpuerta: la ficha %s no trae el bloque ld+json Product con offers" % url)
+        h1 = re.search(r"<h1[^>]*>(.*?)</h1>", t, re.S)
+        titulo = html.unescape(re.sub(r"<!--.*?-->|<[^>]+>", "", h1.group(1))).strip() if h1 else ""
+        nuevo = (o.get("itemCondition") or "").rsplit("/", 1)[-1] in ("", "NewCondition")
+        return {"titulo": titulo or html.unescape(d.get("name") or "").strip(),
+                "precio": _precio(o.get("price"), url),
+                "vendedor": html.unescape(((o.get("seller") or {}).get("name") or "")).strip(),
+                "existencia": existencia_si_no(o.get("availability")) if nuevo else False,
+                "importado": bool(re.search(v.SENAL_IMPORTADO, titulo)), "url": url}
+
+    lectores = {"Soriana": leer_soriana, "Cyberpuerta": leer_cyberpuerta}
+    vendedores = {"Soriana": r"^\s*soriana\s*$",       # solo Soriana misma; sin terceros
+                  "Cyberpuerta": r"^\s*cyberpuerta\s*$"}
+    fichas = {"Soriana": ficha_soriana_si_no, "Cyberpuerta": ficha_cyberpuerta}
     v.LECTORES.update(lectores)
     v.VENDEDOR_OFICIAL.update(vendedores)
     if isinstance(getattr(v, "FICHAS", None), dict):

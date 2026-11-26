@@ -3392,5 +3392,239 @@
   "vendedor": "Soriana",
   "espera": null,
   "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Gris",
+  "precio": 38469.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z FOLD8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold 8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado",
+  "precio": 37459.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 39999.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "ultra-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Blanco",
+  "precio": 37589.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 256GB, 12GB RAM, Crema",
+  "precio": 36449.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Rosa",
+  "precio": 24439.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 28379.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 24439.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Z Flip8 5G 6.9\" Dual SIM, 256GB, 12GB RAM, Negro",
+  "precio": 20889.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Z Flip7 5G 6.8\", 512GB, 12GB RAM, Azul",
+  "precio": 20559.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 256GB, 12GB RAM, Negro",
+  "precio": 33229.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 40179.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "ultra-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+  "precio": 21269.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Playstation Astro Bot y Gran Turismo 7 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+  "precio": 16019.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA SPORTS FC 25, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA SPORTS FC 26, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Assassin's Creed Shadows, PlayStation 5",
+  "precio": 1579.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Battlefield 6, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA Sports Madden NFL 26, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA Sports F1 25, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Playstation 5 ASTRO BOT + GT7 825GB, Wi-Fi, Negro/Blanco",
+  "precio": 13999.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim Digital NBA 2K26 1TB, Wi-Fi, Negro/Blanco",
+  "precio": 9479.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "digital",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim Digital Bundle Astro Bot y Gran Turismo 7 1TB, Wi-Fi, Negro/Blanco",
+  "precio": 13139.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "digital",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
  }
 ]

@@ -45,7 +45,8 @@
     "Costco": {"consulta": "galaxy z fold"},
     "Elektra": {"consulta": "galaxy z fold8"},
     "Liverpool": {"consulta": "galaxy+z+fold8"},
-    "Soriana": {"consulta": "galaxy z fold8"}
+    "Soriana": {"consulta": "galaxy z fold8"},
+    "Cyberpuerta": {"consulta": "galaxy z fold8"}
    },
    "foro": {
     "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]
@@ -82,7 +83,8 @@
     "Elektra": {"consulta": "consola playstation 5"},
     "Liverpool": {"consulta": "playstation+5"},
     "Gameplanet": {"consulta": "consola playstation 5"},
-    "Soriana": {"consulta": "playstation 5 digital"}
+    "Soriana": {"consulta": "playstation 5 digital"},
+    "Cyberpuerta": {"consulta": "playstation 5 digital"}
    },
    "foro": {
     "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]

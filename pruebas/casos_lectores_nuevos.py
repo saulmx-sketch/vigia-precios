@@ -164,4 +164,100 @@ def correr(v):
     assert not v.vendedor_oficial(fold, "Soriana", ""), "sin vendedor no debe contar como Soriana"
     if isinstance(getattr(v, "FICHAS", None), dict):
         assert "Soriana" in v.FICHAS, "FICHAS existe pero Soriana no quedo registrada"
+        _probar_fichas_soriana(v, f_fold)
+    _probar_cyberpuerta(v, fold, ps5)
     return 1
+
+
+def _espera_error(funcion, que):
+    try:
+        funcion()
+    except RuntimeError:
+        return
+    raise AssertionError("%s no lanzo RuntimeError" % que)
+
+
+def _probar_fichas_soriana(v, f_fold):
+    """FICHAS["Soriana"]: existencia True/False/None (contrato de FICHAS), mismo titulo, precio y vendedor."""
+    guardado = v.pedir
+    try:
+        tabla = {FICHA_FOLD8: (200, f_fold)}
+        v.pedir = Servidor(tabla)
+        f = v.FICHAS["Soriana"](FICHA_FOLD8)
+        assert (f["titulo"], f["precio"], f["vendedor"], f["existencia"], f["importado"]) == (
+            "Samsung Galaxy Z Fold8 7.6 Pulgadas 512GB Lavanda Desbloqueado", 36990.0, "Soriana", True, False), f
+        tabla[FICHA_FOLD8] = (200, f_fold.replace("schema.org/InStock", "schema.org/OutOfStock"))
+        assert v.FICHAS["Soriana"](FICHA_FOLD8)["existencia"] is False
+        tabla[FICHA_FOLD8] = (200, f_fold.replace("schema.org/InStock", "schema.org/Raro"))
+        assert v.FICHAS["Soriana"](FICHA_FOLD8)["existencia"] is None
+        tabla[FICHA_FOLD8] = (403, "<html>Access Denied</html>")
+        _espera_error(lambda: v.FICHAS["Soriana"](FICHA_FOLD8), "ficha Soriana 403")
+    finally:
+        v.pedir = guardado
+
+
+CP_BUSCA = "https://www.cyberpuerta.mx/index.php?cl=search&searchparam="
+CP_FICHA = ("https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/"
+            "Samsung-Galaxy-Z-FOLD8-5G-7-6-Dual-SIM-512GB-12GB-RAM-Morado.html")
+
+
+def _probar_cyberpuerta(v, fold, ps5):
+    assert "Cyberpuerta" in v.LECTORES, "Cyberpuerta no quedo registrada"
+    leer = v.LECTORES["Cyberpuerta"]
+    b_fold, b_ps5 = _leer("cyberpuerta_busca_galaxy_z_fold8.html"), _leer("cyberpuerta_busca_playstation_5_digital.html")
+    ficha = _leer("cyberpuerta_ficha_fold8_morado.html")
+    qf, qp = CP_BUSCA + "galaxy+z+fold8", CP_BUSCA + "playstation+5+digital"
+    tabla = {qf: (200, b_fold), qp: (200, b_ps5), CP_FICHA: (200, ficha)}
+    guardado = v.pedir
+    try:
+        v.pedir = srv = Servidor(tabla)
+        # (a) Fold8 512 y Ultra 512 en existencia, vendedor Cyberpuerta, liga a su ficha; sin abrir fichas
+        r = leer(fold, {"consulta": "galaxy z fold8"}, {})
+        assert srv.pedidas == [qf], srv.pedidas
+        assert len(r) == 7 and {o["vendedor"] for o in r} == {"Cyberpuerta"} and {o["tienda"] for o in r} == {"Cyberpuerta"}, r
+        assert sorted((o["var"], o["precio"]) for o in r)[0] == ("normal-512", 34319.0), r
+        assert [(o["var"], o["precio"]) for o in r if o["var"] == "ultra-512"] == [("ultra-512", 39999.0)], r
+        assert CP_FICHA in [o["url"] for o in r], r
+        # (c) agotada: el Ultra 512 Crema ($40,179, OutOfStock) y el Fold8 256 no entran
+        assert not [o for o in r if o["precio"] in (40179.0, 33229.0)], r
+        # PS5 hoy: las digitales estan agotadas y lo demas es de disco o juegos -> lista vacia, sin error
+        assert leer(ps5, {"consulta": "playstation 5 digital"}, {}) == []
+        # la misma respuesta alterada a "en existencia" (LEEME): entran solo las dos Slim Digital
+        tabla[qp] = (200, b_ps5.replace("OutOfStock", "InStock"))
+        r = leer(ps5, {"consulta": "playstation 5 digital"}, {})
+        assert sorted((o["var"], o["precio"]) for o in r) == [("digital", 9479.0), ("digital", 13139.0)], r
+        # (b) vendedor distinto de Cyberpuerta, o sin vendedor: no hay oferta
+        tabla[qf] = (200, b_fold.replace('"name":"Cyberpuerta"', '"name":"Otra Tienda SA"'))
+        assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == [], "un tercero en Cyberpuerta paso"
+        tabla[qf] = (200, re.sub(r'"seller":\{[^}]*\}', '"seller":{}', b_fold))
+        assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == [], "sin vendedor leido se publico"
+        # (d) 403, 503 o pagina sin ld+json: RuntimeError
+        for resp in ((403, "<html>Access Denied</html>"), (503, ""), (200, "<html><body>sin datos</body></html>")):
+            tabla[qf] = resp
+            _espera_error(lambda: leer(fold, {"consulta": "galaxy z fold8"}, {}), "busqueda Cyberpuerta %s" % (resp,))
+        # busqueda con ItemList vacio = lista vacia
+        tabla[qf] = (200, '<script type="application/ld+json">{"@context":"https://schema.org","@graph":'
+                          '[{"@type":"ItemList","itemListElement":[]}]}</script>')
+        assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == []
+        # FICHAS["Cyberpuerta"]: titulo del <h1> (el name del ld+json es el modelo), precio, vendedor, existencia
+        f = v.FICHAS["Cyberpuerta"](CP_FICHA) if isinstance(getattr(v, "FICHAS", None), dict) else None
+        if f is not None:
+            assert (f["titulo"], f["precio"], f["vendedor"], f["existencia"]) == (
+                'Samsung Galaxy Z FOLD8 5G 7.6" Dual SIM, 512GB, 12GB RAM, Morado', 34319.0, "Cyberpuerta", True), f
+            assert v.variante(fold, f["titulo"])["id"] == "normal-512"
+            tabla[CP_FICHA] = (200, ficha.replace('"availability":"InStock"', '"availability":"OutOfStock"'))
+            assert v.FICHAS["Cyberpuerta"](CP_FICHA)["existencia"] is False
+            tabla[CP_FICHA] = (200, ficha.replace('"availability":"InStock"', '"availability":"PreOrder"'))
+            assert v.FICHAS["Cyberpuerta"](CP_FICHA)["existencia"] is None
+            for resp in ((403, "x"), (200, "<html>ficha sin datos</html>")):
+                tabla[CP_FICHA] = resp
+                _espera_error(lambda: v.FICHAS["Cyberpuerta"](CP_FICHA), "ficha Cyberpuerta %s" % (resp,))
+    finally:
+        v.pedir = guardado
+    # (e) de disco, juegos y una garantia (supuesta, a precio de consola) quedan fuera
+    for titulo in ("Sony PlayStation 5 Slim 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+                   "Playstation Astro Bot y Gran Turismo 7 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+                   "EA SPORTS FC 26, PlayStation 5",
+                   "Garantía extendida 2 años para PlayStation 5 Digital"):
+        assert v.oferta(ps5, "Cyberpuerta", titulo, 11990, "u", "Cyberpuerta") is None, titulo
+    assert v.vendedor_oficial(ps5, "Cyberpuerta", " CYBERPUERTA ") and not v.vendedor_oficial(ps5, "Cyberpuerta", "Cyberpuerta Marketplace")
