@@ -31,6 +31,20 @@ try:   # cupon de ficha de Amazon, bancos y tiendas cerradas de Samsung; si falt
 except Exception:
     promos = None
 
+# 25 nov 2026: apagado. El cupon de ficha de Amazon (linea B, promos.amazon_precio) solo se restaba cuando la ficha se
+# releia; con la memoria vendedor_amazon el precio volvia al de sin cupon, oscilaba y el mismo GANGA se repetia
+# (revision independiente R7, hallazgo H2). En False el precio de Amazon es el de la ficha a secas (lectura y relectura)
+# y el cupon queda solo como nota. Se vuelve a prender cuando la memoria guarde el precio ya con cupon.
+RESTAR_CUPON_FICHA_AMAZON = False
+NOTA_CUPON_SIN_RESTAR = "con cupon en la ficha, sin restar"
+
+
+def nota_cupon_amazon(nota, ficha=""):
+    """Nota del cupon de Amazon cuando no se resta: la busqueda o la ficha lo anuncian -> NOTA_CUPON_SIN_RESTAR."""
+    if nota or 'class="couponLabelText"' in (ficha or ""):
+        return NOTA_CUPON_SIN_RESTAR
+    return nota
+
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ESTADO = os.path.join(AQUI, "visto.json")
 PRECIOS = os.path.join(AQUI, "precios.json")
@@ -636,7 +650,7 @@ def ficha_amazon(t):
         if r:
             raise RuntimeError("Amazon respondio %s en la ficha" % r)
         titulo, precio, vend, imp = _ficha_amazon(p)
-        if promos and precio is not None:   # linea B: el mismo cupon de ficha que resta _leer_amazon, con su candado
+        if RESTAR_CUPON_FICHA_AMAZON and promos and precio is not None:   # linea B: el mismo cupon que resta _leer_amazon
             try:
                 f2, _ = promos.amazon_precio(precio, promos.amazon_ficha(p))
                 if f2 is not None and precio * 0.5 <= f2 <= precio:
@@ -747,7 +761,9 @@ def _leer_amazon(prod, cfg, estado, diag):
             if vend:
                 memo[asin] = [precio, vend, importado, prod["id"], paga]   # la memoria guarda el precio sin cupon
             final = paga
-            if promos and (nota or leida):
+            if not RESTAR_CUPON_FICHA_AMAZON:
+                nota = nota_cupon_amazon(nota, t if leida else "")
+            elif promos and (nota or leida):
                 try:   # promos.py: cupon de ficha (de la ficha leida ahora o, si no se leyo, del bloque de busqueda)
                     promo = promos.amazon_ficha(t) if leida else promo_b
                     if promo:
@@ -780,7 +796,9 @@ def _leer_amazon(prod, cfg, estado, diag):
         if vend:
             memo[asin] = [precio, vend, importado, prod["id"], precio]
         nota, final = "", precio
-        if promos:
+        if not RESTAR_CUPON_FICHA_AMAZON:
+            nota = nota_cupon_amazon("", t)
+        elif promos:
             try:   # promos.py: cupon de ficha que no pide nada (Prime, banco, app); si falla, como antes
                 final, nota = promos.amazon_precio(precio, promos.amazon_ficha(t))
                 final = final if final is not None and precio * 0.5 <= final <= precio else precio
