@@ -237,7 +237,10 @@ class Banco:
         dt_falso.datetime = Ahora
 
         srv = Servidor(mapa)
-        env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None, "VIGIA_CONFIG": None}, **(env or {}))
+        # junta-2: SIN_PROMOS=1 por defecto. promos.mejorar (linea B) relee la ficha de Costco cada 60 min de reloj
+        # falso (descuadra las cuentas de peticiones de las escenas) y duerme con el time.sleep real que ató al
+        # importarse; sus casos viven en promos.py --selftest. Una escena que quiera promos pasa env={"SIN_PROMOS": None}.
+        env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None, "VIGIA_CONFIG": None, "SIN_PROMOS": "1"}, **(env or {}))
         # VIGIA_CONFIG se lee al importar (v.CONFIG): si quedo puesta, main() se negaria a escribir estado y avisar.
         # Durante cada corrida v.CONFIG es la copia de la escena (que cargar_config lee de todos modos).
         guardado = (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
