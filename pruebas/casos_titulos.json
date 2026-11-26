@@ -3158,5 +3158,32 @@
   "vendedor": "Gameplanet",
   "espera": null,
   "origen": "pruebas/titulos_vistos_2026-11-25.json #325 (descartado: titulo); vendedor supuesto para la prueba (no se leyo: el titulo no llego a la ficha)"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 de 825 GB edición bundle Blanco Digital (sin lector de disco)",
+  "precio": 12499,
+  "vendedor": "Liverpool",
+  "espera": "digital",
+  "origen": "ficha de Liverpool 1186785807 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785807.html): titulo armado por ficha_liverpool con Tipo de consola 'Fija' y Lector integrado 'Sin lector'"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 Blanco",
+  "precio": 6999,
+  "vendedor": "Liverpool",
+  "espera": null,
+  "origen": "ficha de Liverpool 1156059630 (PlayStation Portal) del 25-nov-2026, Tipo de consola 'Fija/portátil': titulo armado por ficha_liverpool; precio ALTERADO de $5,999 a $6,999 (arriba del piso)"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 de 1 TB edición estándar Blanco con lector de disco",
+  "precio": 14699,
+  "vendedor": "Liverpool",
+  "espera": null,
+  "origen": "ficha de Liverpool 1186785793 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785793.html): Tipo de consola 'Fija', Lector integrado 'CD'"
  }
 ]
