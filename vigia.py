@@ -173,16 +173,52 @@ def var_por_id(prod, vid):
     return next(v for v in prod["variantes"] if v["id"] == vid)
 
 
+def cargar_prospectiva():
+    """Topes y cifras de referencia que prospectiva.py calcula con el historial de precios (prospectiva.json).
+    Devuelve {} si el modulo o el archivo faltan, el archivo vencio o no pasa su validacion: entonces topes()
+    usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia."""
+    try:
+        import prospectiva
+        return prospectiva.cargar_json() or {}
+    except Exception as ex:
+        print("   prospectiva no disponible ({}): topes por fracciones".format(ex), file=sys.stderr)
+        return {}
+
+
+PROSPECTIVA = cargar_prospectiva()   # clave "producto|variante"; vacio = topes por fracciones
+
+
+def prospectiva_de(prod, var):
+    d = PROSPECTIVA.get("%s|%s" % (prod["id"], var["id"]))
+    return d if isinstance(d, dict) else {}
+
+
 def topes(prod, var):
     fijos = prod.get("topes_fijos", {}).get(var["id"])
-    if fijos:
+    if fijos:                                    # una cifra que Saul dio a mano gana siempre
         return tuple(fijos)
+    calculados = prospectiva_de(prod, var).get("topes")
+    if calculados:                               # ya validados por prospectiva.cargar_json()
+        return tuple(calculados)
     return tuple(int(round(var["lista"] * f / 100.0)) * 100 for f in prod["fracciones"])
 
 
 def nivel(precio, prod, var):
     g, c, t = topes(prod, var)
+    bajo = prospectiva_de(prod, var).get("sin_confirmar_bajo")
+    if bajo and precio < bajo:   # muy por debajo de todo lo visto con garantia: se avisa, pero no como GANGA
+        return "SIN CONFIRMAR"
     return "GANGA" if precio <= g else "COMPRAR" if precio <= c else "MIRAR" if precio <= t else None
+
+
+def razon(precio, prod, var, hoy=None):
+    """Una o dos frases en lego de por que ese precio es bueno o no (minimo visto con garantia, lo normal del
+    mes, lo que se espera en la siguiente temporada). Cadena vacia si no hay datos; nunca lanza excepcion."""
+    try:
+        import prospectiva
+        return prospectiva.razon(precio, prospectiva_de(prod, var), hoy) or ""
+    except Exception:
+        return ""
 
 
 def marca_ok(prod, titulo):
@@ -1405,6 +1441,7 @@ def aviso_foro(prods, it):
         "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
         it["link"], "",
         "No se pudo releer la ficha (esta tienda no deja releer la ficha): ábrela antes de comprar.", "",
+        *["- Por qué: " + r for r in [razon(precio, prod, var) if precio is not None else ""] if r],   # linea A
         "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t), "",
         "> " + limpio(it["descripcion"]).replace("\n", "\n> ")])
     return asunto, cuerpo
@@ -1717,6 +1754,7 @@ def selftest():
     for titulo, esperado in casos:
         v = variante(p, titulo)
         assert (v["id"] if v else None) == esperado, (titulo, v and v["id"], esperado)
+    PROSPECTIVA.clear()   # linea A: las cifras fijas de abajo prueban el camino de fracciones, sin prospectiva.json
     assert topes(p, var_por_id(p, "ultra-512")) == (22000, 24000, 26000), topes(p, var_por_id(p, "ultra-512"))
     assert topes(p, var_por_id(p, "normal-512")) == (19900, 21800, 23600), topes(p, var_por_id(p, "normal-512"))
     assert nivel(23999, p, var_por_id(p, "ultra-512")) == "COMPRAR" and nivel(23999, p, var_por_id(p, "normal-512")) is None

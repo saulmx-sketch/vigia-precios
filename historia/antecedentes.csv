@@ -1,0 +1,45 @@
+fecha,producto,variante,tienda,precio,lista,condicion,banco,tipo_banco,vendedor,garantia_mx,fuente,url,id,nota
+2026-10-23,fold8,normal-512,Samsung,26495,48499,"promo (cupones FOLD8MEMBER_20 + LIVESEM)",,ninguno,sin dato,si,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 9,RA-9,"fecha del dato 22-23 oct 2026; el documento dice no reverificado"
+2026-10-23,fold8,normal-512,Amazon,34999,,promo,,ninguno,Amazon,si,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 10,RA-10,"oficial (vende Amazon)"
+2026-10-23,fold8,normal-512,Telcel,39999,,,,ninguno,sin dato,si,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 11,RA-11,
+2026-10-23,fold8,ultra-512,Samsung,26081,53499,"promo (PROMODESC_FOLD8U), solo Grafito, envio desde 12 nov",,ninguno,sin dato,si,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 16,RA-16,"fecha del dato 22-23 oct 2026"
+2026-10-23,fold8,ultra-512,Amazon,30999,,promo,,ninguno,sin dato,si,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 17,RA-17,
+2026-07-22,fold8,ultra-512,Samsung,50999,,preventa con FOLD8_SCLUB,,ninguno,sin dato,si,antecedente,https://www.xataka.com.mx/territorio-samsung-mexico/samsung-galaxy-z-fold-8-ultra-z-fold-8-z-flip-8-lanzamiento-precio-mexico-caracteristicas-especificaciones-ficha-tecnica,RA-18a,"preventa 22 jul-20 ago 2026"
+2026-07-22,fold8,ultra-1tb,Samsung,58499,,preventa con FOLD8_SCLUB,,ninguno,sin dato,si,antecedente,https://www.xataka.com.mx/territorio-samsung-mexico/samsung-galaxy-z-fold-8-ultra-z-fold-8-z-flip-8-lanzamiento-precio-mexico-caracteristicas-especificaciones-ficha-tecnica,RA-18b,"preventa 22 jul-20 ago 2026"
+2026-07-27,fold8,sin-dato,Liverpool,58499,63499,preventa,,ninguno,sin dato,si,antecedente,https://www.adn40.mx/mexico/2026-07-27/samsung-galaxy-z-fold8-ultra-en-liverpool-ya-se-puede-reservar-con-5000-de-descuento-en-preventa/,RA-19,"Ultra; el documento infiere 1 TB sin confirmarlo; 27-28 jul 2026"
+2025-08-08,fold7,512,Samsung,48999,48999,lista,,ninguno,Samsung,si,antecedente,https://news.samsung.com/mx/galaxy-z-fold7-z-flip7-z-flip-fe-y-watch8-ya-disponibles-en-tiendas-samsung-de-mexico,RA-41a,lanzamiento
+2025-08-08,fold7,1tb,Samsung,56499,56499,lista,,ninguno,Samsung,si,antecedente,https://news.samsung.com/mx/galaxy-z-fold7-z-flip7-z-flip-fe-y-watch8-ya-disponibles-en-tiendas-samsung-de-mexico,RA-41b,lanzamiento
+2025-11-24,fold7,1tb,Samsung,24009,48999,"BF_FF30CLUB en la app; los cupones se agotaron y quedo el descuento directo; 24 MSI",,ninguno,sin dato,si,antecedente,https://www.xataka.com.mx/seleccion/samsung-tiene-cupon-infarto-galaxy-z-flip7-fold7-quedan-a-mitad-precio-esta-oferta,RA-45,"lista $48,999 segun la nota"
+2026-01-06,fold7,512,Samsung,22539,,"desde, con FOLD20-CLUB (20 %, 30 % en la app), hasta 1 feb; 24 MSI",,ninguno,sin dato,si,antecedente,https://www.xataka.com.mx/seleccion/samsung-rebaja-varios-miles-pesos-galaxy-z-fold7-deja-a-precio-impensable-para-celular-plegable/amp,RA-49,
+2026-04-04,fold7,512,Amazon,26999,48999,promo,,ninguno,sin dato,sin dato,antecedente,compra-fold8/encargos/2026-10-23_resultado_A.md renglon 51,RA-51,"expiro 4 abr 2026; fuente Promodescuentos segun busqueda, sin url"
+2026-10-23,fold8,ultra-512,Samsung,40124,53499,base sin cupon (Samsung Week),,ninguno,sin dato,si,antecedente,compra-fold8/RECOMENDACION_2026-10-23.md renglon 59,R-59,
+2026-10-23,fold8,ultra-1tb,Samsung,63499,63499,lista; sin cupon conocido,,ninguno,sin dato,si,antecedente,compra-fold8/RECOMENDACION_2026-10-23.md renglon 66,R-66,
+2026-11-13,fold8,ultra-512,Samsung,43999,,"en pagina y en carrito; ningun cupon aplica; solo Grafito",,ninguno,Samsung,si,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 9,P13-9,
+2026-11-13,fold8,ultra-512,Liverpool,35999.20,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 10,P13-10,
+2026-11-13,fold8,ultra-512,Mercado Libre,33999,,,,ninguno,NUVITU,no,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 11,P13-11a,"vendedor NUVITU, no Samsung"
+2026-11-13,fold8,ultra-512,Mercado Libre,34312,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 11,P13-11b,"Violeta, ficha de Samsung"
+2026-11-13,fold8,normal-512,Samsung,40799,,"cupones FOLD8MEMBER_20, LIVESEM, BF26_10, ECO_25 rechazados",,ninguno,Samsung,si,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 20,P13-20a,
+2026-11-13,fold8,normal-512,Amazon,35999.20,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 20,P13-20b,
+2026-11-13,fold8,normal-512,Liverpool,35999.20,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 20,P13-20c,
+2026-08-04,fold8,ultra-512,Samsung,30358,,estudiantes,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 30,P13-30a,"historial Promodescuentos; tienda no dicha (estudiantes = tienda Samsung, inferencia)"
+2026-07-29,fold8,ultra-512,sin dato,28016,,Banorte + PayPal,Banorte,ajeno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 30,P13-30b,historial Promodescuentos
+2026-09-07,fold8,ultra-512,Samsung,29834,,estudiantes,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-13.md renglon 30,P13-30c,"historial Promodescuentos; tienda no dicha (estudiantes = tienda Samsung, inferencia)"
+2026-11-19,fold8,ultra-512,Walmart,30999,,hasta 24 MSI,,ninguno,WEARESHOP,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 9,P19-9,"Grafito; garantia de 12 meses con WEARESHOP"
+2026-11-19,fold8,ultra-512,Walmart,30999,,,,ninguno,WEARESHOP,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglones 10 y 28,P19-10,"Violeta; vendedor leido tras clic segun renglon 28"
+2026-11-19,fold8,ultra-512,Mercado Libre,33499,,,,ninguno,ShopSolu,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 11,P19-11a,Grafito
+2026-11-19,fold8,ultra-512,Mercado Libre,33899,,,,ninguno,NUVITU,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 11,P19-11b,Violeta
+2026-11-19,fold8,ultra-512,Samsung,34199.20,43999,"FOLD8_20CLUB (-$8,799.80) + BF1000 (-$1,000)",,ninguno,Samsung,si,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 12,P19-12,"carrito de invitado; Grafito"
+2026-11-19,fold8,ultra-512,Sam's,38870.93,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 13,P19-13,buscador
+2026-11-19,fold8,ultra-512,Amazon,38999,,,,ninguno,Amazon,si,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglones 14 y 28,P19-14,B0H92G9GNW
+2026-11-19,fold8,ultra-512,Liverpool,55999,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 16,P19-16,
+2026-11-19,fold8,normal-512,Samsung,31639.20,40799,"FOLD8_20CLUB (-$8,159.80) + BF1000 (-$1,000)",,ninguno,Samsung,si,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 24,P19-24a,"Grafito SM-F971BZKMLTM; carrito de invitado"
+2026-11-19,fold8,normal-512,Mercado Libre,33000,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 24,P19-24b,"rango $33,000-34,699"
+2026-11-19,fold8,normal-512,Amazon,34499,,,,ninguno,Amazon,si,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglones 24 y 28,P19-24c,Crema
+2026-11-19,fold8,normal-512,Walmart,34499,,,,ninguno,vendedor externo,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 24,P19-24d,
+2026-11-19,fold8,normal-512,Walmart,38999,,,,ninguno,Samsung,si,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 24,P19-24e,
+2026-11-19,fold8,normal-512,Costco,35999,,"descuento de tienda de $9,000 hasta el 23 nov",,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglones 24 y 26,P19-24f,
+2026-11-19,fold8,normal-512,Sam's,47057,,,,ninguno,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 24,P19-24g,
+2026-11-19,fold8,normal-512,Elektra,26999,,,,ninguno,Systore,no,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 26,P19-26,"vendido por un tercero, no por Elektra ni Samsung"
+2026-11-18,fold8,ultra-512,Walmart,23999,29999,"BBVA o Banamex a 12 o 18 MSI, cupon de 20 % WBPOST12 / WBPOST18; solo el 18 nov",BBVA o Banamex,propio,sin dato,sin dato,antecedente,compra-fold8/PRECIOS_2026-11-19.md renglon 33,P19-33,"Promodescuentos; BBVA basta (Banamex alternativo)"
+2026-11-24,ps5,digital,Amazon,12499,,"paquete con Astro Bot y Gran Turismo 7",,ninguno,Amazon,si,antecedente,gta-consola-o-pc/INFORME_2026-11-24.md renglones 35 y 53,G-35a,"sin rebaja de Black Friday anunciada"
+2026-11-24,ps5,disco,Amazon,14599,,,,ninguno,Amazon,si,antecedente,gta-consola-o-pc/INFORME_2026-11-24.md renglones 35 y 53,G-35b,
