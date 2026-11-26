@@ -109,6 +109,7 @@ URLS = {
     "ml_articulo_fold8": "https://articulo.mercadolibre.com.mx/MLM-3166627273",
     "cyberpuerta_ps5_digital": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital",
     "soriana_fold8_b": "https://www.soriana.com/buscar?q=samsung+galaxy+z+fold",
+    "soriana_ficha_fold8": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
     "chedraui_ficha_ps5": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?fq=productId:3879487",
     "chedraui_ps5_digital_b": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital",
 }
