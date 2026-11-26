@@ -1399,6 +1399,9 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
 
 LECTORES_NUEVOS_ERROR = ""      # por que no se cargaron los lectores nuevos (lo usa main() al decir "lector no cargado")
 _ENGANCHANDO = []
+# LECTORES, VENDEDOR_OFICIAL y FICHAS tal como estaban antes del primer alta de lectores nuevos: el selftest del nucleo
+# los usa para comprobar que pasa igual con los lectores nuevos apagados (revisor R5-H1)
+_SOLO_NUCLEO = []
 
 
 def _pruebas_lectores_nuevos(v):
@@ -1430,6 +1433,8 @@ def enganchar_lectores_nuevos(prueba=None):
         return
     yo = sys.modules[__name__]
     antes = [(d, dict(d)) for d in (LECTORES, VENDEDOR_OFICIAL, getattr(yo, "FICHAS", None)) if isinstance(d, dict)]
+    if not _SOLO_NUCLEO:
+        _SOLO_NUCLEO.extend(antes)
     etapa = "registrar"
     _ENGANCHANDO.append(1)
     try:
@@ -2068,6 +2073,29 @@ def selftest():
             if hasattr(mod, "correr"):
                 mod.correr(yo)
                 corridos.append(nombre)
+        # (R5-H1) con los lectores nuevos dados de baja (archivo ausente, registrar roto o su prueba fallida), los casos
+        # de titulos del nucleo siguen pasando: saltan, diciendolo, los de tiendas sin lector o sin regla de vendedor
+        ruta_t = os.path.join(carpeta, "casos_titulos.py")
+        if _SOLO_NUCLEO and os.path.exists(ruta_t):
+            ahora_d = [(d, dict(d)) for d, _ in _SOLO_NUCLEO]
+            try:
+                for d, copia in _SOLO_NUCLEO:
+                    d.clear()
+                    d.update(copia)
+                spec = importlib.util.spec_from_file_location("prueba_casos_titulos_sin_nuevos", ruta_t)
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                salida_t = io.StringIO()
+                with contextlib.redirect_stdout(salida_t):
+                    mod.correr(yo)
+                nuevas = sorted({t for d, c in ahora_d if d is LECTORES for t in c} - set(LECTORES))
+                if nuevas:
+                    assert "saltados" in salida_t.getvalue(), "casos_titulos no dijo que salto tiendas sin lector"
+            finally:
+                for d, copia in ahora_d:
+                    d.clear()
+                    d.update(copia)
+            corridos.append("casos_titulos.py sin lectores nuevos")
     finally:
         yo.pedir, urllib.request.urlopen, time.sleep = guardados
     # modulos de las lineas A y B (si existen junto a vigia.py), cada uno en su propio proceso

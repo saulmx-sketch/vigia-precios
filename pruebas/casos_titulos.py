@@ -22,6 +22,16 @@ def resolver(v):
         q = json.loads(json.dumps(p))
         q["requisitos"]["solo_vendedor_oficial"] = False
         solo_titulo[pid] = q
+    # Casos de una tienda sin lector cargado o sin regla de vendedor (lectores nuevos apagados: archivo ausente,
+    # registrar roto o su prueba de arranque fallida) se saltan y se dice: el nucleo no depende de lectores_nuevos.py
+    # (revisor R5-H1: si este paso falla en la nube, se apagan todos los avisos de precio).
+    sin_lector = sorted({c["tienda"] for c in casos if c["tienda"] != "sin dato"
+                         and (c["tienda"] not in v.LECTORES or c["tienda"] not in v.VENDEDOR_OFICIAL)})
+    if sin_lector:
+        n = sum(1 for c in casos if c["tienda"] in sin_lector)
+        print("casos_titulos: %d casos saltados: tiendas sin lector cargado o sin regla de vendedor: %s"
+              % (n, ", ".join(sin_lector)))
+        casos = [c for c in casos if c["tienda"] not in sin_lector]
     for c in casos:
         prod = solo_titulo[c["producto"]] if c["tienda"] == "sin dato" else prods[c["producto"]]
         o = v.oferta(prod, c["tienda"], c["titulo"], c["precio"], "u", c["vendedor"],
