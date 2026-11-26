@@ -3160,6 +3160,627 @@
   "origen": "pruebas/titulos_vistos_2026-11-25.json #325 (descartado: titulo); vendedor supuesto para la prueba (no se leyo: el titulo no llego a la ficha)"
  },
  {
+  "tienda": "Soriana",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 7.6 Pulgadas 512GB Lavanda Desbloqueado",
+  "precio": 36990.0,
+  "vendedor": "Soriana",
+  "espera": "normal-512",
+  "origen": "Soriana, ficha 11944979 del 25-nov-2026 (ld+json Product: price 36990.00, seller Soriana, InStock); en la tarjeta del listado aparece $45,990"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Consola PlayStation 5 Digital Slim + Astro Bot y Gran Turismo 7 825GB",
+  "precio": 11990.0,
+  "vendedor": "Soriana",
+  "espera": "digital",
+  "origen": "Soriana, ficha 11912222 del 25-nov-2026 (ld+json Product: price 11990.00, seller Soriana, InStock); en la tarjeta del listado aparece $12,490"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Unidad de Disco para Consolas PS5 Digital",
+  "precio": 5190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, ficha 11864204 del 25-nov-2026 (ld+json Product: price 5190.00, seller Soriana, InStock). Antes de la regla de excluir de linea-C la dejaba fuera solo el piso (dice Consolas y Digital)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Spider Man 2 Standard Edition para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Grand Theft Auto V para PS5",
+  "precio": 790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "God of War Ragnarok para PS5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "The Last of Us Part I Latam para PS5",
+  "precio": 1390.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "The Last of Us Part II Remastered para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Spider-Man Miles Morales LATAM para PS5",
+  "precio": 790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Astro Bot Playstation 5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Gran Turismo 7 para PS5",
+  "precio": 1190.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Monster Hunter Stories 3: Twisted Reflection PlayStation 5",
+  "precio": 1690.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "La Ascension Del Ronin para PS5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Dead Space Remake Playstation 5",
+  "precio": 1390.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Death Stranding 2 On The Beach Playstation 5",
+  "precio": 1490.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Resident Evil Requiem PlayStation 5",
+  "precio": 1690.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "007 First Light Playstation 5",
+  "precio": 1990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Dragon Quest III HD Remake PlayStation 5",
+  "precio": 1790.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "MARVEL'S SPIDER-MAN: MILES MORALES PS5",
+  "precio": 1799.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "FC 24 EA Sports PS5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Stellar Blade para PS5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Starfield PlayStation 5",
+  "precio": 1290.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Red Dead Redemption PlayStation 5",
+  "precio": 990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "PGA Tour 2K25 Playstation 5",
+  "precio": 1590.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Auriculares Inalámbricos Pulse Explore para PS5",
+  "precio": 2990.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Control DualSense PlayStation 5 Gray Camo",
+  "precio": 1490.0,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "Soriana, busqueda https://www.soriana.com/buscar?q=consola+playstation+5 del 25-nov-2026 (titulo del listado; precio: el primero de la tarjeta, que puede ser el de lista tachado; vendedor leido en la ficha solo para la consola y el Fold8, en los demas supuesto para la prueba)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Gris",
+  "precio": 38469.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z FOLD8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold 8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 34319.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado",
+  "precio": 37459.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 39999.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "ultra-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Blanco",
+  "precio": 37589.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "normal-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 256GB, 12GB RAM, Crema",
+  "precio": 36449.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Rosa",
+  "precio": 24439.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Negro",
+  "precio": 28379.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Flip8 5G 6.9\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 24439.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Z Flip8 5G 6.9\" Dual SIM, 256GB, 12GB RAM, Negro",
+  "precio": 20889.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Z Flip7 5G 6.8\", 512GB, 12GB RAM, Azul",
+  "precio": 20559.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 256GB, 12GB RAM, Negro",
+  "precio": 33229.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 Ultra 5G 8\" Dual SIM, 512GB, 12GB RAM, Crema",
+  "precio": 40179.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "ultra-512",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8 del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+  "precio": 21269.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Playstation Astro Bot y Gran Turismo 7 1TB, Wi-Fi, Lector de Discos, Negro/Blanco",
+  "precio": 16019.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA SPORTS FC 25, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA SPORTS FC 26, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Assassin's Creed Shadows, PlayStation 5",
+  "precio": 1579.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Battlefield 6, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA Sports Madden NFL 26, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "EA Sports F1 25, PlayStation 5",
+  "precio": 1679.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability InStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Playstation 5 ASTRO BOT + GT7 825GB, Wi-Fi, Negro/Blanco",
+  "precio": 13999.0,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim Digital NBA 2K26 1TB, Wi-Fi, Negro/Blanco",
+  "precio": 9479.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "digital",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Sony PlayStation 5 Slim Digital Bundle Astro Bot y Gran Turismo 7 1TB, Wi-Fi, Negro/Blanco",
+  "precio": 13139.0,
+  "vendedor": "Cyberpuerta",
+  "espera": "digital",
+  "origen": "Cyberpuerta, busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital del 25-nov-2026 (ld+json: precio y seller.name leidos; availability OutOfStock)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Bundle Consola Playstation 5 Edición Digital de 825 Gb: Astro Bot y Gran Turismo 7",
+  "precio": 12499.0,
+  "vendedor": "Chedraui",
+  "espera": "digital",
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Bundle Consola Playstation 5 Astro Bot y Gran Turismo 7",
+  "precio": 11490.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Pack Consola PlayStation 5 Modelo Slim 1TB Standard  con 2 Juegos",
+  "precio": 8990.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego Funko Fusion Playstation 5",
+  "precio": 1445.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego Playstation 5 Dragon Ball Sparking Zero NAPS5-13064",
+  "precio": 590.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego EA Sports FC 25 PlayStation 5",
+  "precio": 1795.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego PlayStation 4 EA Sports FC 24",
+  "precio": 1005.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 0)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego Marvel's Wolverine - PlayStation 5",
+  "precio": 940.0,
+  "vendedor": "Chedraui",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 10)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego PlayStation 5 Black Myth: Wukong",
+  "precio": 1479.0,
+  "vendedor": "Doto",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 10)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego PlayStation 5 Ninja Gaiden 2: Black",
+  "precio": 1479.0,
+  "vendedor": "Doto",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 10)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Control Inalámbrico PlayStation 5 DualSense Edge Blanco",
+  "precio": 5659.0,
+  "vendedor": "Doto",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 10)"
+ },
+ {
+  "tienda": "Chedraui",
+  "producto": "ps5",
+  "titulo": "Videojuego PlayStation 5 The Last of Us Part II Remastered",
+  "precio": 1109.0,
+  "vendedor": "Doto",
+  "espera": null,
+  "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 100)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Ventilador ABS para Consola for ps5 Digital Edición Negro Ventilador",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "PlayStation 5 Unidad de Disco- Consola Slim digital",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Disc Drive For PS5 Digital Edition Consoles (Slim)",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Unidad de Disco para Consolas PS5 Digital",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Consola PS5 Digital + Unidad de Disco",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": "digital",
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos. Debe entrar: Saul, 'el paquete Digital + unidad de disco cuenta como Digital'"
+ },
+ {
   "tienda": "Liverpool",
   "producto": "ps5",
   "titulo": "Consola PS5 de 825 GB edición bundle Blanco Digital (sin lector de disco)",
@@ -3185,5 +3806,59 @@
   "vendedor": "Liverpool",
   "espera": null,
   "origen": "ficha de Liverpool 1186785793 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785793.html): Tipo de consola 'Fija', Lector integrado 'CD'"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado - Caja Abierta",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado (Exhibición)",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Samsung Galaxy Z Fold8 5G 7.6\" Dual SIM, 512GB, 12GB RAM, Morado Empaque Dañado",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "fold8",
+  "titulo": "Preventa Samsung Galaxy Z Fold8 512GB Morado",
+  "precio": 30000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Consola PlayStation 5 Digital Slim Caja Abierta",
+  "precio": 8000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H4, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
+ },
+ {
+  "tienda": "Cyberpuerta",
+  "producto": "ps5",
+  "titulo": "Garantía Extendida AIG 1 Año(s) - $ 9001 a $ 10000 (home - Consolas PlayStation 5 Digital)",
+  "precio": 7000,
+  "vendedor": "Cyberpuerta",
+  "espera": null,
+  "origen": "revisor R3 (salidas/R3_revisor_lectores.md, H5, 25-nov-2026): titulo supuesto que pasaba la regla de titulos; precio y vendedor supuestos, arriba del piso"
  }
 ]

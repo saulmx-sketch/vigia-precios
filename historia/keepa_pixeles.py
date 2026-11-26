@@ -309,13 +309,27 @@ def renglones(producto, variante, asin, png_largo, png_90=None):
                 salida[-1]["nota"] += "; último día del tramo"
             if sig is not None and sig_p is None:
                 prev = None
+    if asin in PAQUETE:
+        for r in salida:
+            r["nota"] += "; " + PAQUETE[asin]
     salida.sort(key=lambda r: (r["fecha"], r["vendedor"] != "Amazon México"))
     return salida
 
 
+# Que es cada ASIN cuando no es la consola sola (va a la nota de cada renglon). Encargo C5, 25 nov 2026.
+PAQUETE = {
+    "B0C2JR9JGR": "PS5 Digital Edición Nacional (modelo anterior al Slim), consola sola",
+    "B0CTD14KQ6": "paquete PS5 Slim Digital con 2 juegos",
+    "B0F6968Y5G": "paquete PS5 Digital con Call of Duty Black Ops 6",
+    "B0G76569Q9": "paquete PS5 Digital 825GB con EA Sports FC 26",
+    "B0G76PM4FZ": "paquete PS5 Digital 825GB con Ghost of Yotei Collector's Edition (el juego encarece el paquete)",
+}
+
 # ASIN confirmados por el titulo que imprime la grafica (25 nov 2026)
 ASINS = {
-    "ps5": [("digital", "B0FTP523RH"), ("digital", "B0CLQ729TY")],
+    "ps5": [("digital", "B0FTP523RH"), ("digital", "B0CLQ729TY"), ("digital", "B0C2JR9JGR"),
+            ("digital", "B0CTD14KQ6"), ("digital", "B0F6968Y5G"), ("digital", "B0G76569Q9"),
+            ("digital", "B0G76PM4FZ")],
     "fold8": [("ultra-512", "B0H92G9GNW"), ("ultra-512", "B0H773PLWP"), ("normal-512", "B0H76XJTG2"),
               ("normal-512", "B0H773GGWG"), ("normal-512", "B0H779SQRZ")],
     "fold7": [("512", "B0FBTK7ZVB"), ("512", "B0FBT97262")],
@@ -323,28 +337,104 @@ ASINS = {
 }
 
 
+# Banco de prueba del pronostico (encargo C9a): familias con varias generaciones. familia -> [(producto, variante, asin)]
+# Confirmados por el titulo de la grafica el 25 nov 2026. Quedaron fuera por no tener serie de Amazon o por
+# no juntar dos generaciones: Flip (solo Flip5 tiene Amazon), Switch OLED (sin Amazon), Xbox Series X B0HLQ4R5QT
+# (un mes de datos).
+ASINS_BANCO = {
+    "sultra": [("s23ultra", "256", "B0BQXJTDRK"), ("s23ultra", "256", "B0BQXHMF3Y"),
+               ("s24ultra", "256", "B0CQ7RGF7D"),
+               ("s25ultra", "256", "B0DNTX93TX"), ("s25ultra", "256", "B0FB2TLPSH")],
+    "fold5": [("fold5", "512", "B0CBTG1624")],
+    "xbox": [("xboxs", "unica", "B08H71MRV7"), ("xboxs", "unica", "B0DG6G4WST"), ("xboxx", "unica", "B0DFZMY6RL")],
+}
+# Sin precio de lista aproximado: Keepa empieza despues del lanzamiento y sus primeros 60 dias no son el lanzamiento
+# (S23 Ultra Verde: $23,750 sostenido, pero el lanzamiento se ve en $31,000 pocos dias).
+SIN_LISTA = {"B0BQXJTDRK"}
+
+
+def _graficas(aqui, asin):
+    largo = os.path.join(aqui, "keepa", f"{asin}_3650.png")
+    corto = os.path.join(aqui, "keepa", f"{asin}_90.png")
+    if not os.path.exists(os.path.splitext(corto)[0] + ".calib.json"):
+        corto = None
+    return largo, corto
+
+
+def _escribir(ruta, filas):
+    filas.sort(key=lambda r: (r["fecha"], r["producto"], r["variante"], r["id"]))
+    with open(ruta, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=CAMPOS, lineterminator="\n")
+        w.writeheader()
+        w.writerows(filas)
+    print(os.path.basename(ruta), len(filas), "renglones")
+
+
 def escribir_csvs():
     aqui = os.path.dirname(os.path.abspath(__file__))
     for producto, lista in ASINS.items():
         filas = []
         for variante, asin in lista:
-            largo = os.path.join(aqui, "keepa", f"{asin}_3650.png")
-            corto = os.path.join(aqui, "keepa", f"{asin}_90.png")
-            if not os.path.exists(os.path.splitext(corto)[0] + ".calib.json"):
-                corto = None
+            filas += renglones(producto, variante, asin, *_graficas(aqui, asin))
+        _escribir(os.path.join(aqui, f"keepa_{producto}.csv"), filas)
+
+
+def lista_aproximada(serie, dias=60, minimo_dias=7):
+    """Precio mas alto que Amazon sostuvo (al menos minimo_dias en total) en sus primeros `dias` dias de serie."""
+    amz = [(d, a) for d, (a, _) in serie.items() if a is not None]
+    if not amz:
+        return None, None
+    d0 = amz[0][0]
+    cuenta = collections.Counter(redondo(a) for d, a in amz if (d - d0).days < dias)
+    # precios vecinos (misma linea leida con 1 px de diferencia) se juntan
+    grupos = collections.Counter()
+    for p, n in cuenta.items():
+        clave = next((g for g in grupos if abs(g - p) <= 60), p)
+        grupos[clave] += n
+    sostenidos = [p for p, n in grupos.items() if n >= minimo_dias]
+    return d0, (max(sostenidos) if sostenidos else None)
+
+
+def escribir_banco():
+    aqui = os.path.dirname(os.path.abspath(__file__))
+    dest = os.path.join(aqui, "banco")
+    os.makedirs(dest, exist_ok=True)
+    listas = []
+    for familia, lista in ASINS_BANCO.items():
+        filas = []
+        for producto, variante, asin in lista:
+            largo, corto = _graficas(aqui, asin)
             filas += renglones(producto, variante, asin, largo, corto)
-        filas.sort(key=lambda r: (r["fecha"], r["variante"], r["id"]))
-        with open(os.path.join(aqui, f"keepa_{producto}.csv"), "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=CAMPOS, lineterminator="\n")
-            w.writeheader()
-            w.writerows(filas)
-        print(producto, len(filas), "renglones")
+            serie, _ = serie_diaria(largo)
+            d0, lp = lista_aproximada(serie)
+            if lp and asin not in SIN_LISTA:
+                listas.append({"producto": producto, "variante": variante, "desde": d0.isoformat(), "lista": lp,
+                               "fuente_url": URL.format(asin=asin, rango="3650"),
+                               "cita": "aproximada: precio de Amazon al lanzamiento leído de la gráfica"})
+        _escribir(os.path.join(dest, f"keepa_{familia}.csv"), filas)
+    # listas.csv: se conservan los renglones de otras fuentes y se reemplazan los de estas graficas
+    ruta = os.path.join(dest, "listas.csv")
+    previas = []
+    if os.path.exists(ruta):
+        with open(ruta, encoding="utf-8", newline="") as f:
+            previas = [r for r in csv.DictReader(f)
+                       if not r["fuente_url"].startswith("https://graph.keepa.com/")
+                       or r["fuente_url"] not in {x["fuente_url"] for x in listas}]
+    with open(ruta, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=["producto", "variante", "desde", "lista", "fuente_url", "cita"],
+                           lineterminator="\n")
+        w.writeheader()
+        w.writerows(previas + listas)
+    print("listas.csv", len(previas), "previos +", len(listas), "de Keepa")
 
 
 def main():
     modo = sys.argv[1]
     if modo == "csvs":
         escribir_csvs()
+        return
+    if modo == "banco":
+        escribir_banco()
         return
     if modo == "grid":
         grid(sys.argv[2])

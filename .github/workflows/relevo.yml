@@ -6,20 +6,48 @@ on:
   workflow_run:
     workflows: [vigia]
     types: [completed]
+  # Plan B: cada corrida de vigia lanza este flujo en su primer paso, con su numero. El trabajo "vigilar"
+  # pasa por el entorno "espera" (13 min) y arranca cuando esa corrida ya termino y su sucesora deberia
+  # estar esperando. Sirve tambien si el evento workflow_run nunca llega.
   workflow_dispatch:
+    inputs:
+      corrida:
+        description: 'Numero de la corrida de vigia que lanzo este relevo (vacio = disparo a mano)'
+        type: string
+        default: ''
 permissions:
   actions: write
   issues: write
   contents: read
-concurrency:
-  group: relevo
-  cancel-in-progress: false
+# Concurrencia por trabajo, no por flujo: el "vigilar" de cada corrida tiene su propio grupo (no retiene ni
+# reemplaza al relevo por evento mientras pasa sus 13 min en "espera", ni a otro "vigilar"); los relevos por
+# evento comparten el suyo. Dos relevos a la vez no lanzan dos: relevo.sh vuelve a contar antes de cada intento.
 jobs:
-  relevo:
+  vigilar:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    # 12 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
+    environment: espera
+    concurrency:
+      group: relevo-vigilar-${{ inputs.corrida || github.run_id }}
+      cancel-in-progress: false
+    # Peor caso medido por suma (ronda 5): ~555 s de esperas + ~30 llamadas a gh de hasta 25 s cada una.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Relanzar la cadena si quedo detenida (plan B)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERMINO_ID: ${{ inputs.corrida }}
+        run: bash .github/scripts/relevo.sh
+  relevo:
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: relevo-evento
+      cancel-in-progress: false
+    # 15 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
     # relevo cortado por tope no avisa a nadie.
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Relanzar la cadena si quedo detenida

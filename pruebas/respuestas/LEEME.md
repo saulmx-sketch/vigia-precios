@@ -12,6 +12,12 @@ leen las funciones. Las usa `pruebas/casos_confirmacion.py`.
 | `liv_pdp_1186785793.html` | ficha real de Liverpool de la PS5 1 TB estandar ($14,699; Fija, lector CD) | solo recortada |
 | `liv_pdp_1156059630_6999.html` | la ficha del Portal de arriba | ALTERADA: precio $6,999 (arriba del piso) |
 | `liv_pdp_1186785807_2tb_alterada.html` | la ficha real 1186785807 | ALTERADA: hecha pasar por una PS5 Pro sin la palabra "Pro" (titulo "Consola PlayStation 5 de 2 TB", Disco duro y capacidad "2 TB", $14,999), para probar que no entra como Digital |
+| `ipad_amz_busca.html` | seis bloques reales de la busqueda de Amazon "ipad+air+m3+128gb" (M4 11 128 Wi-Fi B0GQVP7LKW, 13 pulgadas, M3 Wi-Fi + Cellular que dice "5G", funda, teclado, renovado) | solo recortada |
+| `ipad_amz_ficha_B0GQVP7LKW.html` | ficha real de Amazon del iPad Air 11 M4 128 GB Wi-Fi ($16,793.61, vende Amazon Mexico) | solo recortada |
+| `ipad_amz_ficha_B0GQVP7LKW_tercero.html` | la ficha de arriba | ALTERADA: vendedor cambiado a "iShop Revendedor MX" |
+| `ipad_liv_busca.html` | cinco renglones reales de la busqueda de Liverpool "ipad+air+11" (128 GB, 256 GB, 13 pulgadas, funda, teclado) | solo recortada |
+| `ipad_liv_pdp_1195646976.html` | ficha real de Liverpool del iPad Air M4 11 128 GB ($18,799, vende Liverpool) | solo recortada |
+| `ipad_cos_busca.json` | tres productos reales de la busqueda de Costco "ipad air" (11 128 GB $14,799, 11 256 GB, 13 pulgadas) | solo recortada |
 | `liv_busca_ps5.html` | busqueda de Liverpool "playstation+5": renglones reales del Portal y del bundle | AGREGADOS dos renglones inventados: el Portal titulado "Consola PS5 Digital" a $6,999 y el tercero de arriba a $8,999 |
 | `liv_busca_fold8.html` | busqueda de Liverpool "galaxy+z+fold8" | solo recortada |
 | `amz_busca_ps5.html` | bloque real de la busqueda de Amazon del articulo B0FTP523RH | ALTERADO el precio de la busqueda ($12,499 a $8,999), para probar que manda el de la ficha |
@@ -20,3 +26,24 @@ leen las funciones. Las usa `pruebas/casos_confirmacion.py`.
 | `cos_api_648324.json` | API de producto de Costco (Fold8 512 Grafito, $44,999 - $7,000) | solo recortada |
 | `gp_pdp_fortnite.html` | ficha de Gameplanet (ld+json) | descripcion recortada |
 | `sam_catalogo.json` | catalogo de Samsung de los 10 modelos de productos.json | solo recortado |
+
+## Lectores nuevos (`lectores_nuevos.py`; las usa `pruebas/casos_lectores_nuevos.py`)
+
+Recortadas a los bloques `ld+json` (y, en Soriana, las tarjetas del listado; en la ficha de Cyberpuerta, su `<h1>`). Las alteraciones NO estan en los archivos: la prueba las hace en memoria sobre la respuesta real, y se listan aqui.
+
+| Archivo | De donde sale | Alteraciones que hace la prueba |
+|---|---|---|
+| `soriana_busca_galaxy_z_fold8.html` | busqueda Soriana "galaxy z fold8" (1 ficha) | ninguna |
+| `soriana_busca_playstation_5_digital.html` | busqueda Soriana "playstation 5 digital" (consola + unidad de disco) | ninguna |
+| `soriana_busca_consola_playstation_5.html` | busqueda Soriana "consola playstation 5" (24 resultados) | ninguna |
+| `soriana_busca_vacia.html` | busqueda Soriana "samsung galaxy z fold" (ItemList vacio) | ninguna |
+| `soriana_ficha_fold8.html`, `soriana_ficha_ps5.html` | fichas Soriana (Fold8 512 $36,990; PS5 Digital $11,990; vende Soriana) | vendedor cambiado a un tercero o borrado; InStock a OutOfStock; nombre cambiado a una PS5 con lector (supuesto) |
+| `soriana_ficha_unidad_disco.html` | ficha Soriana de la unidad de disco ($5,190) | ninguna |
+| `cyberpuerta_busca_galaxy_z_fold8.html` | busqueda Cyberpuerta "galaxy z fold8" (16 articulos) | vendedor cambiado a un tercero o borrado |
+| `cyberpuerta_busca_playstation_5_digital.html` | busqueda Cyberpuerta "playstation 5 digital" (las Slim Digital, agotadas hoy) | ALTERADA en una prueba: todo OutOfStock a InStock, para probar que con existencia entran solo las Slim Digital |
+| `cyberpuerta_ficha_fold8_morado.html` | ficha Cyberpuerta del Fold8 512 Morado ($34,319) | availability a OutOfStock y a PreOrder |
+| `chedraui_busca_consola_playstation_5_digital.json` | catalogo VTEX de Chedraui "consola playstation 5 digital" (7 productos, todos con AvailableQuantity 0 hoy) | ALTERADA en una prueba: AvailableQuantity a 10 en todo, para probar que con existencia entra solo la Edicion Digital; en otra, el vendedor de la Digital cambiado a "Doto" o vacio |
+| `chedraui_busca_playstation_5_digital.json` | catalogo VTEX "playstation 5 digital" (crudo de casa; solo productos PlayStation; trae a "Doto" real) | ninguna |
+| `chedraui_ficha_3879487.json` | catalogo VTEX por articulo de la PS5 Edicion Digital ($12,499, agotada) | AvailableQuantity a 10 |
+
+Los `.json` de Chedraui guardan la respuesta en la clave `respuesta`, junto a `_origen`; la prueba sirve solo `respuesta`.
