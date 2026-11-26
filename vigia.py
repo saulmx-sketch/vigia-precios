@@ -1944,7 +1944,7 @@ def _relanzar(ex):
 def es_cuelgue(ex):
     """La tienda no respondio (corte de red o tope de tiempo de pedir), a diferencia de una respuesta con error."""
     t = str(ex)
-    return t.startswith("sin respuesta:") or "se acabo el tiempo de la corrida" in t
+    return "sin respuesta:" in t or "se acabo el tiempo de la corrida" in t   # revisor F (R1): tambien envuelto
 
 
 def leida(c, leidas):
@@ -2464,6 +2464,8 @@ def selftest():
         _ARRANQUE[0] = guardado
     # pendiente 4 (26 nov): una clave cuenta como leida si se leyo su tienda entera o su par tienda|producto
     assert leida("T|p|v", {"T"}) and leida("T|p|v", {"T|p"}) and not leida("T|p|v", {"T|q"}) and not leida("T|p|v", set())
+    assert es_cuelgue(RuntimeError("sin respuesta: x: timed out")) and es_cuelgue(RuntimeError(
+        "Soriana: fallaron las 2 fichas abiertas: sin respuesta: x: t")) and not es_cuelgue(RuntimeError("respondio 503"))
     # avisos de disponibilidad: si el aviso no se abre, la proxima corrida lo vuelve a intentar
     def falla(asunto, cuerpo):
         raise RuntimeError("GitHub no responde")
