@@ -176,6 +176,19 @@ def _correr(v):
     assert abiertos == ["GANGA $7,100 · PS5 Digital (sin lector) · TiendaX"], abiertos
     assert est["avisado"] == {k: 7100.0} and est["avisado_nivel"] == {k: ["GANGA", 7100.0]}, est
 
+    # Relectura pendiente (coordinador, 25 nov): cuenta dentro del tope de 6, despues de las ofertas nuevas
+    v.FICHAS["TiendaX"] = ps5_x(7100.0)
+    kr = "TiendaX|ps5|relee"
+    est = {"avisado": {kr: 7000.0}, "avisado_nivel": {kr: ["GANGA", 7000.0, v.RELEER]}}
+    mejores = {"TiendaX|ps5|n%d" % i: oferta_x("TiendaX", 7200.0 + i) for i in range(6)}
+    mejores[kr] = oferta_x("TiendaX", 7000.0)
+    claves = [a["clave"] for a in v.avisos_de_precio(mejores, por_id, est["avisado"], est, AHORA)]
+    assert len(claves) == 6 and kr not in claves, claves          # las 6 nuevas se releyeron; la pendiente: sin tiempo
+    assert est["avisado_nivel"][kr] == ["GANGA", 7000.0, v.RELEER], est   # sigue pendiente
+    avs = v.avisos_de_precio({kr: oferta_x("TiendaX", 7000.0)}, por_id, est["avisado"], est, AHORA)
+    assert [(a["resultado"], a["relectura"]) for a in avs] == [("confirmada", True)], avs
+    assert avs[0]["cuerpo"].startswith("Confirmación del aviso anterior"), avs[0]["cuerpo"][:120]
+
     # R1. Ida y vuelta de version: si la version vieja reaviso (avisado cambio), el nivel guardado se descarta
     est = {"avisado": {k: 7200.0}, "avisado_nivel": {k: ["SIN CONFIRMAR", 7000.0]}}
     avisado, niveles = v.normalizar_avisado(est)

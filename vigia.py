@@ -148,7 +148,9 @@ def decodificar(b, tipo=""):
 
 
 def cargar_config(ruta=None):
-    ruta = ruta or CONFIG
+    """Productos de `ruta`; sin ruta, siempre productos.json (lo que esperan las pruebas aunque VIGIA_CONFIG este
+    puesta). main() y cobertura() piden CONFIG, que si sigue a VIGIA_CONFIG."""
+    ruta = ruta or CONFIG_PRINCIPAL
     nombre = os.path.basename(ruta)
     with open(ruta, encoding="utf-8") as f:
         prods = json.load(f)["productos"]
@@ -1235,6 +1237,19 @@ def nivel_avisado(niveles, clave, precio):
     return v if isinstance(v, str) else None
 
 
+# Tercer elemento de avisado_nivel (la version d6ab147 no lee avisado_nivel; las rondas 2 y 3 solo leen los dos primeros):
+RELEER = "releer"   # se aviso GANGA/COMPRAR con "ficha sin releer": queda pendiente de relectura en las corridas siguientes
+HECHO = "hecho"     # ya salio el correo de confirmacion o de correccion de esa relectura: no se vuelve a releer
+
+
+def marca_avisado(niveles, clave, precio):
+    """Tercer elemento de avisado_nivel[clave] ("releer", "hecho" o None), si sigue valiendo para ese precio."""
+    v = niveles.get(clave)
+    if isinstance(v, (list, tuple)) and len(v) >= 3 and nivel_avisado(niveles, clave, precio):
+        return v[2]
+    return None
+
+
 def normalizar_avisado(estado):
     """Deja estado["avisado"] como {clave: precio} (numeros, lo que lee cualquier version anterior del vigia, para poder
     volver atras sin que truene) y en estado["avisado_nivel"] {clave: [nivel, precio avisado]}; un nivel cuyo precio ya
@@ -1254,7 +1269,8 @@ def normalizar_avisado(estado):
     for c in list(niveles):
         niv = nivel_avisado(niveles, c, avisado.get(c)) if c in avisado else None
         if niv:
-            niveles[c] = [niv, avisado[c]]
+            marca = marca_avisado(niveles, c, avisado[c])
+            niveles[c] = [niv, avisado[c]] + ([marca] if marca else [])
         else:
             niveles.pop(c)
     return avisado, niveles
@@ -1280,17 +1296,22 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
                 continue
             ant, niv_ant = avisado_de(avisado[clave]) if clave in avisado else (None, None)
             niv_ant = niv_ant or nivel_avisado(niveles, clave, ant)
-            if ant is not None and o["precio"] > ant - BAJA_MINIMA and niv_ant != "SIN CONFIRMAR":
+            marca = marca_avisado(niveles, clave, ant)
+            # relectura: avisado con "ficha sin releer" y sin bajar lo bastante para un aviso nuevo
+            relee = ant is not None and o["precio"] > ant - BAJA_MINIMA and marca == RELEER and niv in NIVELES_CONFIRMAR
+            if ant is not None and o["precio"] > ant - BAJA_MINIMA and not relee and \
+               not (niv_ant == "SIN CONFIRMAR" and marca != HECHO):
                 continue
-            pend.append((clave, o, prod, var, niv, ant, niv_ant))
+            pend.append((clave, o, prod, var, niv, ant, niv_ant, relee))
         except Exception as ex:
             print("   aviso de %s no se pudo revisar: %s" % (clave, str(ex)[:120]))
-    pend.sort(key=lambda x: x[1]["precio"])
+    # las ofertas nuevas primero (del mas barato al mas caro); las relecturas pendientes despues, dentro del mismo tope
+    pend.sort(key=lambda x: (x[7], x[1]["precio"]))
     hechos = []
     if arranque is not None:
         estado["_arranque"] = arranque
     try:
-        for clave, o, prod, var, niv, ant, niv_ant in pend:
+        for clave, o, prod, var, niv, ant, niv_ant, relee in pend:
             resultado, final, razon_f = None, o, ""
             if niv in NIVELES_CONFIRMAR:
                 resultado, final, razon_f = confirmar(o, prod, estado)
@@ -1301,13 +1322,18 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
                 niv_f = "SIN CONFIRMAR"
             else:
                 niv_f = niv
-            if ant is not None and final["precio"] > ant - BAJA_MINIMA:
+            if relee:
+                # pendiente de relectura: un solo correo mas cuando la ficha se deja leer (confirmacion o correccion);
+                # si sigue sin poderse leer, nada (queda pendiente)
+                if resultado not in ("confirmada", "no_coincide"):
+                    continue
+            elif ant is not None and final["precio"] > ant - BAJA_MINIMA:
                 # sin bajar lo bastante de lo ya avisado: solo vuelve a avisar, una vez, si antes salio SIN CONFIRMAR y
                 # ahora la ficha lo confirma (al precio que sea, dentro de su nivel; revisor R1-P3)
                 if not (niv_ant == "SIN CONFIRMAR" and resultado == "confirmada" and niv_f != "SIN CONFIRMAR"):
                     continue
             hechos.append({"clave": clave, "o": final, "prod": prod, "var": var, "nivel": niv_f, "listado": niv,
-                           "resultado": resultado, "razon": razon_f})
+                           "resultado": resultado, "razon": razon_f, "relectura": relee})
     finally:
         estado.pop("_confirmaciones", None)
         estado.pop("_arranque", None)
@@ -1317,6 +1343,11 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora, arranque=None):
         try:
             a["asunto"], a["cuerpo"] = texto_aviso(a["o"], a["prod"], a["var"], a["nivel"], a["resultado"], a["razon"],
                                                    mejores, hora, a["listado"])
+            if a.get("relectura"):
+                previo = ("Confirmación del aviso anterior, que salió sin releer la ficha: ahora se releyó y coincide."
+                          if a["resultado"] == "confirmada" else
+                          "Corrección del aviso anterior, que salió sin releer la ficha: ahora se releyó y no coincide.")
+                a["cuerpo"] = previo + "\n\n" + a["cuerpo"]
         except Exception as ex:   # texto de respaldo: el aviso sale aunque algo del texto falle
             print("   texto del aviso de %s fallo (%s); sale el texto corto" % (a["clave"], str(ex)[:100]))
             a["asunto"] = "%s %s · %s · %s" % (a["nivel"], pesos(numero(a["precio"])), a["var"]["nombre"], a["o"].get("tienda"))
@@ -1337,7 +1368,9 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
             return False
         avisado[av["clave"]] = av["precio"]
         if niveles is not None:
-            niveles[av["clave"]] = [av["nivel"], av["precio"]]
+            marca = HECHO if av.get("relectura") else \
+                RELEER if av.get("resultado") == "sin_releer" and av.get("nivel") in ("GANGA", "COMPRAR") else None
+            niveles[av["clave"]] = [av["nivel"], av["precio"]] + ([marca] if marca else [])
         return True
     except Exception as ex:
         print("   no se pudo abrir el aviso:", ex)
@@ -1736,7 +1769,7 @@ def _legible(regex):
 
 def cobertura(prods=None):
     """Que se vigila, en palabras, para leer en una pantalla. No usa red."""
-    prods = prods or cargar_config()
+    prods = prods or cargar_config(CONFIG)
     pesos = lambda n: "${:,}".format(n)
     print("QUE VIGILA EL VIGIA (segun %s)" % os.path.basename(CONFIG))
     glob = EXCLUIR[3:-3] if EXCLUIR.startswith(r"\b(") and EXCLUIR.endswith(r")\b") else EXCLUIR
@@ -2052,7 +2085,7 @@ def main():
     ahora = dt.datetime.now(dt.timezone.utc)
     arranque = time.monotonic()   # reloj general de la corrida (SEGUNDOS_CORRIDA)
     LIVERPOOL_LEIDAS.clear()
-    prods = cargar_config()
+    prods = cargar_config(CONFIG)
     por_id = {p["id"]: p for p in prods}
     try:
         with open(ESTADO, encoding="utf-8") as f:

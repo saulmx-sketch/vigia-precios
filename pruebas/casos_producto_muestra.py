@@ -155,9 +155,24 @@ def _correr(v):
     with contextlib.redirect_stdout(salida):
         assert v.cobertura(prods) == 0
     texto = salida.getvalue()
-    for x in ("iPad Air 11", "iPad Air 11 M4 128 GB Wi-Fi", "iPad Air 11 M3 128 GB Wi-Fi", "Amazon", "Liverpool", "Costco",
-              "Tiendas configuradas que aun no tienen lector: Soriana, Cyberpuerta, Chedraui"):
+    for x in ("iPad Air 11", "iPad Air 11 M4 128 GB Wi-Fi", "iPad Air 11 M3 128 GB Wi-Fi"):
         assert x in texto, (x, texto[:600])
+    # cada tienda configurada sale, con lector (directo) o como "aun no tienen lector" (segun este lectores_nuevos.py)
+    renglones = [r for r in texto.splitlines() if r.startswith(("Tiendas que se leen directo:", "Tiendas configuradas que aun"))]
+    for t in ipad["tiendas"]:
+        assert any(t in r for r in renglones), (t, renglones)
+
+    # con otro archivo de productos (VIGIA_CONFIG) la corrida normal se niega: codigo 3, sin leer ni escribir nada
+    guardado = (v.CONFIG, list(sys.argv), v.pedir)
+    try:
+        v.CONFIG, sys.argv = MUESTRA, ["vigia.py"]
+        v.pedir = lambda *a, **k: (_ for _ in ()).throw(AssertionError("la corrida negada pidio red"))
+        with contextlib.redirect_stdout(io.StringIO()) as s:
+            assert v.main() == 3, "con VIGIA_CONFIG y sin --seco main debio negarse"
+        assert "solo se corre --seco o --cobertura" in s.getvalue(), s.getvalue()
+        assert [p["id"] for p in v.cargar_config()] != ["ipad-air"]   # sin ruta, siempre productos.json
+    finally:
+        v.CONFIG, sys.argv, v.pedir = guardado[0], guardado[1], guardado[2]
 
     # la guarda: ningun nombre de producto en el codigo fuera de las zonas permitidas
     hallados = [h for h in nombres_de_producto(v.__file__) if h[1] not in PERMITIDAS]
