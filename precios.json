@@ -1,10 +1,10 @@
 {
  "Amazon|fold8|normal-512": {
   "leido": "2026-11-25 00:00",
-  "nota": "con cupon en la ficha, sin restar",
+  "nota": "",
   "precio": 34394.83,
   "producto": "Fold8 512 GB",
-  "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
+  "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
   "vendedor": "Amazon México"
  },
  "Amazon|ps5|digital": {
@@ -45,6 +45,22 @@
   "precio": 44999.0,
   "producto": "Fold8 512 GB",
   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|fold8|ultra-1tb": {
+  "leido": "2026-11-26 10:40",
+  "nota": "",
+  "precio": 55999.0,
+  "producto": "Fold8 Ultra 1 TB",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314?skuId=1203150845",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|fold8|ultra-512": {
+  "leido": "2026-11-26 10:40",
+  "nota": "",
+  "precio": 44999.0,
+  "producto": "Fold8 Ultra 512 GB",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314?skuId=1203150837",
   "vendedor": "Liverpool"
  },
  "Liverpool|ps5|digital": {
