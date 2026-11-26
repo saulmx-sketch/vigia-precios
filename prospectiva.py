@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""prospectiva.py: cifras de referencia de precios por variante y la razon de cada aviso.
+"""prospectiva.py: cifras de referencia de precios por variante, topes calculados y la razon de cada aviso.
 
-Fase 1: cargador del historial, estadisticas por variante (minimo, lo normal, percentiles, banco ajeno),
-topes iguales a los de vigia.py y razon() en lenguaje llano. Solo biblioteca estandar, Python 3.8 o mayor,
-sin red. Lo usa vigia.py: cargar_json() y razon() nunca lanzan excepcion.
+Fase 1: cargador del historial, estadisticas por variante (minimo, lo normal, percentiles, banco ajeno).
+Fase 2: pronostico por el modelo anterior ("lo que paso con el modelo anterior en las mismas fechas, aplicado
+al nivel de precio de este anio"), topes calculados, prueba hacia atras y recalculo a prueba de todo.
+Solo biblioteca estandar, Python 3.8 o mayor, sin red. Lo usa vigia.py: cargar_json() y razon() nunca lanzan
+excepcion.
 
 Uso:
   py -X utf8 prospectiva.py --selftest
   py -X utf8 prospectiva.py --generar
+  py -X utf8 prospectiva.py --recalcular
+  py -X utf8 prospectiva.py --retroprueba [--csv ruta]
   py -X utf8 prospectiva.py --veredicto fold8 ultra-512 32000 [--fecha 2026-11-25]
   py -X utf8 prospectiva.py --rastro fold8 ultra-512
 """
@@ -20,21 +24,31 @@ import os
 import re
 import sys
 import tempfile
+import time
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 HISTORIA = "historia"
 HISTORIAL = "historial_precios.csv"
 CONFIG = "productos.json"
 SALIDA = "prospectiva.json"
+RETRO_MD = "RETROPRUEBA.md"
 MX = dt.timezone(dt.timedelta(hours=-6))
+UN_DIA = dt.timedelta(days=1)
 
 VERSION = 1
 VIGENCIA_DIAS = 30      # prospectiva.json caduca a los 30 dias de generado
 VENTANA_DIAS = 30       # "ultimos 30 dias" = hoy y los 29 anteriores
-MIN_DIAS_TIPICO = 5     # con menos dias con dato no se dice que es "lo normal"
+MIN_DIAS_TIPICO = 5     # con menos dias con dato no se dice que es "lo normal" (ni hay nivel)
+DIAS_CICLO = 120        # minimo_ciclo = minimo valido de los ultimos 120 dias
 MAX_RAZON = 320
 IGUAL_MARGEN = 100      # diferencia menor que esto cuenta como "iguala"
 TIPICO_MARGEN = 0.02    # "lo normal" solo se menciona si difiere mas de 2 %
+S_DEFECTO = 0.09        # holgura entre topes mientras no haya prueba hacia atras
+S_MIN, S_MAX = 0.05, 0.12
+SESGO_MAX = 0.15
+SALTO_MAX = 0.15        # --recalcular no reemplaza si un tope se mueve mas que esto
+BAJA_MINIMA = 300       # la regla del vigia: ya avisado, vuelve a avisar si baja al menos esto
+MAX_AVISOS = 12
 
 COLUMNAS = ["fecha", "producto", "variante", "tienda", "precio", "lista", "condicion", "banco", "tipo_banco",
             "vendedor", "garantia_mx", "fuente", "url", "id", "nota"]
@@ -43,17 +57,45 @@ COLUMNAS_CALENDARIO = ["evento", "tipo", "inicio", "fin", "producto", "fuente_ur
 COLUMNAS_LISTAS = ["producto", "variante", "desde", "lista", "fuente_url", "cita"]
 PISOS_ANTECESOR = {"fold7": 12000, "fold6": 12000}
 EVENTOS_RESPALDO = [
-    {"evento": "Buen Fin 2026", "tipo": "evento", "inicio": "2026-11-13", "fin": "2026-11-17", "producto": "",
+    {"evento": "Buen Fin 2026", "tipo": "temporada", "inicio": "2026-11-13", "fin": "2026-11-17", "producto": "",
      "fuente_url": "", "cita": "contexto comun de la linea A, 25 nov 2026", "rastro": "respaldo"},
-    {"evento": "Black Friday 2026", "tipo": "evento", "inicio": "2026-11-27", "fin": "2026-11-30", "producto": "",
+    {"evento": "Black Friday 2026", "tipo": "temporada", "inicio": "2026-11-27", "fin": "2026-11-30", "producto": "",
      "fuente_url": "", "cita": "contexto comun de la linea A, 25 nov 2026", "rastro": "respaldo"},
 ]
 CANJE = re.compile(r"canje|a\s+cambio|trade[\s-]*in|plan\s+de\s+telefon|plan\s+tarifario|\bcon\s+plan\b", re.I)
+NO_REVERIFICADO = re.compile(r"no\s+reverificad", re.I)
+# Condiciones de acceso que no se tienen por omision (linea A, fase 2d): el precio va a la serie aparte, con banco ajeno
+ACCESO = re.compile(r"estudiantes?|(?<![a-z])epp(?![a-z])|business|nueva\s+cuenta|primera\s+compra|emplead[oa]s?|meli\s*(\+|plus)", re.I)
+
+
+def condicion_de_acceso(o):
+    """El texto de la condicion de acceso que casa en condicion, tienda o nota, o None."""
+    m = ACCESO.search(" | ".join(str(o.get(k) or "") for k in ("condicion", "tienda", "nota")))
+    return m.group(0) if m else None
+ULTIMO_TRAMO = re.compile(r"[uú]ltimo\s+d[ií]a\s+del\s+tramo", re.I)
 MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
-METODO = ("Se juntaron los precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos "
-          "(lecturas del vigia y archivos de historia/); el minimo es el mas barato visto, lo normal es el "
-          "precio mas bajo tipico de cada dia en los ultimos 30 dias, y los topes siguen siendo los "
-          "porcentajes de productos.json.")
+MESES_LARGOS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre",
+                "noviembre", "diciembre"]
+METODO = ("Precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos (lecturas del vigia y "
+          "historia/). El piso esperado repite lo que hizo el modelo anterior (o la misma consola el anio pasado) en "
+          "las mismas fechas, a la escala del precio de hoy; los topes salen de ese piso y del minimo de los "
+          "ultimos 120 dias.")
+
+# Listas de lanzamiento para pasar los precios de 1 TB a su equivalente de 512 GB (historia/listas.csv
+# renglones 2-3 para el Fold6 y 6-7 para el Fold7).
+FACTOR_FOLD7 = {"512": 1.0, "1tb": 48999.0 / 56499.0}
+FACTOR_FOLD6 = {"512": 1.0, "1tb": 45999.0 / 51999.0}
+ANALOGOS_FOLD = [{"nombre": "Fold7", "corto": "el Fold7", "producto": "fold7", "factores": FACTOR_FOLD7, "desfase": 364},
+                 {"nombre": "Fold6", "corto": "el Fold6", "producto": "fold6", "factores": FACTOR_FOLD6, "desfase": 728}]
+ANALOGOS_PS5 = [{"nombre": "PS5 Digital un año antes", "corto": "la misma consola", "producto": "ps5",
+                 "factores": {"digital": 1.0}, "desfase": 364},
+                {"nombre": "PS5 Digital dos años antes", "corto": "la misma consola", "producto": "ps5",
+                 "factores": {"digital": 1.0}, "desfase": 728}]
+PROPIAS = {"fold8|ultra-512": ANALOGOS_FOLD, "fold8|normal-512": ANALOGOS_FOLD, "ps5|digital": ANALOGOS_PS5}
+HERMANAS = {"fold8|ultra-1tb": "fold8|ultra-512", "fold8|ultra": "fold8|ultra-512",
+            "fold8|normal": "fold8|normal-512", "fold8|normal-1tb": "fold8|normal-512"}
+QUIEN = {"fold8": "modelo_anterior", "ps5": "misma_consola"}
+LISTA_LANZAMIENTO_FOLD7_512 = 48999   # historia/listas.csv renglon 6
 
 
 # ---------------------------------------------------------------- utilidades
@@ -73,6 +115,16 @@ def _hoy(hoy=None):
     if isinstance(hoy, dt.date):
         return hoy
     return dt.date.fromisoformat(str(hoy).strip()[:10])
+
+
+_FECHAS = {}
+
+
+def _d(txt):
+    v = _FECHAS.get(txt)
+    if v is None:
+        v = _FECHAS[txt] = dt.date.fromisoformat(txt)
+    return v
 
 
 def _precio_txt(txt):
@@ -107,6 +159,14 @@ def _numero(x):
 def _num_json(x):
     x = float(x)
     return int(x) if x.is_integer() else round(x, 2)
+
+
+def _entero(x):
+    return int(round(float(x)))
+
+
+def _floor100(x):
+    return int(math.floor(float(x) / 100.0 + 1e-9)) * 100
 
 
 def _dinero(x):
@@ -159,12 +219,17 @@ def leer_productos(ruta):
     return prods
 
 
+def topes_fracciones(prod, var):
+    """Los topes a mano de hoy: fracciones de la lista, redondeadas a centenas (igual que vigia.py)."""
+    return [int(round(var["lista"] * f / 100.0)) * 100 for f in prod["fracciones"]]
+
+
 def topes_vigia(prod, var):
-    """Los mismos topes que hoy calcula vigia.topes()."""
+    """Los mismos topes que vigia.topes() da sin prospectiva.json: (terna, origen)."""
     fijos = (prod.get("topes_fijos") or {}).get(var["id"])
     if fijos:
         return [int(x) for x in fijos], "topes_fijos"
-    return [int(round(var["lista"] * f / 100.0)) * 100 for f in prod["fracciones"]], "fracciones"
+    return topes_fracciones(prod, var), "fracciones"
 
 
 def _sin_capacidad(var):
@@ -304,7 +369,18 @@ def cargar_listas(carpeta, prods):
              "cita": "", "rastro": "productos.json"} for p in prods for v in p["variantes"]], "productos.json"
 
 
-# ---------------------------------------------------------------- validez y estadisticas
+def lista_vigente(listas, producto, variante, t, defecto=None):
+    """La lista con 'desde' mas reciente que no pase de t (los renglones sin fecha no cuentan)."""
+    mejor = None
+    for l in listas:
+        if l.get("producto") != producto or l.get("variante") != variante or not l.get("desde"):
+            continue
+        if l["desde"] <= t.isoformat() and (mejor is None or l["desde"] >= mejor["desde"]):
+            mejor = l
+    return (mejor["lista"], mejor["rastro"]) if mejor else (defecto, "productos.json")
+
+
+# ---------------------------------------------------------------- validez y estadisticas de la fase 1
 
 def clasificar(o, pisos):
     """'valida', 'ajeno' (falla solo por el banco) o el motivo del descarte."""
@@ -315,6 +391,8 @@ def clasificar(o, pisos):
     piso = pisos.get(o.get("producto"))
     if piso is None:
         return "producto_desconocido"
+    if NO_REVERIFICADO.search(o.get("nota") or ""):                                                            # linea A
+        return "no_reverificado"
     if not (gar == "si" or (gar == "sin dato" and fuente in ("foro", "prensa") and revl == "ok")):           # (a)
         return "sin_garantia" if gar == "no" else "garantia_sin_confirmar"
     if CANJE.search(o.get("condicion") or ""):                                                                 # (c)
@@ -323,12 +401,20 @@ def clasificar(o, pisos):
         return "revision_no_ok" if revl else "sin_revision"
     if o["precio"] < piso:                                                                                     # (e)
         return "bajo_piso"
+    if condicion_de_acceso(o):                                                                                 # fase 2d
+        return "condicion_de_acceso"
     tb = str(o.get("tipo_banco", "")).strip().lower()                                                          # (b)
     if tb in ("ninguno", "propio"):
         return "valida"
     if tb == "ajeno":
         return "ajeno"
     return "banco_sin_dato"
+
+
+def _pisos(prods):
+    pisos = dict(PISOS_ANTECESOR)
+    pisos.update({p["id"]: p["piso"] for p in prods})
+    return pisos
 
 
 def _pct(valores, q):
@@ -362,9 +448,11 @@ def _ficha(prod, var, g, desde30, hasta):
     for motivo, _ in g["descartes"]:
         descartadas[motivo] = descartadas.get(motivo, 0) + 1
     ficha = {"nombre": var["nombre"], "lista": var["lista"], "topes": tope, "topes_origen": origen,
-             "topes_manual": list(tope), "sin_confirmar_bajo": None, "minimo": None, "minimo_30d": None,
-             "tipico": None, "percentiles": None, "ajeno": None, "pisos_esperados": [], "baja_mas": [],
-             "n_datos": {"validas": validas, "ajeno": len(g["ajenas"]), "descartadas": descartadas}}
+             "topes_manual": topes_fracciones(prod, var), "sin_confirmar_bajo": None, "minimo": None,
+             "minimo_30d": None, "tipico": None, "percentiles": None, "ajeno": None, "pisos_esperados": [],
+             "baja_mas": [], "n_datos": {"validas": validas, "descartadas": descartadas,
+                                         "ajeno": len([o for o in g["ajenas"] if not condicion_de_acceso(o)]),
+                                         "condicion_de_acceso": len([o for o in g["ajenas"] if condicion_de_acceso(o)])}}
     det = {"validas": g["validas"], "ajenas": g["ajenas"], "descartes": g["descartes"], "dias": [],
            "desde30": desde30, "hasta": hasta, "sin_capacidad": _sin_capacidad(var)}
     if det["sin_capacidad"] or not g["validas"]:
@@ -386,25 +474,27 @@ def _ficha(prod, var, g, desde30, hasta):
                             "p50": _num_json(round(_pct(todos, 50), 2)), "n": len(todos)}
     aj = _mas_barata(g["ajenas"])
     if aj:
+        acceso = condicion_de_acceso(aj)
         ficha["ajeno"] = {"precio": _num_json(aj["precio"]), "fecha": aj["fecha"], "tienda": aj["tienda"],
-                          "banco": aj.get("banco", ""), "rastro": aj["rastro"]}
+                          "banco": aj.get("banco", ""), "rastro": aj["rastro"],
+                          "motivo": "condicion de acceso" if acceso else "banco ajeno",
+                          "condicion": acceso or aj.get("banco", "")}
     return ficha, det
 
 
 def calcular(obs, prods, hoy=None):
-    """Fichas por variante de productos.json. Devuelve (variantes, detalle) ; detalle sirve a --rastro."""
+    """Fichas de la fase 1 por variante de productos.json. Devuelve (variantes, detalle)."""
     hoy = _hoy(hoy)
     hasta = hoy.isoformat()
     desde30 = (hoy - dt.timedelta(days=VENTANA_DIAS - 1)).isoformat()
-    pisos = dict(PISOS_ANTECESOR)
-    pisos.update({p["id"]: p["piso"] for p in prods})
+    pisos = _pisos(prods)
     grupos = {}
     for o in obs:
         g = grupos.setdefault("%s|%s" % (o["producto"], o["variante"]), {"validas": [], "ajenas": [], "descartes": []})
         motivo = "fecha_posterior" if o["fecha"] > hasta else clasificar(o, pisos)
         if motivo == "valida":
             g["validas"].append(o)
-        elif motivo == "ajeno":
+        elif motivo in ("ajeno", "condicion_de_acceso"):   # la serie aparte: no fija referencias ni topes
             g["ajenas"].append(o)
         else:
             g["descartes"].append((motivo, o))
@@ -422,6 +512,809 @@ def cargar_todo(base=AQUI):
     obs = cargar_historia(os.path.join(base, HISTORIA))
     obs_vigia, sin_traducir = cargar_historial(os.path.join(base, HISTORIAL), prods)
     return prods, obs_vigia + obs, sin_traducir
+
+
+# ---------------------------------------------------------------- fase 2: serie diaria valida
+
+def _clave_asin(o):
+    """ASIN y sufijo (":tercero") del id de un renglon de Keepa: 'B0FBTK7ZVB:2025-08-01:tercero' -> 'B0FBTK7ZVB:tercero'."""
+    partes = str(o.get("id") or "").split(":")
+    clave = partes[0] + ("".join(":" + x for x in partes[2:]) if len(partes) > 2 else "")
+    return "%s|%s" % (o.get("archivo", ""), clave)
+
+
+def serie_diaria(validas, factores, hasta, todas):
+    """{fecha: (precio, observacion)} con el precio valido mas barato de cada dia, ya rellenado hacia adelante.
+
+    validas: observaciones validas; todas: todas las del producto (validas o no), para saber cual es el renglon
+    siguiente de cada ASIN y cuando una tienda vuelve a leerse. factores: variante -> factor (1 TB a 512 GB).
+    Keepa vale desde su fecha hasta el dia antes del renglon siguiente del mismo ASIN, sin pasar de un renglon
+    que diga "ultimo dia del tramo"; el ultimo renglon de un ASIN vale hasta la fecha mas reciente de su archivo
+    (el dia en que se leyo la grafica). 'propio' vale su dia y hasta 2 dias mas si esa tienda no se vuelve a
+    leer; prensa, antecedente y foro valen su dia y los 2 siguientes.
+    Como ninguna regla mira datos posteriores salvo para detenerse, esta serie cortada en t es identica a la
+    que se armaria solo con datos de fecha <= t (por eso la prueba hacia atras no ve el futuro)."""
+    todas = [o for o in todas if o["variante"] in factores]
+    siguiente, max_archivo, lecturas, grupos = {}, {}, {}, {}
+    for o in todas:
+        if o["fecha"] > max_archivo.get(o["archivo"], ""):
+            max_archivo[o["archivo"]] = o["fecha"]
+        if o["fuente"] == "keepa":
+            grupos.setdefault(_clave_asin(o), []).append(o)
+        elif o["fuente"] == "propio":
+            lecturas.setdefault((o["tienda"], o["variante"]), set()).add(o["fecha"])
+    for g in grupos.values():
+        g.sort(key=lambda o: (o["fecha"], o["renglon"]))
+        for a, b in zip(g, g[1:]):
+            siguiente[id(a)] = b["fecha"]
+    dia = {}
+    for o in validas:
+        f = factores.get(o["variante"])
+        if f is None:
+            continue
+        precio = o["precio"] * f
+        d0 = _d(o["fecha"])
+        if o["fuente"] == "keepa":
+            if ULTIMO_TRAMO.search(o.get("nota") or ""):
+                fin = d0
+            elif id(o) in siguiente:
+                fin = _d(siguiente[id(o)]) - UN_DIA
+            else:
+                fin = _d(max_archivo.get(o["archivo"], o["fecha"]))
+            fin = max(fin, d0)
+        elif o["fuente"] == "propio":
+            fin = d0
+            vistas = lecturas.get((o["tienda"], o["variante"]), set())
+            for k in (1, 2):
+                dk = d0 + dt.timedelta(days=k)
+                if dk.isoformat() in vistas:
+                    break
+                fin = dk
+        else:
+            fin = d0 + dt.timedelta(days=2)
+        d = d0
+        tope = min(fin, hasta)
+        while d <= tope:
+            act = dia.get(d)
+            if act is None or (precio, o["rastro"]) < (act[0], act[1]["rastro"]):
+                dia[d] = (precio, o)
+            d += UN_DIA
+    return dia
+
+
+def nivel_en(serie, t):
+    """(mediana de los 30 dias que terminan en t, dias con dato); mediana None con menos de 5 dias."""
+    vals = [serie[t - dt.timedelta(days=k)][0] for k in range(VENTANA_DIAS) if (t - dt.timedelta(days=k)) in serie]
+    return (_pct(vals, 50) if len(vals) >= MIN_DIAS_TIPICO else None), len(vals)
+
+
+def horizonte(t):
+    if t.month >= 10:
+        return dt.date(t.year + 1, 1, 31)
+    if t.month == 1:
+        return dt.date(t.year, 1, 31)
+    return t + dt.timedelta(days=90)
+
+
+def _minimo_ciclo(serie, t):
+    mejor = None
+    for k in range(DIAS_CICLO):
+        d = t - dt.timedelta(days=k)
+        v = serie.get(d)
+        if v and (mejor is None or (v[0], d) <= (mejor[0], mejor[1])):
+            mejor = (v[0], d, v[1])
+    return mejor
+
+
+def _frase_base(a, dia_a, valor, nivel_a, t):
+    precio_a, o = valor[1], valor[2]
+    baja = int(round((1 - precio_a / nivel_a) * 100))
+    capac = " (el de 1 TB)" if o.get("variante") == "1tb" else ""
+    rel = "%d %% debajo" % baja if baja >= 0 else "%d %% arriba" % -baja
+    return "%s%s llegó a %s en %s el %s, %s de su nivel de %s" % (
+        a["corto"], capac, _dinero(o["precio"]), o.get("tienda") or "una tienda", _fecha_corta(dia_a, t + dt.timedelta(days=9999)),
+        rel, MESES_LARGOS[(t - dt.timedelta(days=a["desfase"])).month - 1])
+
+
+def pronostico(serie, analogos, t, eventos, s=S_DEFECTO, sesgo=0.0):
+    """Piso esperado de aqui al horizonte, por evento y por analogo, en la fecha t (solo mira datos <= t).
+
+    analogos: [{"nombre", "corto", "desfase", "serie"}]. El piso trae bajo, central y alto: con dos o mas anios
+    parecidos, el menor, la mediana y el mayor de sus pisos; con uno (o ninguno, y entonces central = minimo de
+    120 dias), bajo = central / (1 + sesgo) y alto = central x (1 + s). Devuelve un diccionario con objetos
+    internos (fechas, observaciones y caminos) que _ficha_pron() vuelve JSON."""
+    H = horizonte(t)
+    niv, n_niv = nivel_en(serie, t)
+    mc = _minimo_ciclo(serie, t)
+    futuros = [t + dt.timedelta(days=k) for k in range(1, (H - t).days + 1)]
+    usados, infos = [], []
+    for a in analogos:
+        desf = dt.timedelta(days=a["desfase"])
+        ta, sa = t - desf, a["serie"]
+        antes = sum(1 for k in range(VENTANA_DIAS) if (ta - dt.timedelta(days=k)) in sa)
+        futuro = sum(1 for d in futuros if (d - desf) in sa)
+        info = {"nombre": a["nombre"], "corto": a["corto"], "desfase": a["desfase"], "dias_antes": antes,
+                "dias_futuro": futuro, "usado": False}
+        if niv is None:
+            info["motivo"] = "sin nivel propio: %d dias con dato en los ultimos 30 (hacen falta %d)" % (n_niv, MIN_DIAS_TIPICO)
+        elif antes < 15:
+            info["motivo"] = "solo %d de los 30 dias que terminan el %s tienen dato (hacen falta 15)" % (antes, ta.isoformat())
+        elif futuro < 20:
+            info["motivo"] = "solo %d dias con dato del %s al %s (hacen falta 20)" % (
+                futuro, (t + UN_DIA - desf).isoformat(), (H - desf).isoformat())
+        else:
+            na, _ = nivel_en(sa, ta)
+            camino = {}
+            for d in futuros:
+                v = sa.get(d - desf)
+                if v:
+                    camino[d] = (niv * v[0] / na, v[0], v[1])
+            dmin = min(camino, key=lambda d: (camino[d][0], d))
+            minimos = {}
+            for etiqueta, L in (("7", 7), ("30", 30), ("horizonte", None)):
+                lim = H if L is None else min(t + dt.timedelta(days=L), H)
+                vals_m = [camino[d][0] for d in camino if d <= lim]
+                minimos[etiqueta] = min(vals_m) if vals_m else None
+            info.update(usado=True, nivel=na, piso=camino[dmin][0], fecha=dmin, fecha_analogo=dmin - desf,
+                        obs=camino[dmin][2], base=_frase_base(a, dmin - desf, camino[dmin], na, t), minimos=minimos)
+            usados.append((a, info, camino))
+        infos.append(info)
+    piso = None
+    if usados:
+        vals = sorted(i["piso"] for _, i, _ in usados)
+        el_bajo = min((i for _, i, _ in usados), key=lambda i: i["piso"])
+        central = _pct(vals, 50)
+        if len(vals) >= 2:
+            bajo, alto = vals[0], vals[-1]
+        else:
+            bajo, alto = central / (1 + sesgo), central * (1 + s)
+        piso = {"precio": central, "bajo": bajo, "alto": alto, "rango": [bajo, alto], "n_analogos": len(vals),
+                "fecha": el_bajo["fecha"], "tipo": "analogo", "horizonte": H, "obs": [i["obs"] for _, i, _ in usados]}
+    elif mc:
+        central = mc[0]
+        bajo, alto = central / (1 + sesgo), central * (1 + s)
+        piso = {"precio": central, "bajo": bajo, "alto": alto, "rango": [bajo, alto], "n_analogos": 0,
+                "fecha": mc[1], "tipo": "estimacion", "horizonte": H, "obs": [mc[2]]}
+    pisos_e = []
+    for e in eventos:
+        try:
+            ini, fin = _d(e["inicio"]) - UN_DIA, _d(e["fin"]) + UN_DIA
+        except Exception:
+            continue
+        a_, b_ = max(ini, t + UN_DIA), min(fin, H)
+        if a_ > b_ or not usados:
+            continue
+        mins = []
+        for a, info, camino in usados:
+            dias = [d for d in camino if a_ <= d <= b_]
+            if dias:
+                dm = min(dias, key=lambda d: (camino[d][0], d))
+                mins.append((camino[dm][0], dm, a, info, camino[dm]))
+        if not mins:
+            continue
+        vals = sorted(m[0] for m in mins)
+        low = min(mins, key=lambda m: m[0])
+        pe = {"evento": e["evento"], "inicio": e["inicio"], "fin": e["fin"], "piso": _pct(vals, 50),
+              "rango": [vals[0], vals[-1]], "tipo": "analogo",
+              "base": _frase_base(low[2], low[1] - dt.timedelta(days=low[2]["desfase"]), low[4], low[3]["nivel"], t),
+              "obs": [m[4][2] for m in mins], "fecha": low[1], "calendario": e.get("rastro", "")}
+        if niv is not None and pe["piso"] > niv:   # tope de cordura: un piso esperado nunca arriba de lo normal de hoy
+            pe["piso"] = niv
+            pe["rango"] = [min(x, niv) for x in pe["rango"]]
+            pe["base"] = "no se espera rebaja respecto de lo normal de hoy"
+            pe["cordura"] = True
+        pisos_e.append(pe)
+    return {"t": t, "horizonte": H, "nivel": niv, "n_nivel": n_niv, "minimo_ciclo": mc, "analogos": infos,
+            "piso": piso, "pisos_esperados": pisos_e, "_usados": usados}
+
+
+def calcular_topes(bajo, central, alto, minimo_ciclo, nivel):
+    """Terna (ganga, comprar, mirar) redondeada hacia abajo a centenas (reglas de la fase 2b).
+    ganga = el menor entre bajo x 1.02 y minimo_ciclo; comprar = central x 1.02, al menos ganga x 1.03;
+    mirar = el menor entre alto x 1.02 y nivel x 0.97, al menos comprar x 1.03."""
+    g = _floor100(bajo * 1.02 if minimo_ciclo is None else min(bajo * 1.02, minimo_ciclo))
+    c = central * 1.02
+    if c < g * 1.03:
+        c = g * 1.03
+    c = _floor100(c)
+    m = alto * 1.02 if not nivel else min(alto * 1.02, nivel * 0.97)
+    if m < c * 1.03:
+        m = c * 1.03
+    return [g, c, _floor100(m)]
+
+
+def topes_de(pron):
+    """La terna de un pronostico, o None si no hay piso."""
+    p = pron.get("piso")
+    if not p:
+        return None
+    return calcular_topes(p["bajo"], p["precio"], p["alto"], pron["minimo_ciclo"][0] if pron.get("minimo_ciclo") else None,
+                          pron.get("nivel"))
+
+
+def sin_confirmar(pron):
+    piso = pron.get("piso")
+    if not piso:
+        return None
+    vals = [piso["bajo"]] + ([pron["minimo_ciclo"][0]] if pron.get("minimo_ciclo") else [])
+    return _floor100(0.80 * min(vals))
+
+
+def baja_mas(pron, precio):
+    """En cuantos analogos el camino bajo de precio x 0.98 a 7 dias, 30 dias y al horizonte (con cuentas)."""
+    usados, t, H = pron["_usados"], pron["t"], pron["horizonte"]
+    salida, vistos = [], set()
+    for L in (7, 30, (H - t).days):
+        if L <= 0 or L in vistos:
+            continue
+        vistos.add(L)
+        lim = min(t + dt.timedelta(days=L), H)
+        veces, hasta = 0, None
+        for _, _, camino in usados:
+            vals = [camino[d][0] for d in camino if d <= lim]
+            if vals and min(vals) < precio * 0.98:
+                veces += 1
+                hasta = min(vals) if hasta is None else min(hasta, min(vals))
+        plazo = "en los %d días siguientes" % L if L in (7, 30) else "de aquí al %s" % _fecha_corta(lim, t)
+        if len(usados) == 1:
+            frase = ("el año parecido bajó más %s, hasta el equivalente de %s" % (plazo, _dinero(hasta)) if veces
+                     else "el año parecido no bajó más %s" % plazo)
+        elif veces:
+            frase = "en %d de %d años parecidos bajó más %s, hasta el equivalente de %s" % (veces, len(usados), plazo, _dinero(hasta))
+        else:
+            frase = "en ninguno de los %d años parecidos bajó más %s" % (len(usados), plazo)
+        salida.append({"dias": L, "hasta_fecha": lim.isoformat(), "veces": veces, "de": len(usados),
+                       "hasta": _entero(hasta) if hasta is not None else None, "frase": frase})
+    return salida
+
+
+def _rastros(obs):
+    vistos, salida = set(), []
+    for o in obs:
+        if o["rastro"] not in vistos:
+            vistos.add(o["rastro"])
+            salida.append(o["rastro"])
+    return salida
+
+
+def _ficha_pron(pron):
+    """La parte JSON del pronostico."""
+    f = {"nivel": None, "minimo_ciclo": None, "piso": None, "pisos_esperados": [], "analogos": []}
+    if pron["nivel"] is not None:
+        f["nivel"] = {"precio": _entero(pron["nivel"]), "n": pron["n_nivel"]}
+    mc = pron["minimo_ciclo"]
+    if mc:
+        f["minimo_ciclo"] = {"precio": _num_json(round(mc[0], 2)), "fecha": mc[1].isoformat(), "tienda": mc[2]["tienda"],
+                             "rastro": mc[2]["rastro"]}
+    p = pron["piso"]
+    if p:
+        f["piso"] = {"precio": _entero(p["precio"]), "bajo": _entero(p["bajo"]),
+                     "rango": [_entero(p["rango"][0]), _entero(p["rango"][1])], "n_analogos": p["n_analogos"],
+                     "fecha": p["fecha"].isoformat(), "tipo": p["tipo"], "horizonte": p["horizonte"].isoformat(),
+                     "rastros": _rastros(p["obs"])}
+    for e in pron["pisos_esperados"]:
+        f["pisos_esperados"].append({"evento": e["evento"], "inicio": e["inicio"], "fin": e["fin"],
+                                     "piso": _entero(e["piso"]), "rango": [_entero(e["rango"][0]), _entero(e["rango"][1])],
+                                     "tipo": e["tipo"], "base": e["base"], "rastros": _rastros(e["obs"])})
+    for i in pron["analogos"]:
+        a = {"nombre": i["nombre"], "desfase": i["desfase"], "usado": i["usado"], "dias_antes": i["dias_antes"],
+             "dias_futuro": i["dias_futuro"]}
+        if i["usado"]:
+            a.update(nivel=_entero(i["nivel"]), piso=_entero(i["piso"]), fecha=i["fecha"].isoformat(),
+                     fecha_analogo=i["fecha_analogo"].isoformat(), base=i["base"], rastro=i["obs"]["rastro"],
+                     minimos={k: (_entero(x) if x is not None else None) for k, x in i["minimos"].items()})
+        else:
+            a["motivo"] = i["motivo"]
+        f["analogos"].append(a)
+    return f
+
+
+def _escalar(ficha_base, factor):
+    """Piso y pisos esperados de una variante hermana, por proporcion de lista."""
+    f = {}
+    p = ficha_base.get("piso")
+    if p:
+        f["piso"] = dict(p, precio=_entero(p["precio"] * factor), rango=[_entero(x * factor) for x in p["rango"]],
+                         tipo="proporcion")
+        if "bajo" in p:
+            f["piso"]["bajo"] = _entero(p["bajo"] * factor)
+    f["pisos_esperados"] = [dict(e, piso=_entero(e["piso"] * factor), rango=[_entero(x * factor) for x in e["rango"]],
+                                 base=e["base"] + " (por proporción de lista)") for e in ficha_base.get("pisos_esperados", [])]
+    f["analogos"] = []
+    for a in ficha_base.get("analogos", []):
+        a2 = dict(a)
+        if isinstance(a.get("minimos"), dict):
+            a2["minimos"] = {k: (_entero(x * factor) if x is not None else None) for k, x in a["minimos"].items()}
+        for k in ("nivel", "piso"):
+            if a.get(k) is not None:
+                a2[k] = _entero(a[k] * factor)
+        f["analogos"].append(a2)
+    return f
+
+
+def topes_activos(manual, calculados, n_analogos, lista, por="pronostico"):
+    """Los topes que usa el vigia (fase 2c): ganga y comprar a mano; mirar se amplia solo con dos o mas anios
+    parecidos (o por proporcion de una variante que los tiene). Devuelve (topes, origen, nota)."""
+    manual = list(manual)
+    if n_analogos >= 2 and calculados:
+        if calculados[2] > manual[2]:
+            if calculados[2] <= lista:
+                return [manual[0], manual[1], calculados[2]], "a mano; mirar ampliado por %s" % por, None
+            return manual, "fracciones", "el mirar calculado (%d) pasa de la lista (%d)" % (calculados[2], lista)
+        return manual, "fracciones", "dos años parecidos, pero el mirar calculado no supera el de a mano"
+    if n_analogos == 1:
+        return manual, "fracciones", "un solo año parecido: el pronóstico es orientación, no fija topes"
+    return manual, "fracciones", "sin año parecido ni historia suficiente"
+
+
+def _desempatar(variantes, prods):
+    """Dos variantes de distinta lista nunca con la misma terna: se sube 100 la de mayor lista."""
+    for p in prods:
+        claves = sorted(["%s|%s" % (p["id"], v["id"]) for v in p["variantes"]], key=lambda c: variantes[c]["lista"])
+        cambio = True
+        while cambio:
+            cambio = False
+            for i, a in enumerate(claves):
+                for b in claves[i + 1:]:
+                    fa, fb = variantes[a], variantes[b]
+                    if fa["lista"] != fb["lista"] and fa["topes"] == fb["topes"]:
+                        fb["topes"] = [x + 100 for x in fb["topes"]]
+                        fb["topes_motivo"] = "subida 100 para no repetir la terna de %s" % a
+                        cambio = True
+
+
+class Contexto(object):
+    """Todo lo leido de disco, con las series diarias en cache."""
+
+    def __init__(self, base=AQUI, hoy=None):
+        self.base = base
+        self.hoy = _hoy(hoy)
+        self.prods, self.obs, self.sin_traducir = cargar_todo(base)
+        self.por_id = {p["id"]: p for p in self.prods}
+        eventos, self.origen_calendario = cargar_calendario(os.path.join(base, HISTORIA))
+        self.eventos = eventos
+        self.temporadas = [e for e in eventos if e.get("tipo") == "temporada" and e.get("fin")]
+        self.listas, self.origen_listas = cargar_listas(os.path.join(base, HISTORIA), self.prods)
+        pisos = _pisos(self.prods)
+        hasta = self.hoy.isoformat()
+        self.validas, self.todas = {}, {}
+        for o in self.obs:
+            self.todas.setdefault(o["producto"], []).append(o)
+            if o["fecha"] <= hasta and clasificar(o, pisos) == "valida":
+                self.validas.setdefault(o["producto"], []).append(o)
+        self._series = {}
+
+    def serie(self, producto, factores):
+        clave = (producto, tuple(sorted(factores.items())))
+        if clave not in self._series:
+            self._series[clave] = serie_diaria(self.validas.get(producto, []), factores, self.hoy,
+                                               self.todas.get(producto, []))
+        return self._series[clave]
+
+    def analogos(self, specs):
+        return [dict(a, serie=self.serie(a["producto"], a["factores"])) for a in specs]
+
+
+# ---------------------------------------------------------------- fase 2: prueba hacia atras
+
+def _casos(hoy):
+    h = hoy.isoformat()
+    return [
+        {"caso": "A", "titulo": "Fold7 512 GB, temporada 2025-26", "producto": "fold7", "factores": {"512": 1.0},
+         "analogos": [dict(ANALOGOS_FOLD[1], desfase=364)], "inicio": "2025-10-15", "fin": "2026-01-31",
+         "piso_producto": 12000, "lista": ("fija", LISTA_LANZAMIENTO_FOLD7_512), "fracciones": [0.411, 0.449, 0.486],
+         "clave_lista": ("fold7", "512")},
+        {"caso": "B", "titulo": "PS5 Digital, temporada 2025-26", "producto": "ps5", "factores": {"digital": 1.0},
+         "analogos": ANALOGOS_PS5, "inicio": "2025-10-15", "fin": "2026-01-31", "piso_producto": 6500,
+         "lista": ("vigente", None), "fracciones": [0.60, 0.72, 0.864], "clave_lista": ("ps5", "digital")},
+        {"caso": "C", "titulo": "Fold8 Ultra 512 GB, del 15 oct 2026 a hoy", "producto": "fold8",
+         "factores": {"ultra-512": 1.0}, "analogos": ANALOGOS_FOLD, "inicio": "2026-10-15", "fin": h,
+         "piso_producto": 12000, "lista": ("productos", "ultra-512"), "fracciones": [0.411, 0.449, 0.486],
+         "clave_lista": ("fold8", "ultra-512")},
+        {"caso": "D", "titulo": "Fold8 512 GB, del 15 oct 2026 a hoy", "producto": "fold8",
+         "factores": {"normal-512": 1.0}, "analogos": ANALOGOS_FOLD, "inicio": "2026-10-15", "fin": h,
+         "piso_producto": 12000, "lista": ("productos", "normal-512"), "fracciones": [0.411, 0.449, 0.486],
+         "clave_lista": ("fold8", "normal-512")},
+        {"caso": "E", "titulo": "PS5 Digital, del 15 oct 2026 a hoy", "producto": "ps5", "factores": {"digital": 1.0},
+         "analogos": ANALOGOS_PS5, "inicio": "2026-10-15", "fin": h, "piso_producto": 6500,
+         "lista": ("vigente", None), "fracciones": [0.60, 0.72, 0.864], "clave_lista": ("ps5", "digital")},
+    ]
+
+
+def _lista_caso(ctx, caso, t):
+    modo, valor = caso["lista"]
+    if modo == "fija":
+        return valor
+    if modo == "productos":
+        p = ctx.por_id[caso["producto"]]
+        return next(v["lista"] for v in p["variantes"] if v["id"] == valor)
+    defecto = None
+    p = ctx.por_id.get(caso["producto"])
+    if p:
+        defecto = next((v["lista"] for v in p["variantes"] if v["id"] == caso["clave_lista"][1]), None)
+    return lista_vigente(ctx.listas, caso["clave_lista"][0], caso["clave_lista"][1], t, defecto)[0]
+
+
+def error_piso(ctx, caso):
+    """Piso pronosticado el 15 de noviembre contra el minimo real del dia siguiente al 31 de enero (o a hoy)."""
+    serie = ctx.serie(caso["producto"], caso["factores"])
+    t = dt.date(_d(caso["inicio"]).year, 11, 15)
+    if t > ctx.hoy:
+        return None
+    pron = pronostico(serie, ctx.analogos(caso["analogos"]), t, ctx.temporadas)
+    fin = min(horizonte(t), ctx.hoy)
+    reales = [(serie[d][0], d, serie[d][1]) for d in serie if t < d <= fin]
+    if not pron["piso"] or not reales:
+        return {"t": t, "piso": pron["piso"]["precio"] if pron["piso"] else None, "real": None, "error": None,
+                "parcial": fin < horizonte(t), "tipo": pron["piso"]["tipo"] if pron["piso"] else None}
+    real = min(reales, key=lambda x: (x[0], x[1]))
+    return {"t": t, "piso": pron["piso"]["precio"], "tipo": pron["piso"]["tipo"], "real": real[0], "fecha_real": real[1],
+            "tienda_real": real[2]["tienda"], "error": (pron["piso"]["precio"] - real[0]) / real[0],
+            "parcial": fin < horizonte(t)}
+
+
+def s_de_errores(errores):
+    """(s, sesgo, explicacion). s = media de los errores en valor absoluto, acotada a [0.05, 0.12];
+    sesgo = media con signo si es positiva (el piso salio alto), si no 0, acotada a 0.15."""
+    vals = [e["error"] for e in errores if e and e.get("error") is not None]
+    if not vals:
+        return S_DEFECTO, 0.0, "sin prueba hacia atras: s = %.2f y sesgo = 0" % S_DEFECTO
+    s = sum(abs(x) for x in vals) / len(vals)
+    media = sum(vals) / len(vals)
+    sesgo = min(SESGO_MAX, max(0.0, media))
+    return (min(S_MAX, max(S_MIN, s)), sesgo,
+            "de %d errores del piso: media sin signo %.3f (s acotada entre %.2f y %.2f), media con signo %+.3f (sesgo acotado a %.2f)"
+            % (len(vals), s, S_MIN, S_MAX, media, SESGO_MAX))
+
+
+def _nivel_aviso(precio, topes, sc):
+    g, c, m = topes
+    if sc and precio < sc:
+        return "sin confirmar"
+    return "ganga" if precio <= g else "comprar" if precio <= c else "mirar" if precio <= m else None
+
+
+RANGO_NIVEL = {None: 0, "mirar": 1, "comprar": 2, "ganga": 3, "sin confirmar": 4}
+METODOS_RETRO = ("a mano", "calculado", "activo")
+
+
+def topes_retro(serie, analogos, t, eventos, s, sesgo, piso_producto):
+    """Topes del dia t en la prueba hacia atras: se calculan como el dia anterior (solo datos de fecha < t, lo que
+    el vigia sabria antes de leer el precio de ese dia). Sin cota de lista (el historial de listas viejas es
+    incompleto); si el orden creciente o el piso del producto fallan, devuelve None. (topes, sin_confirmar, pron)"""
+    pron = pronostico(serie, analogos, t - UN_DIA, eventos, s, sesgo)
+    if not pron["piso"] or pron["piso"]["tipo"] == "estimacion":   # fase 2c: sin anio parecido no se calcula nada
+        return None, None, pron
+    tp = topes_de(pron)
+    if tp and _terna_ok(tp, piso_producto, float("inf")):
+        return tp, sin_confirmar(pron), pron
+    return None, None, pron
+
+
+def _activos_retro(manual, calc, pron):
+    """Topes activos de un dia de la prueba hacia atras (las reglas de construir(), sin cota de lista)."""
+    if not manual:
+        return None, None
+    n = pron["piso"]["n_analogos"] if (pron["piso"] and pron["piso"]["tipo"] != "estimacion") else 0
+    tp = topes_activos(manual, calc, n, float("inf"))[0]
+    if n >= 1:
+        sc = sin_confirmar(pron)
+    elif pron["minimo_ciclo"]:
+        sc = _floor100(0.80 * pron["minimo_ciclo"][0])
+    else:
+        sc = None
+    return tp, sc
+
+
+def correr_caso(ctx, caso, s, sesgo=0.0, filas_csv=None):
+    serie = ctx.serie(caso["producto"], caso["factores"])
+    analogos = ctx.analogos(caso["analogos"])
+    ini, fin = _d(caso["inicio"]), min(_d(caso["fin"]), ctx.hoy)
+    metodos = dict((nombre, {"avisos": [], "estado": None, "precio": None, "sc_dias": [], "sin_calculo_dias": 0,
+                             "estimacion_dias": 0}) for nombre in METODOS_RETRO)
+    t = ini
+    while t <= fin:
+        lista = _lista_caso(ctx, caso, t)
+        manual = [int(round(lista * f / 100.0)) * 100 for f in caso["fracciones"]] if lista else None
+        calc, sc_calc, pron = topes_retro(serie, analogos, t, ctx.temporadas, s, sesgo, caso["piso_producto"])
+        activo, sc_act = _activos_retro(manual, calc, pron)
+        if not pron["piso"] or pron["piso"]["tipo"] == "estimacion":
+            metodos["calculado"]["estimacion_dias"] += 1
+        if calc is None:
+            metodos["calculado"]["sin_calculo_dias"] += 1
+        v = serie.get(t)
+        for nombre, topes, scv in (("a mano", manual, None), ("calculado", calc, sc_calc), ("activo", activo, sc_act)):
+            mt = metodos[nombre]
+            lvl = _nivel_aviso(v[0], topes, scv) if (v and topes) else None
+            aviso = ""
+            if v and topes:
+                if lvl is None:
+                    mt["estado"], mt["precio"] = None, None
+                elif RANGO_NIVEL[lvl] > RANGO_NIVEL[mt["estado"]] or (mt["precio"] is not None and v[0] <= mt["precio"] - BAJA_MINIMA):
+                    mt["avisos"].append({"fecha": t, "nivel": lvl, "precio": v[0], "tienda": v[1]["tienda"], "rastro": v[1]["rastro"],
+                                         "n_analogos": pron["piso"]["n_analogos"] if (nombre != "a mano" and pron["piso"]) else None})
+                    mt["estado"], mt["precio"] = max(lvl, mt["estado"], key=lambda x: RANGO_NIVEL[x]), v[0]
+                    aviso = lvl
+                if lvl == "sin confirmar":
+                    mt["sc_dias"].append((t, v[0]))
+            if filas_csv is not None:
+                filas_csv.append([caso["caso"], nombre, t.isoformat(), _entero(v[0]) if v else "", v[1]["tienda"] if v else "",
+                                  topes[0] if topes else "", topes[1] if topes else "", topes[2] if topes else "",
+                                  scv or "", lvl or "", aviso, (pron["piso"]["tipo"] if pron["piso"] else "") if nombre != "a mano" else ""])
+        t += UN_DIA
+    reales = [(serie[d][0], d, serie[d][1]) for d in serie if ini <= d <= fin]
+    minimo = min(reales, key=lambda x: (x[0], x[1])) if reales else None
+    res = {"caso": caso, "minimo": minimo, "metodos": {}, "error": error_piso(ctx, caso)}
+    for nombre, mt in metodos.items():
+        compra = [a for a in mt["avisos"] if a["nivel"] in ("comprar", "ganga")]
+        gangas = [a for a in mt["avisos"] if a["nivel"] == "ganga"]
+        cazo = bool(minimo) and any(a["fecha"] <= minimo[1] and a["precio"] <= minimo[0] * 1.05 for a in compra)
+        primero = compra[0] if compra else None
+        pganga = gangas[0] if gangas else None
+        sobre = lambda a: ((a["precio"] - minimo[0]) / minimo[0]) if (a and minimo) else None
+        r = {"avisos": mt["avisos"], "cazo": cazo, "primero": primero, "sc_dias": mt["sc_dias"],
+             "sin_calculo_dias": mt["sin_calculo_dias"], "estimacion_dias": mt["estimacion_dias"],
+             "avisos_sc": len([a for a in mt["avisos"] if a["nivel"] == "sin confirmar"]),
+             "de_mas": (primero["precio"] - minimo[0]) if (primero and minimo) else None,
+             "primero_pct": sobre(primero), "primera_ganga": pganga, "ganga_pct": sobre(pganga),
+             "analogos_ganga": pganga.get("n_analogos") if pganga else None}
+        r["sobreprecio"] = r["ganga_pct"] is not None and r["ganga_pct"] > 0.10
+        motivos = []
+        if not minimo:
+            motivos.append("no hay precios validos en la temporada")
+        elif not cazo:
+            motivos.append("no aviso de comprar o ganga el dia del minimo ni antes a menos de 5 % de el")
+        if len(mt["avisos"]) > MAX_AVISOS:
+            motivos.append("%d avisos (el tope es %d)" % (len(mt["avisos"]), MAX_AVISOS))
+        r["veredicto"] = "VERDE" if not motivos else "ROJO"
+        r["motivo"] = "; ".join(motivos)
+        res["metodos"][nombre] = r
+    return res
+
+
+def _cuenta_niveles(avisos):
+    c = {}
+    for a in avisos:
+        c[a["nivel"]] = c.get(a["nivel"], 0) + 1
+    return ", ".join("%s %d" % (k, c[k]) for k in ("mirar", "comprar", "ganga", "sin confirmar") if k in c) or "ninguno"
+
+
+def retroprueba(base=AQUI, ruta_csv=None, hoy=None, escribir=True, ctx=None):
+    """Corre los cinco casos. Devuelve (resultados, s, texto_md)."""
+    ctx = ctx or Contexto(base, hoy)
+    casos = _casos(ctx.hoy)
+    s, sesgo, s_motivo = s_de_errores([error_piso(ctx, c) for c in casos if c["caso"] in ("A", "B")])
+    filas = [] if ruta_csv else None
+    resultados = [correr_caso(ctx, c, s, sesgo, filas) for c in casos]
+    md = _retro_md(resultados, s, sesgo, s_motivo, ctx)
+    if escribir:
+        ruta = os.path.join(base, HISTORIA, RETRO_MD)
+        carpeta = os.path.dirname(ruta)
+        fd, tmp = tempfile.mkstemp(prefix=".retro.", suffix=".tmp", dir=carpeta)
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as f:
+            f.write(md)
+        os.replace(tmp, ruta)
+    if ruta_csv:
+        with open(ruta_csv, "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f, lineterminator="\n")
+            w.writerow(["caso", "metodo", "fecha", "precio", "tienda", "ganga", "comprar", "mirar", "sin_confirmar",
+                        "nivel", "aviso", "tipo_piso"])
+            w.writerows(filas)
+    return resultados, s, sesgo, md
+
+
+def _veredicto_txt(x):
+    return x["veredicto"] + (" con sobreprecio" if x.get("sobreprecio") else "")
+
+
+def _apertura(resultados):
+    """El primer parrafo de RETROPRUEBA.md (fase 2c), con las cifras de esta corrida."""
+    por = {r["caso"]["caso"]: r for r in resultados}
+    a, b = por.get("A"), por.get("B")
+    e = a["error"] if a else None
+    n_txt = ("%d %% %s" % (int(round(abs(e["error"]) * 100)), "arriba" if e["error"] >= 0 else "abajo")
+             if (e and e.get("error") is not None) else "sin comparar")
+    xa = a["metodos"]["calculado"] if a else None
+    m_txt = ("la primera etiqueta de ganga, %d %% %s" % (int(round(abs(xa["ganga_pct"]) * 100)),
+                                                       "arriba" if xa["ganga_pct"] >= 0 else "abajo")
+             if (xa and xa.get("ganga_pct") is not None) else "no hubo etiqueta de ganga")
+    if b:
+        xb = b["metodos"]["calculado"]
+        dias = (_d(b["caso"]["fin"]) - _d(b["caso"]["inicio"])).days + 1
+        con = dias - xb["estimacion_dias"]
+        ps5 = ("para la PS5 2025-26 no había año parecido con datos" if con <= 0 else
+               "para la PS5 2025-26 solo hubo año parecido con datos en %d de %d días" % (con, dias))
+    else:
+        ps5 = "la PS5 2025-26 no se pudo correr"
+    return ("La prueba hacia atrás no alcanza para certificar topes calculados: en el único caso probado sin conocer la "
+            "respuesta (Fold7 2025-26, un solo año parecido) el piso pronosticado quedó %s del mínimo real y %s; %s. "
+            "Por eso las etiquetas de ganga y comprar siguen siendo las de a mano y solo se amplía el tope de mirar donde "
+            "hay dos años parecidos (Fold8)." % (n_txt, m_txt, ps5))
+
+
+LIMITES = [
+    "Son dos temporadas (Fold7 2025-26 y PS5 2025-26): sirve para detectar un método malo, no para certificar uno bueno.",
+    "Los topes a mano se calibraron en noviembre de 2026 viendo ya la historia del Fold7, así que su resultado en el "
+    "caso A no es una prueba limpia (conocían la respuesta); el método nuevo sí se probó sin verla, usando solo al Fold6.",
+    "La serie de Amazon sale de una gráfica leída por píxeles (± $50, ± 1 día) y los precios de la tienda de Samsung con "
+    "cupón solo se conocen por notas de prensa de días sueltos, así que el mínimo real de una temporada puede haber sido "
+    "más bajo de lo registrado.",
+    "No existe ninguna temporada pasada con dos años parecidos con datos, que es la situación del Fold8 hoy: ese caso "
+    "no se pudo probar hacia atrás.",
+]
+
+
+def _retro_md(resultados, s, sesgo, s_motivo, ctx):
+    L = [_apertura(resultados), "", "# Prueba hacia atrás de prospectiva.py (%s)" % ctx.hoy.isoformat(), "",
+         "Cada día de la temporada se calcularon los topes solo con lo que se sabía antes de ese día (datos de fecha "
+         "anterior), y se miró el precio válido más barato de ese día. Hay aviso cuando el precio entra a un nivel "
+         "(mirar, comprar, ganga, sin confirmar) o cuando, ya avisado, baja %d pesos o más. Un aviso de \"sin "
+         "confirmar\" también es un correo enviado, pero no cuenta como compra. Se comparan tres juegos de topes: \"a "
+         "mano\" (porcentajes fijos de la lista), \"calculado\" (la terna completa del pronóstico; los días sin año "
+         "parecido no hay topes calculados y se cuentan aparte) y \"activo\" (lo que hoy usa el vigía: ganga y comprar a "
+         "mano, y mirar ampliado solo con dos años parecidos). \"Con sobreprecio\" = el primer aviso de ganga quedó más "
+         "de 10 %% arriba del mínimo real de la temporada. VERDE/ROJO por caso usa la vara de la fase 2: informa, no "
+         "decide." % BAJA_MINIMA, "",
+         "Holgura entre topes (s): %.3f; sesgo del piso: %.3f (%s)." % (s, sesgo, s_motivo), ""]
+    for r in resultados:
+        c, m = r["caso"], r["minimo"]
+        L.append("## Caso %s: %s" % (c["caso"], c["titulo"]))
+        L.append("")
+        if m:
+            L.append("- Lo más barato de la temporada: %s el %s en %s (%s)." % (_dinero(m[0]), _fecha_corta(m[1], ctx.hoy + dt.timedelta(days=9999)), m[2]["tienda"], m[2]["rastro"]))
+        else:
+            L.append("- Sin precios válidos en la temporada.")
+        e = r["error"]
+        if e and e.get("error") is not None:
+            L.append("- Piso pronosticado el %s: %s (%s); lo más bajo real después: %s el %s, error %+.1f %%%s." % (
+                e["t"].isoformat(), _dinero(e["piso"]), e["tipo"], _dinero(e["real"]), e["fecha_real"].isoformat(),
+                e["error"] * 100, " (parcial: la temporada no ha terminado)" if e["parcial"] else ""))
+        elif e:
+            L.append("- Piso del %s: no se pudo comparar (piso %s, real %s)." % (
+                e["t"].isoformat(), _dinero(e["piso"]) if e.get("piso") else "sin dato", "sin dato"))
+        else:
+            L.append("- Piso del 15 de noviembre: todavía no llega esa fecha.")
+        for nombre in METODOS_RETRO:
+            x = r["metodos"][nombre]
+            L.append("- Topes %s: %s. %d avisos (%s)." % (nombre, _veredicto_txt(x) + (" (" + x["motivo"] + ")" if x["motivo"] else ""),
+                                                       len(x["avisos"]), _cuenta_niveles(x["avisos"])))
+            if x["avisos"]:
+                L.append("  - Avisos: " + "; ".join("%s %s %s" % (a["fecha"].isoformat(), a["nivel"], _dinero(a["precio"])) for a in x["avisos"]) + ".")
+            L.append("  - %s." % ("Cazó el mínimo" if x["cazo"] else "No cazó el mínimo"))
+            for etiqueta, a, pct in (("Primer aviso de ganga", x["primera_ganga"], x["ganga_pct"]),
+                                     ("Primer aviso de comprar o ganga", x["primero"], x["primero_pct"])):
+                if a:
+                    L.append("  - %s: %s, %s (%s), %s del mínimo real." % (
+                        etiqueta, a["fecha"].isoformat(), _dinero(a["precio"]), a["nivel"],
+                        "%d %% arriba" % int(round(pct * 100)) if pct is not None else "sin comparar"))
+                else:
+                    L.append("  - %s: no hubo." % etiqueta)
+            if x["primero"]:
+                L.append("  - Quien compra en el primer aviso de comprar o ganga paga %s el %s, %s más que el mínimo." % (
+                    _dinero(x["primero"]["precio"]), x["primero"]["fecha"].isoformat(), _dinero(x["de_mas"])))
+            else:
+                L.append("  - Nunca avisó de comprar ni de ganga.")
+            if nombre != "a mano":
+                L.append("  - Avisos de \"sin confirmar\" enviados: %d. Días con un precio válido real en \"sin confirmar\": %s." % (
+                    x["avisos_sc"], "; ".join("%s %s" % (d.isoformat(), _dinero(p)) for d, p in x["sc_dias"]) or "ninguno"))
+            if nombre == "calculado" and x["sin_calculo_dias"]:
+                L.append("  - Días sin topes calculados (sin año parecido utilizable o terna fuera de orden): %d." % x["sin_calculo_dias"])
+        L.append("")
+    L.append("## Límites de esta prueba")
+    L.append("")
+    for i, lim in enumerate(LIMITES, 1):
+        L.append("%d. %s" % (i, lim))
+    return "\n".join(L) + "\n"
+
+
+def _tabla_retro(resultados, s, sesgo):
+    print("s = %.3f; sesgo = %.3f" % (s, sesgo))
+    print("%-4s %-9s %-21s %-6s %-9s %-5s %-28s %-27s %-27s %-11s %s" % (
+        "caso", "topes", "veredicto", "avisos", "sin conf.", "cazo", "minimo real", "primera ganga (% arriba)",
+        "primer comprar/ganga (%)", "sin calcular", "error piso"))
+    for r in resultados:
+        m, e = r["minimo"], r["error"]
+        mt = "%s %s %s" % (_dinero(m[0]), m[1].isoformat(), m[2]["tienda"]) if m else "-"
+        et = ("%+.1f %%%s" % (e["error"] * 100, " parcial" if e["parcial"] else "")) if (e and e.get("error") is not None) else "-"
+        for nombre in METODOS_RETRO:
+            x = r["metodos"][nombre]
+            def _a(a, pct):
+                if not a:
+                    return "-"
+                return "%s %s (%s)" % (_dinero(a["precio"]), a["fecha"].isoformat(), "%+d %%" % int(round(pct * 100)) if pct is not None else "?")
+            print("%-4s %-9s %-21s %-6d %-9d %-5s %-28s %-27s %-27s %-11s %s" % (
+                r["caso"]["caso"], nombre, _veredicto_txt(x), len(x["avisos"]), x["avisos_sc"], "si" if x["cazo"] else "no", mt,
+                _a(x["primera_ganga"], x["ganga_pct"]), _a(x["primero"], x["primero_pct"]),
+                "%d dias" % x["sin_calculo_dias"] if nombre == "calculado" else "", et if nombre == "calculado" else ""))
+
+
+# ---------------------------------------------------------------- fase 2: armar prospectiva.json
+
+def construir(base=AQUI, ahora=None, ctx=None):
+    """Calcula todo en memoria. Devuelve (doc, detalle, info)."""
+    ahora = (ahora or dt.datetime.now(MX)).astimezone(MX).replace(microsecond=0)
+    ctx = ctx or Contexto(base, ahora.date())
+    hoy = ctx.hoy
+    variantes, detalle = calcular(ctx.obs, ctx.prods, hoy)
+    casos = _casos(hoy)
+    s, sesgo, s_motivo = s_de_errores([error_piso(ctx, c) for c in casos if c["caso"] in ("A", "B")])
+    prons = {}
+    for p in ctx.prods:
+        for v in p["variantes"]:
+            clave = "%s|%s" % (p["id"], v["id"])
+            f = variantes[clave]
+            manual = topes_fracciones(p, v)
+            f["topes_manual"] = manual
+            f["analogo"] = QUIEN.get(p["id"], "modelo_anterior")
+            f["s"] = round(s, 4)
+            f["sesgo"] = round(sesgo, 4)
+            for k, vacio in (("nivel", None), ("minimo_ciclo", None), ("piso", None), ("analogos", []),
+                             ("topes_calculados", None)):
+                f.setdefault(k, vacio)
+            fijos = (p.get("topes_fijos") or {}).get(v["id"])
+            if clave not in PROPIAS:
+                continue
+            serie = ctx.serie(p["id"], {v["id"]: 1.0})
+            pron = pronostico(serie, ctx.analogos(PROPIAS[clave]), hoy, ctx.temporadas, s, sesgo)
+            prons[clave] = pron
+            detalle[clave]["pron"] = pron
+            f.update(_ficha_pron(pron))
+            piso = pron["piso"]
+            con_base = bool(piso) and piso["tipo"] != "estimacion"
+            n = piso["n_analogos"] if con_base else 0
+            if not con_base:   # sin anio parecido no hay base: no se calcula piso ni topes, tampoco desde el propio precio
+                f["piso"], f["pisos_esperados"] = None, []
+            calc = topes_de(pron) if con_base else None
+            f["topes_calculados"] = calc
+            if fijos:
+                f["topes"], f["topes_origen"] = [int(x) for x in fijos], "topes_fijos"
+            else:
+                f["topes"], f["topes_origen"], nota = topes_activos(manual, calc, n, v["lista"])
+                if nota:
+                    f["topes_nota"] = nota
+            mc = pron["minimo_ciclo"]
+            if n >= 1:
+                f["sin_confirmar_bajo"] = sin_confirmar(pron)
+            elif mc:
+                f["sin_confirmar_bajo"] = _floor100(0.80 * mc[0])
+            if pron["_usados"]:
+                f["baja_mas"] = [{"tope": nm, "precio": x, "plazos": baja_mas(pron, x)}
+                                 for nm, x in zip(("ganga", "comprar", "mirar"), f["topes"])]
+    for clave, base_clave in HERMANAS.items():
+        if clave not in variantes or base_clave not in variantes:
+            continue
+        f, fb = variantes[clave], variantes[base_clave]
+        pid, vid = clave.split("|")
+        p = ctx.por_id[pid]
+        v = next(x for x in p["variantes"] if x["id"] == vid)
+        factor = float(v["lista"]) / float(fb["lista"])
+        f.update(_escalar(fb, factor))
+        calc_b = fb.get("topes_calculados")
+        f["topes_calculados"] = [_floor100(x * factor) for x in calc_b] if calc_b else None
+        n = (fb.get("piso") or {}).get("n_analogos") or 0
+        if fb.get("sin_confirmar_bajo"):
+            f["sin_confirmar_bajo"] = _floor100(fb["sin_confirmar_bajo"] * factor)
+        fijos = (p.get("topes_fijos") or {}).get(vid)
+        if fijos:
+            f["topes"], f["topes_origen"] = [int(x) for x in fijos], "topes_fijos"
+            continue
+        f["topes"], f["topes_origen"], nota = topes_activos(f["topes_manual"], f["topes_calculados"], n, v["lista"],
+                                                            "proporcion de %s" % base_clave.split("|")[1])
+        if nota:
+            f["topes_nota"] = nota
+    _desempatar(variantes, ctx.prods)
+    for clave, f in variantes.items():   # una terna subida por el desempate tambien debe caber en su rango
+        p = ctx.por_id[clave.split("|")[0]]
+        if not _terna_ok(f["topes"], p["piso"], f["lista"]):
+            f["topes"], f["topes_origen"] = list(f["topes_manual"]), "fracciones"
+            f["topes_motivo"] = "fuera de rango tras el desempate"
+            f["sin_confirmar_bajo"] = None
+    doc = {"version": VERSION, "generado": ahora.isoformat(),
+           "vence": (hoy + dt.timedelta(days=VIGENCIA_DIAS)).isoformat(), "metodo": METODO, "variantes": variantes}
+    info = {"observaciones": len(ctx.obs), "sin_traducir": ctx.sin_traducir, "eventos": len(ctx.eventos),
+            "temporadas": len(ctx.temporadas), "origen_calendario": ctx.origen_calendario, "listas": len(ctx.listas),
+            "origen_listas": ctx.origen_listas, "s": s, "sesgo": sesgo, "s_motivo": s_motivo, "ctx": ctx}
+    return doc, detalle, info
 
 
 def escribir_json(doc, ruta):
@@ -443,18 +1336,55 @@ def escribir_json(doc, ruta):
 
 def generar(base=AQUI, ahora=None, ruta=None):
     """Calcula todo y escribe prospectiva.json. Devuelve (doc, detalle, info)."""
-    ahora = (ahora or dt.datetime.now(MX)).astimezone(MX).replace(microsecond=0)
-    prods, obs, sin_traducir = cargar_todo(base)
-    variantes, detalle = calcular(obs, prods, ahora.date())
-    doc = {"version": VERSION, "generado": ahora.isoformat(),
-           "vence": (ahora.date() + dt.timedelta(days=VIGENCIA_DIAS)).isoformat(),
-           "metodo": METODO, "variantes": variantes}
+    doc, detalle, info = construir(base, ahora)
     escribir_json(doc, ruta or os.path.join(base, SALIDA))
-    eventos, origen_cal = cargar_calendario(os.path.join(base, HISTORIA))
-    listas, origen_listas = cargar_listas(os.path.join(base, HISTORIA), prods)
-    info = {"observaciones": len(obs), "sin_traducir": sin_traducir, "eventos": len(eventos),
-            "origen_calendario": origen_cal, "listas": len(listas), "origen_listas": origen_listas}
     return doc, detalle, info
+
+
+def recalcular(base=AQUI, ahora=None, ruta=None):
+    """Como generar, pero solo reemplaza el archivo si el resultado valida y ningun tope salta mas de 15 %.
+    Ante cualquier problema deja el archivo anterior intacto y lo dice por stderr. Devuelve 0 siempre."""
+    ruta = ruta or os.path.join(base, SALIDA)
+    try:
+        doc, _, info = construir(base, ahora)
+        prods = {p["id"]: p for p in info["ctx"].prods}
+        limpio, fallas = _validar(doc["variantes"], prods)
+        if fallas:
+            _aviso("recalcular: no se reemplaza (%s)" % "; ".join(fallas))
+            return 0
+        if os.path.exists(ruta):
+            try:
+                with open(ruta, encoding="utf-8") as f:
+                    anterior = json.load(f).get("variantes") or {}
+            except Exception as e:
+                anterior = {}
+                _aviso("recalcular: el archivo anterior no se pudo leer (%s); se reemplaza" % e)
+            saltos = []
+            for clave, f in doc["variantes"].items():
+                ant = anterior.get(clave) if isinstance(anterior.get(clave), dict) else {}
+                n_ant = (ant.get("piso") or {}).get("n_analogos") if isinstance(ant.get("piso"), dict) else 0
+                n_new = (f.get("piso") or {}).get("n_analogos") if isinstance(f.get("piso"), dict) else 0
+                baja = isinstance(n_ant, int) and n_ant >= 2 and not (isinstance(n_new, int) and n_new >= 2)
+                if baja:
+                    _aviso("recalcular: %s paso de %d a %s anios parecidos; su mirar vuelve al de a mano (%s)"
+                           % (clave, n_ant, n_new or 0, f["topes"][2]))
+                viejo = ant.get("topes")
+                if not isinstance(viejo, list) or len(viejo) != 3:
+                    continue
+                for n, a, b in zip(("ganga", "comprar", "mirar"), viejo, f["topes"]):
+                    if baja and n == "mirar":
+                        continue   # volver al mirar de a mano es la direccion segura: no lo frena el resguardo del 15 %
+                    if _numero(a) and abs(b - a) / float(a) > SALTO_MAX:
+                        saltos.append("%s %s de %s a %s" % (clave, n, a, b))
+            if saltos:
+                _aviso("recalcular: no se reemplaza; topes que se mueven mas de %d %% (revisar a mano con --generar): %s"
+                       % (int(SALTO_MAX * 100), "; ".join(saltos)))
+                return 0
+        escribir_json(doc, ruta)
+        print("prospectiva.json reemplazado (%s)" % doc["generado"])
+    except Exception as e:
+        _aviso("recalcular: no se reemplaza (%s: %s)" % (type(e).__name__, e))
+    return 0
 
 
 # ---------------------------------------------------------------- lo que llama vigia.py
@@ -468,30 +1398,13 @@ def _terna_ok(topes, piso, lista):
     return g < c < m and piso <= g and m <= lista
 
 
-def _cargar_json(ruta, hoy):
-    ruta = ruta or os.path.join(AQUI, SALIDA)
-    if not os.path.exists(ruta):
-        _aviso("%s no existe; se usan las fracciones" % os.path.basename(ruta))
-        return {}
-    with open(ruta, encoding="utf-8") as f:
-        doc = json.load(f)
-    if not isinstance(doc, dict) or doc.get("version") != VERSION:
-        _aviso("prospectiva.json con version distinta de %d; no se usa" % VERSION)
-        return {}
-    vence = dt.date.fromisoformat(str(doc.get("vence", ""))[:10])
-    if _hoy(hoy) > vence:
-        _aviso("prospectiva.json vencio el %s; no se usa" % vence.isoformat())
-        return {}
-    variantes = doc.get("variantes")
-    if not isinstance(variantes, dict):
-        _aviso("prospectiva.json sin 'variantes'; no se usa")
-        return {}
-    prods = {p["id"]: p for p in leer_productos(os.path.join(os.path.dirname(os.path.abspath(ruta)), CONFIG))}
-    por_prod = {}
+def _validar(variantes, prods):
+    """(variantes validas, fallas). Si una variante de un producto falla, se quita todo ese producto."""
+    por_prod, fallas = {}, []
     for clave, datos in variantes.items():
         pid = str(clave).split("|", 1)[0]
         if pid not in prods:
-            _aviso("prospectiva.json: %s no esta en productos.json; se quita" % clave)
+            fallas.append("%s no esta en productos.json" % clave)
             continue
         por_prod.setdefault(pid, {})[clave] = datos
     limpio = {}
@@ -504,6 +1417,10 @@ def _cargar_json(ruta, hoy):
                 falla = "%s no esta en productos.json" % clave
             elif not isinstance(datos, dict) or not _terna_ok(datos.get("topes"), p["piso"], listas[clave]):
                 falla = "%s trae topes no validos (%r)" % (clave, datos.get("topes") if isinstance(datos, dict) else datos)
+            elif datos.get("topes_calculados") is not None and not (
+                    isinstance(datos["topes_calculados"], list) and len(datos["topes_calculados"]) == 3
+                    and all(isinstance(x, int) and not isinstance(x, bool) for x in datos["topes_calculados"])):
+                falla = "%s trae topes_calculados no validos (%r)" % (clave, datos["topes_calculados"])
             else:
                 t = tuple(datos["topes"])
                 otra = ternas.get(t)
@@ -513,9 +1430,35 @@ def _cargar_json(ruta, hoy):
             if falla:
                 break
         if falla:
-            _aviso("prospectiva.json: %s; el producto %s vuelve a sus fracciones" % (falla, pid))
+            fallas.append("%s; el producto %s vuelve a sus fracciones" % (falla, pid))
             continue
         limpio.update(grupo)
+    return limpio, fallas
+
+
+def _cargar_json(ruta, hoy):
+    ruta = ruta or os.path.join(AQUI, SALIDA)
+    nombre = os.path.basename(ruta)
+    if not os.path.exists(ruta):
+        _aviso("%s no existe; se usan las fracciones" % nombre)
+        return {}
+    with open(ruta, encoding="utf-8") as f:
+        doc = json.load(f)
+    if not isinstance(doc, dict) or doc.get("version") != VERSION:
+        _aviso("%s con version distinta de %d; no se usa" % (nombre, VERSION))
+        return {}
+    vence = dt.date.fromisoformat(str(doc.get("vence", ""))[:10])
+    if _hoy(hoy) > vence:
+        _aviso("%s vencio el %s; no se usa" % (nombre, vence.isoformat()))
+        return {}
+    variantes = doc.get("variantes")
+    if not isinstance(variantes, dict):
+        _aviso("%s sin 'variantes'; no se usa" % nombre)
+        return {}
+    prods = {p["id"]: p for p in leer_productos(os.path.join(os.path.dirname(os.path.abspath(ruta)), CONFIG))}
+    limpio, fallas = _validar(variantes, prods)
+    for falla in fallas:
+        _aviso("%s: %s" % (nombre, falla))
     return limpio
 
 
@@ -528,6 +1471,68 @@ def cargar_json(ruta=None, hoy=None):
         return {}
 
 
+def _eventos_validos(d, hoy):
+    pisos = d.get("pisos_esperados") if isinstance(d.get("pisos_esperados"), list) else []
+    salida = []
+    for e in pisos:
+        if not isinstance(e, dict):
+            continue
+        piso, fin, nombre = _numero(e.get("piso")), str(e.get("fin") or "")[:10], e.get("evento")
+        if piso is None or not isinstance(nombre, str) or not nombre.strip() or len(fin) != 10 or fin < hoy.isoformat():
+            continue
+        salida.append((str(e.get("inicio") or fin)[:10], nombre.strip(), piso, fin))
+    return sorted(salida)
+
+
+def _veredicto(p, d, hoy):
+    """Veredicto desde el pronostico (fase 2c), solo con al menos un anio parecido.
+    Devuelve (frase, frase_corta, nota_de_orientacion) o None."""
+    piso = d.get("piso") if isinstance(d.get("piso"), dict) else {}
+    n = piso.get("n_analogos")
+    if not isinstance(n, int) or isinstance(n, bool) or n < 1:
+        return None
+    central = _numero(piso.get("precio"))
+    rango = piso.get("rango") if isinstance(piso.get("rango"), list) and piso.get("rango") else [None]
+    bajo = _numero(piso.get("bajo")) or _numero(rango[0])
+    if central is None or bajo is None:
+        return None
+    hz = _fecha_corta(piso.get("horizonte"), hoy)
+    aqui = " de aquí a %s" % hz if hz else ""
+    antes = " antes de %s" % hz if hz else ""
+    orient = "Es orientación: solo hay un año para comparar." if n == 1 else None
+    if p <= bajo * 1.02:
+        corta = "Compra hoy: es igual o mejor que lo más bajo que se espera%s." % aqui
+        larga = "Compra hoy: es igual o mejor que lo más bajo que se espera%s (entre %s y %s)." % (aqui, _dinero(bajo), _dinero(central))
+        return larga, corta, orient
+    if p <= central * 1.02:
+        analogos = d.get("analogos") if isinstance(d.get("analogos"), list) else []
+        mins = [_numero((a.get("minimos") or {}).get("horizonte")) for a in analogos
+                if isinstance(a, dict) and a.get("usado") and isinstance(a.get("minimos"), dict)]
+        mins = [m for m in mins if m is not None]
+        bajaron = [m for m in mins if m < p * 0.98]
+        if not mins:
+            cuenta = None
+        elif len(mins) == 1:
+            cuenta = ("el año pasado bajó más%s, hasta unos %s" % (antes, _dinero(min(bajaron))) if bajaron
+                      else "el año pasado no bajó más%s" % antes)
+        elif bajaron:
+            cuenta = "en %d de %d años parecidos bajó más%s, hasta unos %s" % (len(bajaron), len(mins), antes, _dinero(min(bajaron)))
+        else:
+            cuenta = "en ninguno de los %d años parecidos bajó más%s" % (len(mins), antes)
+        corta = "Buen precio: está en lo que se espera como piso (alrededor de %s)." % _dinero(central)
+        larga = corta[:-1] + "; %s." % cuenta if cuenta else corta
+        return larga, corta, orient
+    paren = ("(la misma consola bajó así el año pasado)" if d.get("analogo") == "misma_consola"
+             else "(el modelo anterior bajó así el año pasado)")
+    mas_baratos = [e for e in _eventos_validos(d, hoy) if e[2] < p]
+    if mas_baratos:
+        e = mas_baratos[0]
+        txt = "Conviene esperar: hacia %s se espera alrededor de %s %s." % (e[1], _dinero(e[2]), paren)
+    else:
+        txt = "Conviene esperar: se espera alrededor de %s%s." % (_dinero(central), antes)
+    return txt, txt, orient
+
+
 def _razon(precio, datos, hoy):
     p = _numero(precio)
     if p is None:
@@ -537,13 +1542,13 @@ def _razon(precio, datos, hoy):
         hoy = _hoy(hoy)
     except Exception:
         hoy = _hoy(None)
-    frases = []
+    f_sc = f_min = f_ver = f_tip = f_viene = None
     sc = _numero(d.get("sin_confirmar_bajo"))
     if sc is None and isinstance(d.get("sin_confirmar_bajo"), dict):
         sc = _numero(d["sin_confirmar_bajo"].get("precio"))
     if sc is not None and p < sc:
-        frases.append("Sin confirmar: está muy por debajo de todo lo visto con garantía; abre la ficha y revisa "
-                      "quién vende antes de creerlo.")
+        f_sc = ("Sin confirmar: está muy por debajo de lo visto con garantía en los últimos cuatro meses; abre la ficha "
+                "y revisa quién vende antes de creerlo.")
     mn = d.get("minimo") if isinstance(d.get("minimo"), dict) else {}
     x = _numero(mn.get("precio"))
     if x is not None:
@@ -556,41 +1561,44 @@ def _razon(precio, datos, hoy):
             partes.append("en " + t.strip())
         donde = " ".join(partes)
         if abs(p - x) < IGUAL_MARGEN:
-            frases.append("Iguala el precio más bajo visto con garantía (%s%s)." % (_dinero(x), ", " + donde if donde else ""))
+            f_min = "Iguala el precio más bajo visto con garantía (%s%s)." % (_dinero(x), ", " + donde if donde else "")
         elif p < x:
-            frases.append("%s es el precio más bajo visto con garantía en México desde que salió; el anterior fue %s%s."
-                          % (_dinero(p), _dinero(x), " " + donde if donde else ""))
+            f_min = ("%s es el precio más bajo visto con garantía en México desde que salió; el anterior fue %s%s."
+                     % (_dinero(p), _dinero(x), " " + donde if donde else ""))
         else:
-            frases.append("Está %s arriba del más bajo visto con garantía (%s%s)."
-                          % (_dinero(p - x), _dinero(x), ", " + donde if donde else ""))
+            f_min = "Está %s arriba del más bajo visto con garantía (%s%s)." % (_dinero(p - x), _dinero(x), ", " + donde if donde else "")
+    f_ver = f_ver_corta = f_orient = None
+    ver = _veredicto(p, d, hoy)
+    if ver:
+        f_ver, f_ver_corta, f_orient = ver
+        piso = d.get("piso") if isinstance(d.get("piso"), dict) else {}
+        if piso.get("tipo") == "proporcion":   # hermana: el aviso dice de donde sale; si no cabe, se quita entero
+            marca = lambda txt: txt[:-1] + " (estimado por proporción con el de 512 GB)." if txt else txt
+            f_ver, f_ver_corta = marca(f_ver), marca(f_ver_corta)
     tip = d.get("tipico") if isinstance(d.get("tipico"), dict) else {}
     tp = _numero(tip.get("precio"))
     if tp is not None and abs(p - tp) / tp > TIPICO_MARGEN:
-        frases.append("Lo normal en los últimos 30 días ha sido %s." % _dinero(tp))
-    pisos = d.get("pisos_esperados") if isinstance(d.get("pisos_esperados"), list) else []
-    hoy_s = hoy.isoformat()
-    vienen = []
-    for e in pisos:
-        if not isinstance(e, dict):
-            continue
-        piso, fin, nombre = _numero(e.get("piso")), str(e.get("fin") or "")[:10], e.get("evento")
-        if piso is None or not isinstance(nombre, str) or not nombre.strip() or len(fin) != 10 or fin < hoy_s:
-            continue
-        if piso < p:
-            vienen.append((str(e.get("inicio") or fin)[:10], nombre.strip(), piso))
-    if vienen:
-        _, nombre, piso = sorted(vienen)[0]
-        frases.append("En %s el modelo anterior llegó a un precio equivalente a %s." % (nombre, _dinero(piso)))
-    while len(" ".join(frases)) > MAX_RAZON and len(frases) > 1:
-        frases.pop()
-    texto = " ".join(frases)
+        f_tip = "Lo normal en los últimos 30 días ha sido %s." % _dinero(tp)
+    if f_ver is None:
+        vienen = [e for e in _eventos_validos(d, hoy) if e[2] < p]
+        if vienen:
+            quien = "la misma consola el año pasado" if d.get("analogo") == "misma_consola" else "el modelo anterior"
+            f_viene = "En %s %s llegó a un precio equivalente a %s." % (vienen[0][1], quien, _dinero(vienen[0][2]))
+    orden = [f_sc, f_min, f_ver, f_orient, f_tip, f_viene]          # orden en que se leen
+    # lo que se sacrifica primero si no cabe: "lo que viene", la nota de orientacion, lo normal, la parte larga del
+    # veredicto, el veredicto, el minimo; "sin confirmar" nunca
+    quitar = [(5, None), (3, None), (4, None), (2, f_ver_corta), (2, None), (1, None)]
+    while len(" ".join(x for x in orden if x)) > MAX_RAZON and quitar:
+        i, nuevo = quitar.pop(0)
+        orden[i] = nuevo if orden[i] else None
+    texto = " ".join(x for x in orden if x)
     if len(texto) > MAX_RAZON:
         texto = texto[:MAX_RAZON - 3].rsplit(" ", 1)[0] + "..."
     return texto
 
 
 def razon(precio, datos, hoy=None):
-    """Una o dos frases en lenguaje llano (320 caracteres como maximo) de por que el precio es bueno o no."""
+    """Frases en lenguaje llano (320 caracteres como maximo) de por que el precio es bueno o no."""
     try:
         return _razon(precio, datos, hoy)
     except Exception:
@@ -616,16 +1624,138 @@ def _escribir(ruta, texto):
 def _obs_prueba(fecha, precio, **k):
     o = {c: "" for c in COLUMNAS}
     o.update({"fecha": fecha, "producto": "fold8", "variante": "ultra-512", "tienda": "Samsung", "precio": float(precio),
-              "tipo_banco": "ninguno", "garantia_mx": "si", "fuente": "propio", "revision": None,
-              "rastro": "prueba:%s:%s" % (fecha, precio)})
+              "tipo_banco": "ninguno", "garantia_mx": "si", "fuente": "propio", "revision": None, "archivo": "prueba.csv",
+              "renglon": 0, "rastro": "prueba:%s:%s:%s" % (fecha, precio, k.get("id", ""))})
     o.update(k)
     return o
+
+
+def _serie_fija(inicio, dias, precio, cambios=None):
+    """Serie {fecha: (precio, obs)} de prueba: 'dias' dias desde 'inicio' a 'precio', con cambios {k: precio}."""
+    cambios = cambios or {}
+    s = {}
+    for k in range(dias):
+        d = inicio + dt.timedelta(days=k)
+        pr = cambios.get(k, precio)
+        s[d] = (float(pr), _obs_prueba(d.isoformat(), pr, id="S%d" % k))
+    return s
+
+
+def _selftest_fase2():
+    D = dt.date
+    # relleno hacia adelante de keepa, de un punto suelto y de 'propio'
+    todas = [_obs_prueba("2026-01-01", 30000, fuente="keepa", id="X:2026-01-01", archivo="k.csv"),
+             _obs_prueba("2026-01-05", 29000, fuente="keepa", id="X:2026-01-05", archivo="k.csv"),
+             _obs_prueba("2026-01-08", 29500, fuente="keepa", id="X:2026-01-08", archivo="k.csv", nota="último día del tramo"),
+             _obs_prueba("2026-01-20", 28000, fuente="keepa", id="X:2026-01-20", archivo="k.csv"),
+             _obs_prueba("2026-01-22", 27000, fuente="keepa", id="Y:2026-01-22:tercero", archivo="k.csv", garantia_mx="no"),
+             _obs_prueba("2026-02-01", 26000, fuente="prensa", id="P1"),
+             _obs_prueba("2026-03-01", 25000, fuente="propio", id="V1", tienda="Samsung"),
+             _obs_prueba("2026-03-02", 25500, fuente="propio", id="V2", tienda="Samsung")]
+    validas = [o for o in todas if o["garantia_mx"] == "si"]
+    s = serie_diaria(validas, {"ultra-512": 1.0}, D(2026, 3, 31), todas)
+    assert [s[D(2026, 1, k)][0] for k in (1, 4, 5, 7, 8)] == [30000, 30000, 29000, 29000, 29500]
+    assert D(2026, 1, 9) not in s and D(2026, 1, 19) not in s, "el ultimo dia del tramo corta el relleno"
+    assert s[D(2026, 1, 22)][0] == 28000 and D(2026, 1, 23) not in s, "el ultimo renglon vale hasta la fecha mas reciente del archivo"
+    assert [s.get(D(2026, 2, k), (None,))[0] for k in (1, 2, 3, 4)] == [26000, 26000, 26000, None]
+    assert [s.get(D(2026, 3, k), (None,))[0] for k in (1, 2, 3, 4, 5)] == [25000, 25500, 25500, 25500, None]
+    todas2 = [dict(o, nota="") for o in todas]
+    s2 = serie_diaria([o for o in todas2 if o["garantia_mx"] == "si"], {"ultra-512": 1.0}, D(2026, 3, 31), todas2)
+    assert s2[D(2026, 1, 19)][0] == 29500 and s2[D(2026, 1, 20)][0] == 28000, "sin marca de tramo sigue hasta el renglon siguiente"
+    s3 = serie_diaria(validas, {"ultra-512": 1.0}, D(2026, 1, 6), todas)
+    assert max(s3) == D(2026, 1, 6) and all(s3[d] == s[d] for d in s3), "cortar en t = solo datos hasta t"
+    s4 = serie_diaria([_obs_prueba("2025-11-01", 56499, variante="1tb", producto="fold7", fuente="prensa")],
+                      FACTOR_FOLD7, D(2025, 12, 1), [])
+    assert abs(s4[D(2025, 11, 1)][0] - 48999) < 0.01, "1 TB convertido a 512 por proporcion de lista"
+    # camino simulado con una serie conocida, desfases de 364 y 728
+    t = D(2026, 3, 1)                           # horizonte = t + 90 = 2026-05-30
+    este = _serie_fija(t - dt.timedelta(days=29), 30, 100)            # nivel de hoy = 100
+    a1 = _serie_fija(t - dt.timedelta(days=364 + 29), 70, 200, {39: 120})   # nivel 200; t+10 cae en 120
+    a2 = _serie_fija(t - dt.timedelta(days=728 + 29), 70, 200, {34: 140})   # nivel 200; t+5 cae en 140
+    corto = _serie_fija(t - dt.timedelta(days=364 + 9), 50, 200)            # solo 10 dias antes de la fecha desfasada
+    ans = [{"nombre": "A1", "corto": "el A1", "desfase": 364, "serie": a1},
+           {"nombre": "A2", "corto": "el A2", "desfase": 728, "serie": a2},
+           {"nombre": "C", "corto": "el C", "desfase": 364, "serie": corto}]
+    ev = [{"evento": "Evento X", "inicio": "2026-03-04", "fin": "2026-03-07", "tipo": "temporada"}]
+    pr = pronostico(este, ans, t, ev)
+    # a mano: camino_A1(t+10) = 100 x 120 / 200 = 60; camino_A2(t+5) = 100 x 140 / 200 = 70; los demas dias 100
+    usados = {i["nombre"]: i for i in pr["analogos"] if i["usado"]}
+    assert sorted(usados) == ["A1", "A2"], pr["analogos"]
+    assert abs(usados["A1"]["piso"] - 60) < 1e-9 and usados["A1"]["fecha"] == t + dt.timedelta(days=10)
+    assert abs(usados["A2"]["piso"] - 70) < 1e-9 and usados["A2"]["fecha"] == t + dt.timedelta(days=5)
+    assert usados["A1"]["fecha_analogo"] == t + dt.timedelta(days=10) - dt.timedelta(days=364)
+    nousado = [i for i in pr["analogos"] if not i["usado"]][0]
+    assert nousado["nombre"] == "C" and "hacen falta 15" in nousado["motivo"], nousado
+    assert abs(pr["piso"]["precio"] - 65) < 1e-9 and pr["piso"]["rango"] == [60, 70] and pr["piso"]["tipo"] == "analogo"
+    assert pr["piso"]["bajo"] == 60 and pr["piso"]["alto"] == 70 and pr["piso"]["n_analogos"] == 2, "dos anios: menor, mediana, mayor"
+    uno = pronostico(este, [ans[0]], t, ev, 0.10, 0.05)
+    # un anio: central = 60; bajo = 60 / 1.05 = 57.142857...; alto = 60 x 1.10 = 66
+    assert uno["piso"]["n_analogos"] == 1 and abs(uno["piso"]["precio"] - 60) < 1e-9
+    assert abs(uno["piso"]["bajo"] - 60 / 1.05) < 1e-9 and abs(uno["piso"]["alto"] - 66) < 1e-9
+    assert pr["horizonte"] == D(2026, 5, 30) and pr["nivel"] == 100
+    # evento del 4 al 7 de marzo, con holgura del 3 al 8: A1 da 100 (su 60 cae el 11), A2 da 70 el 6 -> mediana 85
+    assert len(pr["pisos_esperados"]) == 1 and abs(pr["pisos_esperados"][0]["piso"] - 85) < 1e-9
+    assert pr["pisos_esperados"][0]["rango"] == [70, 100]
+    bm = baja_mas(pr, 72)   # 72 x 0.98 = 70.56: a 7 dias solo A2 (70); a 30 dias los dos (hasta 60)
+    assert (bm[0]["veces"], bm[0]["de"], bm[0]["hasta"]) == (1, 2, 70) and (bm[1]["veces"], bm[1]["hasta"]) == (2, 60), bm
+    assert "en 1 de 2 años parecidos bajó más en los 7 días siguientes" in bm[0]["frase"]
+    sin = pronostico(este, [ans[2]], t, ev, 0.10, 0.05)
+    assert sin["piso"]["tipo"] == "estimacion" and sin["piso"]["precio"] == 100 and sin["pisos_esperados"] == []
+    # ninguno: central = minimo de 120 dias (100); bajo = 100 / 1.05; alto = 110
+    assert sin["piso"]["n_analogos"] == 0 and abs(sin["piso"]["bajo"] - 100 / 1.05) < 1e-9 and abs(sin["piso"]["alto"] - 110) < 1e-9
+    assert horizonte(D(2026, 11, 25)) == D(2027, 1, 31) and horizonte(D(2026, 1, 10)) == D(2026, 1, 31)
+    # topes (fase 2b), calculados a mano:
+    # dos anios: ganga = min(23670 x 1.02 = 24143, 26081) -> 24100; comprar = 26054 x 1.02 = 26575 -> 26500;
+    # mirar = min(28439 x 1.02 = 29008, 36010 x 0.97 = 34930) -> 29000
+    assert calcular_topes(23670, 26054, 28439, 26081, 36010) == [24100, 26500, 29000]
+    assert calcular_topes(30000, 31000, 33000, 29000, 40000) == [29000, 31600, 33600], "ganga acotada por minimo_ciclo"
+    # comprar = 30600 < ganga x 1.03 = 31518 -> 31500; mirar = 30600 < 31500 x 1.03 = 32445 -> 32400
+    assert calcular_topes(30000, 30000, 30000, None, None) == [30600, 31500, 32400], "separacion minima de 3 %"
+    # mirar = min(33660, 33000 x 0.97 = 32010) = 32010 < 31600 x 1.03 = 32548 -> 32500
+    assert calcular_topes(30000, 31000, 33000, 29000, 33000) == [29000, 31600, 32500], "mirar acotado por el nivel"
+    s1, g1, _ = s_de_errores([{"error": 0.20}, {"error": -0.30}])
+    assert s1 == 0.12 and g1 == 0.0, "errores de signo mezclado: sesgo 0"
+    s2, g2, _ = s_de_errores([{"error": 0.174}, {"error": 0.036}])
+    assert abs(s2 - 0.105) < 1e-9 and abs(g2 - 0.105) < 1e-9, "los dos altos: sesgo = media con signo"
+    assert s_de_errores([{"error": 0.40}, {"error": 0.30}])[1] == SESGO_MAX and s_de_errores([{"error": 0.01}])[0] == 0.05
+    assert s_de_errores([None, {"error": None}])[:2] == (S_DEFECTO, 0.0)
+    # prueba hacia atras sin ver el dia: un precio bajisimo el propio dia t no cambia los topes de t
+    ta = D(2026, 3, 1)
+    sa = _serie_fija(ta - dt.timedelta(days=29), 29, 10000)          # datos hasta el dia anterior
+    sb = dict(sa)
+    sb[ta] = (5000.0, _obs_prueba(ta.isoformat(), 5000, id="HOY"))
+    an = [{"nombre": "AN", "corto": "el AN", "desfase": 364,
+           "serie": _serie_fija(ta - UN_DIA - dt.timedelta(days=364 + 29), 70, 20000, {40: 16000})}]
+    tpa, tpb = topes_retro(sa, an, ta, [], 0.09, 0.0, 1000)[0], topes_retro(sb, an, ta, [], 0.09, 0.0, 1000)[0]
+    # pronostico del dia anterior: un anio, central = 10000 x 16000 / 20000 = 8000 = bajo; alto = 8720; minimo 120 dias 10000
+    # ganga = min(8160, 10000) -> 8100; comprar = 8160 < 8343 -> 8300; mirar = min(8894, 9700) -> 8800
+    assert tpa == tpb == [8100, 8300, 8800], (tpa, tpb)
+    assert topes_retro(sa, [], ta, [], 0.09, 0.0, 1000)[0] is None, "sin anio parecido no hay topes calculados"
+    assert topes_de(pronostico(sb, [], ta, [], 0.09, 0.0))[0] == 5000, "viendo el dia, el minimo de 120 dias seria el de hoy"
+    # topes activos (fase 2c)
+    man = [22000, 24000, 26000]
+    assert topes_activos(man, [24100, 26500, 29000], 2, 53499) == ([22000, 24000, 29000], "a mano; mirar ampliado por pronostico", None)
+    assert topes_activos(man, [24100, 26500, 29000], 2, 53499, "proporcion de ultra-512")[1] == "a mano; mirar ampliado por proporcion de ultra-512"
+    tp1 = topes_activos(man, [24100, 26500, 29000], 1, 53499)
+    assert tp1[0] == man and tp1[1] == "fracciones" and tp1[2].startswith("un solo año parecido")
+    assert topes_activos(man, None, 0, 53499)[2] == "sin año parecido ni historia suficiente"
+    assert topes_activos(man, [20000, 22000, 25000], 2, 53499)[0] == man, "mirar calculado menor: se queda el de a mano"
+    assert topes_activos(man, [30000, 40000, 60000], 2, 53499)[0] == man, "mirar calculado arriba de la lista: a mano"
+    # tope de cordura: el camino da 150 en todo el evento, mas que el nivel de hoy (100)
+    a5 = _serie_fija(t - dt.timedelta(days=364 + 29), 70, 200, dict((k, 300) for k in range(30, 70)))
+    p5 = pronostico(este, [{"nombre": "A5", "corto": "el A5", "desfase": 364, "serie": a5}], t, ev)
+    e5 = p5["pisos_esperados"][0]
+    assert e5["piso"] == 100 and e5["rango"] == [100, 100] and e5["base"] == "no se espera rebaja respecto de lo normal de hoy", e5
+    vs = {"p|a": {"lista": 100000, "topes": [20000, 21000, 22000]}, "p|b": {"lista": 120000, "topes": [20000, 21000, 22000]},
+          "p|c": {"lista": 100000, "topes": [20000, 21000, 22000]}}
+    _desempatar(vs, [{"id": "p", "variantes": [{"id": "a"}, {"id": "b"}, {"id": "c"}]}])
+    assert vs["p|b"]["topes"] == [20100, 21100, 22100] and vs["p|a"]["topes"] == vs["p|c"]["topes"] == [20000, 21000, 22000]
 
 
 def selftest():
     hoy = dt.date(2026, 11, 25)
     prods = PRODS_PRUEBA["productos"]
-    # 1. topes de fase 1 iguales a los de vigia.py
+    # 1. topes de fracciones iguales a los de vigia.py
     esperado = {"fold8|ultra-512": [22000, 24000, 26000], "fold8|normal-512": [19900, 21800, 23600],
                 "ps5|digital": [7500, 9000, 10800]}
     for p in prods:
@@ -647,6 +1777,7 @@ def selftest():
     for p in reales:
         for v in p["variantes"]:
             assert list(vg.topes(p, v)) == topes_vigia(p, v)[0], (p["id"], v["id"])
+    _selftest_fase2()
     with tempfile.TemporaryDirectory() as tmp:
         hist = os.path.join(tmp, HISTORIA)
         os.mkdir(hist)
@@ -663,9 +1794,10 @@ def selftest():
                   "2026-11-22,fold8,ultra-512,Samsung,abc,,,,ninguno,sin dato,si,propio,u,P8,,\n"
                   "2026-11-23,fold8,ultra-512,Samsung,9000,,,,ninguno,Samsung,si,propio,u,P9,,\n"
                   "2026-11-23,fold8,ultra-512,Amazon,31000,,\"linea uno\nlinea dos\",,ninguno,Amazon,si,keepa,u,K10,,\n"
-                  "2026-11-24,fold8,ultra-512,Samsung,28000,,,,ninguno,sin dato,si,foro,u,F11,,\n")
+                  "2026-11-24,fold8,ultra-512,Samsung,28000,,,,ninguno,sin dato,si,foro,u,F11,,\n"
+                  "2026-11-24,fold8,normal-512,Samsung,26495,,,,ninguno,Samsung,si,propio,u,R12,el documento dice no reverificado,ok\n")
         _escribir(os.path.join(hist, "calendario.csv"), ",".join(COLUMNAS_CALENDARIO) +
-                  "\nBuen Fin 2026,evento,2026-11-13,2026-11-17,,u,cita\n")
+                  "\nBuen Fin 2026,temporada,2026-11-13,2026-11-17,,u,cita\nAnuncio,lanzamiento,2026-07-22,,fold8,u,cita\n")
         _escribir(os.path.join(hist, "vacio.csv"), "")
         _escribir(os.path.join(hist, "cortado.csv"), ",".join(COLUMNAS) + "\n2026-11-24,fold8,ultra-512,Samsung,\"300")
         _escribir(os.path.join(tmp, HISTORIAL), ",".join(COLUMNAS_HISTORIAL) + "\n"
@@ -676,7 +1808,7 @@ def selftest():
         # 2. cargador: encabezado ajeno, renglon roto, archivo vacio, archivo cortado
         obs = cargar_historia(hist)
         ids = {o["id"]: o for o in obs}
-        assert sorted(ids) == ["F11", "F4", "F6", "K10", "P1", "P2", "P3", "P5", "P9"], sorted(ids)
+        assert sorted(ids) == ["F11", "F4", "F6", "K10", "P1", "P2", "P3", "P5", "P9", "R12"], sorted(ids)
         assert ids["K10"]["renglon"] == 11 and ids["F11"]["renglon"] == 13, (ids["K10"]["renglon"], ids["F11"]["renglon"])
         assert ids["P1"]["rastro"] == "historia/prueba.csv:P1" and ids["P1"]["revision"] == ""
         # 3. traduccion de historial_precios.csv
@@ -692,7 +1824,7 @@ def selftest():
         motivos = {k: clasificar(v, pisos) for k, v in ids.items()}
         assert motivos == {"P1": "valida", "P2": "ajeno", "P3": "canje_o_plan", "F4": "revision_no_ok",
                            "P5": "sin_garantia", "F6": "valida", "P9": "bajo_piso", "K10": "valida",
-                           "F11": "sin_revision"}, motivos
+                           "F11": "sin_revision", "R12": "no_reverificado"}, motivos
         assert clasificar(_obs_prueba("2026-11-20", 30000, condicion="con plan Telcel"), pisos) == "canje_o_plan"
         assert clasificar(_obs_prueba("2026-11-20", 30000, condicion="Trade-in"), pisos) == "canje_o_plan"
         assert clasificar(_obs_prueba("2026-11-20", 30000, tipo_banco="propio"), pisos) == "valida"
@@ -716,21 +1848,42 @@ def selftest():
         doc, det, info = generar(tmp, dt.datetime(2026, 11, 25, 12, 0, tzinfo=MX))
         v = doc["variantes"]
         assert doc["vence"] == "2026-12-25" and doc["generado"] == "2026-11-25T12:00:00-06:00"
-        assert v["fold8|ultra-512"]["minimo"]["precio"] == 29000, v["fold8|ultra-512"]["minimo"]
-        assert v["fold8|ultra-512"]["minimo"]["rastro"] == "historia/prueba.csv:F6", v["fold8|ultra-512"]["minimo"]
-        assert v["fold8|ultra-512"]["ajeno"]["precio"] == 25000 and v["fold8|ultra-512"]["ajeno"]["banco"] == "Banorte"
-        assert v["fold8|ultra-512"]["n_datos"]["validas"] == {"propio": 2, "foro": 1, "keepa": 1}
-        assert v["fold8|ultra-512"]["n_datos"]["descartadas"] == {"canje_o_plan": 1, "revision_no_ok": 1,
-                                                                  "sin_garantia": 1, "bajo_piso": 1, "sin_revision": 1}
+        u = v["fold8|ultra-512"]
+        assert u["minimo"]["precio"] == 29000 and u["minimo"]["rastro"] == "historia/prueba.csv:F6", u["minimo"]
+        assert u["ajeno"]["precio"] == 25000 and u["ajeno"]["banco"] == "Banorte"
+        assert u["n_datos"]["validas"] == {"propio": 2, "foro": 1, "keepa": 1}
+        assert u["n_datos"]["descartadas"] == {"canje_o_plan": 1, "revision_no_ok": 1, "sin_garantia": 1,
+                                               "bajo_piso": 1, "sin_revision": 1}
+        assert v["fold8|normal-512"]["n_datos"]["descartadas"] == {"no_reverificado": 1}
         assert v["fold8|ultra"]["minimo"] is None and v["fold8|normal-512"]["minimo"] is None
         assert v["ps5|digital"]["minimo"]["precio"] == 10999.99
-        for clave, t in esperado.items():
-            assert v[clave]["topes"] == t and v[clave]["topes_manual"] == t and v[clave]["topes_origen"] == "fracciones"
-        assert info["origen_calendario"] == "historia/calendario.csv" and info["eventos"] == 1
+        for clave, t3 in esperado.items():
+            assert v[clave]["topes_manual"] == t3
+        # sin anios parecidos en los datos de prueba: no hay piso ni topes calculados; activos = a mano;
+        # sin confirmar = 0.80 x minimo de 120 dias (29,000) = 23,200; s = 0.09 y sesgo 0 (sin casos A y B)
+        assert u["piso"] is None and u["topes_calculados"] is None and u["s"] == S_DEFECTO and u["sesgo"] == 0, u["piso"]
+        assert u["topes"] == esperado["fold8|ultra-512"] and u["topes_origen"] == "fracciones", (u["topes"], u["topes_origen"])
+        assert u["topes_nota"] == "sin año parecido ni historia suficiente"
+        assert v["fold8|ultra"]["topes_origen"] == "fracciones" and v["fold8|ultra"]["topes"] == esperado["fold8|ultra-512"]
+        assert v["fold8|normal-512"]["topes_origen"] == "fracciones" and v["fold8|normal-512"]["topes"] == esperado["fold8|normal-512"]
+        assert v["ps5|digital"]["topes"] == esperado["ps5|digital"] and v["ps5|digital"]["topes_calculados"] is None
+        assert u["sin_confirmar_bajo"] == 23200, u["sin_confirmar_bajo"]
+        assert info["origen_calendario"] == "historia/calendario.csv" and info["eventos"] == 2 and info["temporadas"] == 1
         with open(ruta, "rb") as fb:
             assert b"\r\n" not in fb.read()
         assert sorted(cargar_json(ruta, hoy)) == sorted(v), sorted(cargar_json(ruta, hoy))
         assert cargar_json(ruta, "2026-12-25") and cargar_json(ruta, "2026-12-26") == {}
+        # topes_fijos ganan siempre
+        pf = json.loads(json.dumps(PRODS_PRUEBA))
+        pf["productos"][0]["topes_fijos"] = {"ultra-512": [20000, 22000, 24000]}
+        otra = os.path.join(tmp, "fijos")
+        os.mkdir(otra)
+        os.mkdir(os.path.join(otra, HISTORIA))
+        _escribir(os.path.join(otra, CONFIG), json.dumps(pf))
+        _escribir(os.path.join(otra, HISTORIA, "prueba.csv"), open(os.path.join(hist, "prueba.csv"), encoding="utf-8").read())
+        dfj, _, _ = construir(otra, dt.datetime(2026, 11, 25, 12, 0, tzinfo=MX))
+        assert dfj["variantes"]["fold8|ultra-512"]["topes"] == [20000, 22000, 24000]
+        assert dfj["variantes"]["fold8|ultra-512"]["topes_origen"] == "topes_fijos"
         # 7. cargar_json rechaza lo malo
         def prueba(nombre, cambio):
             d2 = json.loads(json.dumps(doc))
@@ -744,9 +1897,9 @@ def selftest():
         assert prueba("v2.json", lambda d2: d2.update(version=2)) == {}
         r = prueba("desordenada.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes=[9000, 7500, 10800]))
         assert "ps5|digital" not in r and "fold8|ultra-512" in r
-        r = prueba("repetida.json", lambda d2: d2["variantes"]["fold8|normal-512"].update(topes=[22000, 24000, 26000]))
+        r = prueba("repetida.json", lambda d2: d2["variantes"]["fold8|normal-512"].update(topes=list(u["topes"])))
         assert not any(k.startswith("fold8|") for k in r) and "ps5|digital" in r, sorted(r)
-        r = prueba("misma_lista.json", lambda d2: d2["variantes"]["fold8|ultra"].update(topes=[22000, 24000, 26000]))
+        r = prueba("misma_lista.json", lambda d2: d2["variantes"]["fold8|ultra"].update(topes=list(u["topes"])))
         assert "fold8|ultra" in r
         assert "ps5|digital" not in prueba("alto.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes=[7500, 9000, 13000]))
         assert "ps5|digital" not in prueba("bajo.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes=[6000, 9000, 10800]))
@@ -754,11 +1907,51 @@ def selftest():
         assert "ps5|digital" not in prueba("dos.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes=[7500, 9000]))
         r = prueba("extra.json", lambda d2: d2["variantes"].update({"ps5|pro": {"topes": [7000, 8000, 9000]}}))
         assert not any(k.startswith("ps5|") for k in r)
-        otra = os.path.join(tmp, "sin_config")
-        os.mkdir(otra)
-        escribir_json(doc, os.path.join(otra, SALIDA))
-        assert cargar_json(os.path.join(otra, SALIDA), hoy) == {}
-    # 8. razon
+        assert "ps5|digital" not in prueba("calc_malo.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes_calculados=[1, 2]))
+        assert "ps5|digital" in prueba("calc_bien.json", lambda d2: d2["variantes"]["ps5|digital"].update(topes_calculados=[7000, 8000, 9000]))
+        sincfg = os.path.join(tmp, "sin_config")
+        os.mkdir(sincfg)
+        escribir_json(doc, os.path.join(sincfg, SALIDA))
+        assert cargar_json(os.path.join(sincfg, SALIDA), hoy) == {}
+        # 8. --recalcular: historia rota deja el archivo intacto; salto de mas de 15 % no reemplaza; lo normal si
+        with open(ruta, "rb") as fb:
+            antes = fb.read()
+        g = globals()
+        original = g["cargar_historia"]
+
+        def rota(carpeta):
+            raise IOError("historia rota de prueba")
+        g["cargar_historia"] = rota
+        try:
+            assert recalcular(tmp, dt.datetime(2026, 11, 25, 13, 0, tzinfo=MX)) == 0
+        finally:
+            g["cargar_historia"] = original
+        with open(ruta, "rb") as fb:
+            assert fb.read() == antes, "historia rota: el archivo anterior debe quedar intacto"
+        d2 = json.loads(antes.decode("utf-8"))
+        d2["variantes"]["ps5|digital"]["topes"] = [7500, 9000, 10800]
+        d2["variantes"]["fold8|ultra-512"]["topes"] = [15000, 16000, 17000]
+        escribir_json(d2, ruta)
+        with open(ruta, "rb") as fb:
+            antes = fb.read()
+        assert recalcular(tmp, dt.datetime(2026, 11, 25, 13, 0, tzinfo=MX)) == 0
+        with open(ruta, "rb") as fb:
+            assert fb.read() == antes, "un salto de mas de 15 % no reemplaza"
+        escribir_json(doc, ruta)
+        assert recalcular(tmp, dt.datetime(2026, 11, 25, 13, 0, tzinfo=MX)) == 0
+        with open(ruta, encoding="utf-8") as fb:
+            assert json.load(fb)["generado"] == "2026-11-25T13:00:00-06:00", "sin saltos si reemplaza"
+        # el archivo anterior tenia dos anios parecidos y mirar ampliado a 31,000 (16 % arriba de 26,000); ahora no hay
+        # anio parecido: el mirar vuelve al de a mano aunque baje mas de 15 %, y se reemplaza
+        d3 = json.loads(json.dumps(doc))
+        d3["variantes"]["fold8|ultra-512"]["topes"] = [22000, 24000, 31000]
+        d3["variantes"]["fold8|ultra-512"]["piso"] = {"n_analogos": 2}
+        escribir_json(d3, ruta)
+        assert recalcular(tmp, dt.datetime(2026, 11, 25, 14, 0, tzinfo=MX)) == 0
+        with open(ruta, encoding="utf-8") as fb:
+            d4j = json.load(fb)
+        assert d4j["generado"] == "2026-11-25T14:00:00-06:00" and d4j["variantes"]["fold8|ultra-512"]["topes"] == [22000, 24000, 26000]
+    # 9. razon
     datos = {"minimo": {"precio": 34199.2, "fecha": "2026-11-19", "tienda": "Samsung"}, "tipico": {"precio": 34199.2, "n": 6}}
     r = razon(23999, datos, hoy)
     assert r.startswith("$23,999 es el precio más bajo visto con garantía en México desde que salió; el anterior fue "
@@ -772,13 +1965,77 @@ def selftest():
     assert "28 nov 2025" in razon(36000, {"minimo": {"precio": 30000, "fecha": "2025-11-28", "tienda": "Amazon"}}, hoy)
     assert razon(30000, {}, hoy) == "" and razon(30000, None, hoy) == ""
     d2 = dict(datos, sin_confirmar_bajo=20000)
-    assert razon(15000, d2, hoy).startswith("Sin confirmar: está muy por debajo de todo lo visto con garantía;")
+    assert razon(15000, d2, hoy).startswith("Sin confirmar: está muy por debajo de lo visto con garantía en los últimos "
+                                            "cuatro meses; abre la ficha y revisa quién vende antes de creerlo.")
     assert not razon(25000, d2, hoy).startswith("Sin confirmar")
+    # condicion de acceso (fase 2d): va a la serie aparte, no fija referencias
+    pz = dict(PISOS_ANTECESOR, fold8=12000, ps5=6500)
+    for k, txt in (("condicion", "cupón CART5_EPP"), ("tienda", "Samsung tienda de estudiantes"), ("nota", "solo Samsung Business"),
+                   ("condicion", "para nueva cuenta"), ("condicion", "en tu primera compra"), ("nota", "programa de empleados"),
+                   ("condicion", "precio Meli+"), ("condicion", "con Meli Plus")):
+        assert clasificar(_obs_prueba("2026-11-20", 30000, **{k: txt}), pz) == "condicion_de_acceso", (k, txt)
+    assert clasificar(_obs_prueba("2026-11-20", 30000, condicion="cupón FOLD8U_35CLUB"), pz) == "valida"
+    va, _ = calcular([_obs_prueba("2026-11-20", 30000), _obs_prueba("2026-11-21", 25000, condicion="tienda de estudiantes"),
+                      _obs_prueba("2026-11-22", 27000, banco="Banorte", tipo_banco="ajeno")], PRODS_PRUEBA["productos"], hoy)
+    fu = va["fold8|ultra-512"]
+    assert fu["minimo"]["precio"] == 30000 and fu["ajeno"]["precio"] == 25000, (fu["minimo"], fu["ajeno"])
+    assert fu["ajeno"]["motivo"] == "condicion de acceso" and fu["ajeno"]["condicion"] == "estudiantes", fu["ajeno"]
+    assert fu["n_datos"]["condicion_de_acceso"] == 1 and fu["n_datos"]["ajeno"] == 1, fu["n_datos"]
+    # hermana por proporcion: el veredicto dice de donde sale, y si no cabe se quita entero
+    dh = {"piso": {"precio": 30000, "bajo": 28000, "rango": [28000, 33000], "n_analogos": 2, "horizonte": "2027-01-31",
+                   "tipo": "proporcion"}, "analogos": [], "pisos_esperados": []}
+    r = razon(40000, dh, hoy)
+    assert r == "Conviene esperar: se espera alrededor de $30,000 antes de 31 ene 2027 (estimado por proporción con el de 512 GB).", r
+    assert "(estimado por proporción con el de 512 GB)." in razon(28000, dh, hoy)
+    rl = razon(40000, dict(dh, minimo={"precio": 39000, "fecha": "2026-11-19", "tienda": "T" * 230}), hoy)
+    assert "Conviene esperar" not in rl and len(rl) <= MAX_RAZON, rl
     d3 = dict(datos, pisos_esperados=[{"evento": "Buen Fin 2026", "inicio": "2026-11-13", "fin": "2026-11-17", "piso": 20000},
                                       {"evento": "Black Friday 2026", "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 28000}])
     r = razon(36000, d3, hoy)
     assert "En Black Friday 2026 el modelo anterior llegó a un precio equivalente a $28,000." in r and "Buen Fin" not in r, r
     assert "modelo anterior" not in razon(27000, d3, hoy)
+    # veredictos de la fase 2c: salen del pronostico (bajo, central, anios parecidos), no de las etiquetas
+    d4 = dict(datos, topes=[22000, 24000, 29000], topes_origen="a mano; mirar ampliado por pronostico", analogo="modelo_anterior",
+              piso={"precio": 25500, "bajo": 23400, "rango": [23400, 27600], "n_analogos": 2, "fecha": "2026-12-20",
+                    "horizonte": "2027-01-31", "tipo": "analogo"},
+              analogos=[{"usado": True, "minimos": {"7": 30000, "30": 28000, "horizonte": 23400}},
+                        {"usado": True, "minimos": {"7": 31000, "30": 29000, "horizonte": 27600}},
+                        {"usado": False, "motivo": "x"}],
+              pisos_esperados=[{"evento": "Black Friday y Cyber Monday 2026", "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 27000},
+                               {"evento": "Navidad 2026", "inicio": "2026-12-16", "fin": "2027-01-06", "piso": 25500}])
+    r = razon(23800, d4, hoy)   # 23,800 <= bajo x 1.02 = 23,868
+    assert "Compra hoy: es igual o mejor que lo más bajo que se espera de aquí a 31 ene 2027 (entre $23,400 y $25,500)." in r, r
+    r = razon(26000, d4, hoy)   # 26,000 <= central x 1.02 = 26,010; 26,000 x 0.98 = 25,480: solo el de 23,400 bajo mas
+    assert ("Buen precio: está en lo que se espera como piso (alrededor de $25,500); en 1 de 2 años parecidos bajó más "
+            "antes de 31 ene 2027, hasta unos $23,400.") in r, r
+    r = razon(25900, dict(d4, analogos=[{"usado": True, "minimos": {"horizonte": 26000}}, {"usado": True, "minimos": {"horizonte": 27600}}]), hoy)
+    assert "en ninguno de los 2 años parecidos bajó más antes de 31 ene 2027." in r, r
+    r = razon(34199, d4, hoy)
+    assert "Conviene esperar: hacia Black Friday y Cyber Monday 2026 se espera alrededor de $27,000 (el modelo anterior bajó así el año pasado)." in r, r
+    assert "llegó a un precio equivalente" not in r and "orientación" not in r
+    r = razon(30000, dict(d4, pisos_esperados=[]), hoy)
+    assert "Conviene esperar: se espera alrededor de $25,500 antes de 31 ene 2027." in r, r
+    cortas = [razon(23000, dict(d4, tipico=None, minimo={"precio": 30000, "fecha": "2026-11-19", "tienda": "T" * n}), hoy)
+              for n in range(0, 260, 2)]
+    assert any("Compra hoy" in x and "(entre" not in x for x in cortas), "si no cabe, la ganga va sin el parentesis"
+    assert all(len(x) <= MAX_RAZON for x in cortas)
+    d5 = {"analogo": "misma_consola", "topes": [7500, 9000, 10800], "topes_origen": "fracciones",
+          "piso": {"precio": 11724, "bajo": 10932, "rango": [10932, 12915], "n_analogos": 1, "horizonte": "2027-01-31"},
+          "analogos": [{"usado": True, "minimos": {"horizonte": 11724}}],
+          "pisos_esperados": [{"evento": "Navidad 2026", "inicio": "2026-12-16", "fin": "2027-01-06", "piso": 11724}]}
+    assert razon(11000, d5, hoy) == ("Compra hoy: es igual o mejor que lo más bajo que se espera de aquí a 31 ene 2027 "
+                                     "(entre $10,932 y $11,724). Es orientación: solo hay un año para comparar."), razon(11000, d5, hoy)
+    assert razon(11900, d5, hoy) == ("Buen precio: está en lo que se espera como piso (alrededor de $11,724); el año pasado "
+                                     "no bajó más antes de 31 ene 2027. Es orientación: solo hay un año para comparar."), razon(11900, d5, hoy)
+    assert razon(13000, d5, hoy) == ("Conviene esperar: hacia Navidad 2026 se espera alrededor de $11,724 (la misma consola "
+                                     "bajó así el año pasado). Es orientación: solo hay un año para comparar."), razon(13000, d5, hoy)
+    r = razon(20000, dict(d4, piso=dict(d4["piso"], n_analogos=0)), hoy)
+    assert "Compra hoy" not in r and "Buen precio" not in r and "Conviene esperar" not in r, "sin anio parecido no hay veredicto"
+    largo = dict(d4, sin_confirmar_bajo=99999, minimo={"precio": 30000, "tienda": "T" * 200, "fecha": "2026-11-19"},
+                 pisos_esperados=[{"evento": "E" * 300, "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 2}])
+    for pr in (1000, 25999, 28000, 34199):
+        r = razon(pr, largo, hoy)
+        assert len(r) <= MAX_RAZON and r.startswith("Sin confirmar"), r
     raros = [None, {}, [], "x", {"minimo": None}, {"minimo": {"precio": None}}, {"minimo": "x"},
              {"minimo": {"precio": "abc", "fecha": "xx", "tienda": 5}}, {"tipico": {"precio": 0}},
              {"tipico": None, "pisos_esperados": [None, 3, {"piso": "x"}, {"evento": 4, "fin": None, "piso": 1}]},
@@ -786,12 +2043,17 @@ def selftest():
              {"minimo": {"precio": 30000, "fecha": None, "tienda": None}},
              {"minimo": {"precio": 30000, "tienda": "T" * 500}, "tipico": {"precio": 1}, "sin_confirmar_bajo": 99999,
               "pisos_esperados": [{"evento": "E" * 400, "fin": "2026-12-01", "piso": 2}]},
-             {"minimo": {"precio": "T" * 500}}]
+             {"minimo": {"precio": "T" * 500}},
+             {"topes": [1, 2], "topes_origen": "prospectiva", "piso": {"precio": 5}},
+             {"topes": ["a", None, 3], "topes_origen": "prospectiva", "piso": None},
+             {"topes": [100, 200, 300], "topes_origen": 5, "piso": {"precio": "x", "horizonte": 7}},
+             {"topes": [100, 200, 300], "topes_origen": "proporcion de x", "piso": {"precio": 50, "horizonte": None,
+                                                                                    "tipo": "estimacion", "fecha": 3}}]
     for dd in raros:
-        for pr in (None, "abc", -5, 0, 25000, float("nan"), float("inf"), True, "25000", [1]):
+        for prc in (None, "abc", -5, 0, 150, 25000, float("nan"), float("inf"), True, "25000", [1]):
             for hh in (hoy, None, "2026-11-25", "malo"):
-                r = razon(pr, dd, hh)
-                assert isinstance(r, str) and len(r) <= MAX_RAZON, (pr, dd, r)
+                r = razon(prc, dd, hh)
+                assert isinstance(r, str) and len(r) <= MAX_RAZON, (prc, dd, r)
     assert razon(25000, {"minimo": {"precio": 30000, "fecha": None, "tienda": None}}, hoy) == \
         "$25,000 es el precio más bajo visto con garantía en México desde que salió; el anterior fue $30,000."
     return True
@@ -805,22 +2067,38 @@ def _fmt(x):
 
 def _imprimir_tabla(doc, info):
     print("prospectiva.json generado %s, vence %s" % (doc["generado"], doc["vence"]))
-    print("observaciones leidas: %d; calendario: %d eventos (%s); listas: %d (%s)" % (
-        info["observaciones"], info["eventos"], info["origen_calendario"], info["listas"], info["origen_listas"]))
+    print("observaciones leidas: %d; calendario: %d eventos, %d temporadas (%s); listas: %d (%s)" % (
+        info["observaciones"], info["eventos"], info["temporadas"], info["origen_calendario"], info["listas"], info["origen_listas"]))
+    print("s = %.4f, sesgo = %.4f (%s)" % (info["s"], info["sesgo"], info["s_motivo"]))
     if info["sin_traducir"]:
         print("renglones del vigia sin variante en productos.json: %s" % ", ".join(
             "%s (%d)" % kv for kv in sorted(info["sin_traducir"].items())))
-    print("%-17s %-19s %-34s %-12s %-26s %-6s %s" % ("variante", "topes", "minimo", "tipico (n)", "validas", "ajeno", "descartadas"))
+    print("%-17s %-19s %-19s %-19s %-45s %-12s %-35s %s" % (
+        "variante", "activos", "calculados", "a mano", "origen", "nivel (n)", "piso central [bajo-alto] tipo", "anios parecidos"))
     for clave, f in sorted(doc["variantes"].items()):
-        m = f["minimo"]
-        mtxt = "%s %s %s" % (_fmt(m["precio"]), m["fecha"], m["tienda"]) if m else "-"
-        t = f["tipico"]
-        ttxt = "%s (%d)" % (_fmt(t["precio"]), t["n"]) if t else "-"
-        nd = f["n_datos"]
-        val = ", ".join("%s %d" % kv for kv in sorted(nd["validas"].items())) or "0"
-        desc = ", ".join("%s %d" % kv for kv in sorted(nd["descartadas"].items())) or "0"
-        aj = _fmt(f["ajeno"]["precio"]) if f["ajeno"] else str(nd["ajeno"])
-        print("%-17s %-19s %-34s %-12s %-26s %-6s %s" % (clave, "/".join(str(x) for x in f["topes"]), mtxt, ttxt, val, aj, desc))
+        nv = f.get("nivel")
+        ntxt = "%s (%d)" % (_fmt(nv["precio"]), nv["n"]) if nv else "-"
+        p = f.get("piso")
+        ptxt = "%s [%s-%s] %s" % (_fmt(p["precio"]), _fmt(p["rango"][0]), _fmt(p["rango"][1]), p["tipo"]) if p else "-"
+        n = p.get("n_analogos", 0) if p else 0
+        usados = ", ".join(a["nombre"] for a in f.get("analogos", []) if a.get("usado"))
+        calc = f.get("topes_calculados")
+        print("%-17s %-19s %-19s %-19s %-45s %-12s %-35s %s" % (
+            clave, "/".join(str(x) for x in f["topes"]), "/".join(str(x) for x in calc) if calc else "-",
+            "/".join(str(x) for x in f["topes_manual"]), f["topes_origen"], ntxt, ptxt,
+            "%d%s" % (n, " (" + usados + ")" if usados else "")))
+        for k in ("topes_nota", "topes_motivo"):
+            if f.get(k):
+                print("    %s: %s" % (k, f[k]))
+        for a in f.get("analogos", []):
+            if not a["usado"]:
+                print("    %s sin usar: %s" % (a["nombre"], a["motivo"]))
+        for e in f.get("pisos_esperados", []):
+            print("    %s: %s [%s-%s]; %s" % (e["evento"], _fmt(e["piso"]), _fmt(e["rango"][0]), _fmt(e["rango"][1]), e["base"]))
+        if f.get("sin_confirmar_bajo"):
+            print("    sin confirmar por debajo de %s" % _fmt(f["sin_confirmar_bajo"]))
+        for b in f.get("baja_mas", []):
+            print("    a %s (%s): %s" % (_fmt(b["precio"]), b["tope"], "; ".join(x["frase"] for x in b["plazos"])))
 
 
 def _donde(o):
@@ -828,38 +2106,72 @@ def _donde(o):
 
 
 def _rastro(prod, var):
-    prods, obs, _ = cargar_todo(AQUI)
-    variantes, detalle = calcular(obs, prods, None)
+    doc, detalle, info = construir(AQUI)
+    variantes = doc["variantes"]
     clave = "%s|%s" % (prod, var)
     if clave not in variantes:
         print("no existe la variante %s en productos.json" % clave)
         return 1
     f, d = variantes[clave], detalle[clave]
-    p = next(x for x in prods if x["id"] == prod)
+    ctx = info["ctx"]
+    p = ctx.por_id[prod]
     v = next(x for x in p["variantes"] if x["id"] == var)
-    por_rastro = {o["rastro"]: o for o in d["validas"] + d["ajenas"]}
+    por_rastro = {o["rastro"]: o for o in ctx.obs}
     print("%s (%s), calculado al %s" % (clave, f["nombre"], d["hasta"]))
-    if f["topes_origen"] == "fracciones":
-        print("topes %s: productos.json, lista %s x fracciones %s, redondeo a centenas (igual que vigia.py)"
-              % (f["topes"], v["lista"], p["fracciones"]))
-    else:
-        print("topes %s: productos.json, topes_fijos de %s" % (f["topes"], var))
+    print("topes a mano %s: productos.json, lista %s x fracciones %s, redondeo a centenas" % (f["topes_manual"], v["lista"], p["fracciones"]))
+    print("topes activos %s: %s%s" % (f["topes"], f["topes_origen"],
+                                      "; " + (f.get("topes_nota") or f.get("topes_motivo")) if (f.get("topes_nota") or f.get("topes_motivo")) else ""))
+    print("topes calculados (informativos): %s" % (f.get("topes_calculados") or "null"))
+    if f.get("topes_calculados"):
+        print("  ganga = el menor entre bajo x 1.02 y minimo_ciclo; comprar = central x 1.02 (al menos ganga x 1.03); "
+              "mirar = el menor entre alto x 1.02 y nivel x 0.97 (al menos comprar x 1.03); s = %s, sesgo = %s"
+              % (f.get("s"), f.get("sesgo")))
     if d["sin_capacidad"]:
         print("variante con capacidad sin dato: no lleva minimo ni cifras propias")
-    for nombre in ("minimo", "minimo_30d", "ajeno"):
-        m = f[nombre]
+    for nombre in ("minimo", "minimo_30d", "ajeno", "minimo_ciclo"):
+        m = f.get(nombre)
         print("%s: %s" % (nombre, "null" if not m else "%s el %s en %s <- %s" % (
             _fmt(m["precio"]), m["fecha"], m["tienda"], _donde(por_rastro[m["rastro"]]))))
     t = f["tipico"]
     recientes = [(fe, o) for fe, o in d["dias"] if fe >= d["desde30"]]
-    print("tipico: %s, del %s al %s, %d dias con dato (hacen falta %d)" % (
+    print("tipico: %s, del %s al %s, %d dias con lectura (hacen falta %d)" % (
         "null" if not t else _fmt(t["precio"]), d["desde30"], d["hasta"], len(recientes), MIN_DIAS_TIPICO))
     pc = f["percentiles"]
     print("percentiles: %s" % ("null" if not pc else "p10 %s, p25 %s, p50 %s sobre %d dias" % (
         _fmt(pc["p10"]), _fmt(pc["p25"]), _fmt(pc["p50"]), pc["n"])))
-    print("precio valido mas barato de cada dia (base de tipico y percentiles):")
-    for fe, o in d["dias"]:
-        print("  %s %s %s%s <- %s" % (fe, _fmt(o["precio"]), o["tienda"], " (30 dias)" if fe >= d["desde30"] else "", _donde(o)))
+    pron = d.get("pron")
+    if pron:
+        serie = ctx.serie(prod, {var: 1.0})
+        print("nivel: %s, mediana de la serie diaria rellenada del %s al %s (%d dias):" % (
+            _fmt(pron["nivel"]), (pron["t"] - dt.timedelta(days=29)).isoformat(), pron["t"].isoformat(), pron["n_nivel"]))
+        for k in range(VENTANA_DIAS - 1, -1, -1):
+            dd = pron["t"] - dt.timedelta(days=k)
+            if dd in serie:
+                print("  %s %s <- %s" % (dd.isoformat(), _fmt(serie[dd][0]), _donde(serie[dd][1])))
+        pz = f.get("piso")
+        if pz:
+            print("piso: %s [%s-%s], %s, horizonte %s" % (_fmt(pz["precio"]), _fmt(pz["rango"][0]), _fmt(pz["rango"][1]), pz["tipo"], pz["horizonte"]))
+        for a, info_a, camino in pron["_usados"]:
+            ta = pron["t"] - dt.timedelta(days=a["desfase"])
+            print("  analogo %s (desfase %d): nivel %s el %s; camino minimo %s el %s <- analogo el %s: %s, %s" % (
+                a["nombre"], a["desfase"], _fmt(info_a["nivel"]), ta.isoformat(), _fmt(info_a["piso"]), info_a["fecha"].isoformat(),
+                info_a["fecha_analogo"].isoformat(), _fmt(camino[info_a["fecha"]][1]), _donde(info_a["obs"])))
+            print("    dias del analogo que dan su nivel:")
+            for k in range(VENTANA_DIAS - 1, -1, -1):
+                dd = ta - dt.timedelta(days=k)
+                if dd in a["serie"]:
+                    print("      %s %s <- %s" % (dd.isoformat(), _fmt(a["serie"][dd][0]), _donde(a["serie"][dd][1])))
+        for i in pron["analogos"]:
+            if not i["usado"]:
+                print("  analogo %s sin usar: %s" % (i["nombre"], i["motivo"]))
+        if pz and pz["tipo"] == "estimacion":
+            print("  piso = minimo_ciclo <- %s" % _donde(pron["minimo_ciclo"][2]))
+        for e in pron["pisos_esperados"]:
+            print("  %s (%s): %s [%s-%s] <- %s; %s" % (e["evento"], e["calendario"], _fmt(e["piso"]), _fmt(e["rango"][0]),
+                                                     _fmt(e["rango"][1]), "; ".join(_donde(o) for o in e["obs"]), e["base"]))
+    elif f.get("piso"):
+        print("piso por proporcion: %s [%s-%s] (de %s)" % (_fmt(f["piso"]["precio"]), _fmt(f["piso"]["rango"][0]),
+                                                         _fmt(f["piso"]["rango"][1]), HERMANAS.get(clave)))
     print("n_datos: %s" % json.dumps(f["n_datos"], ensure_ascii=False, sort_keys=True))
     for motivo, o in sorted(d["descartes"], key=lambda mo: (mo[0], mo[1]["fecha"])):
         print("  descartada %s: %s %s %s <- %s" % (motivo, o["fecha"], _fmt(o["precio"]), o["tienda"], _donde(o)))
@@ -878,8 +2190,19 @@ def main(argv):
         print("selftest OK")
         return 0
     if orden == "--generar":
+        t0 = time.perf_counter()
         doc, _, info = generar(AQUI)
         _imprimir_tabla(doc, info)
+        print("tiempo: %.2f s" % (time.perf_counter() - t0))
+        return 0
+    if orden == "--recalcular":
+        return recalcular(AQUI)
+    if orden == "--retroprueba":
+        ruta_csv = argv[argv.index("--csv") + 1] if "--csv" in argv[:-1] else None
+        resultados, s, sesgo, md = retroprueba(AQUI, ruta_csv)
+        print(md.splitlines()[0])
+        _tabla_retro(resultados, s, sesgo)
+        print("escrito %s" % os.path.join(HISTORIA, RETRO_MD))
         return 0
     if orden == "--veredicto" and len(argv) >= 4:
         fecha = argv[argv.index("--fecha") + 1] if "--fecha" in argv[:-1] else None
@@ -887,15 +2210,11 @@ def main(argv):
         datos = cargar_json(hoy=fecha).get(clave)
         if datos is None:
             _aviso("%s no esta en un prospectiva.json valido; se calcula al momento" % clave)
-            prods, obs, _ = cargar_todo(AQUI)
-            datos = calcular(obs, prods, fecha)[0].get(clave)
+            datos = construir(AQUI)[0]["variantes"].get(clave)
         print(razon(argv[3], datos, fecha) or "(sin nada que decir)")
         return 0
     if orden == "--rastro" and len(argv) >= 3:
         return _rastro(argv[1], argv[2])
-    if orden in ("--recalcular", "--retroprueba"):
-        print("pendiente de la fase 2")
-        return 0
     print(__doc__)
     return 2
 
