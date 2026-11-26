@@ -4,6 +4,7 @@
   {
    "id": "fold8",
    "nombre": "Galaxy Z Fold8",
+   "apagado": "26 nov 2026: Saul compro el Fold8 (pedido MX261126-58303606) y ordeno 'Si, apagalos'. Apaga el normal y el Ultra; la PS5 sigue. Para reencender: borrar esta linea",
    "marca": "samsung",
    "patron": "fold\\s*-?\\s*8|zfold8|fold\\s*ultra\\s*8",
    "excluir": "",
