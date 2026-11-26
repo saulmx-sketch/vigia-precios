@@ -648,6 +648,26 @@ LECTORES = {"Samsung": leer_samsung, "Amazon": leer_amazon, "Costco": leer_costc
             "Elektra": leer_elektra, "Liverpool": leer_liverpool, "Gameplanet": leer_gameplanet}
 
 
+def enganchar_lectores_nuevos():
+    """Suma los lectores de lectores_nuevos.py (Soriana, ...). Si el archivo falta, nada; si truena, deja todo como
+    estaba, lo dice en un renglon y el vigia sigue con sus lectores de siempre."""
+    yo = sys.modules[__name__]
+    antes = [(d, dict(d)) for d in (LECTORES, VENDEDOR_OFICIAL, getattr(yo, "FICHAS", None)) if isinstance(d, dict)]
+    try:
+        import lectores_nuevos
+        lectores_nuevos.registrar(yo)
+    except Exception as ex:
+        if isinstance(ex, ModuleNotFoundError) and ex.name == "lectores_nuevos":
+            return
+        for d, copia in antes:
+            d.clear()
+            d.update(copia)
+        print("lectores nuevos apagados: %s: %s" % (type(ex).__name__, ex))
+
+
+enganchar_lectores_nuevos()
+
+
 # ------------------------------------------------------------------------------- foro (respaldo)
 def a_numero(txt):
     m = re.search(r"\$?\s*([\d][\d,\.]*)", txt or "")
