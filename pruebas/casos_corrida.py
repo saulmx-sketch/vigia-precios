@@ -874,6 +874,34 @@ def e14_promos(v):
                           "nota '%s'; actua %s" % (precios, todos, nota, actua))
         finally:
             b.borrar()
+        # (e) y (f): la ficha de Amazon baja a $7,200 y la busqueda sigue en $8,999 (corridas cada 15 min)
+        solo_ficha = amazon_con_cupon()
+        solo_ficha[r"amazon\.com\.mx/s\?k="] = "amz_busca_ps5.html"
+        if hasattr(v, "MINUTOS_MEMO_AMAZON"):
+            for nombre, minutos in (("(e) antes del arreglo (lo recordado no caduca)", 10 ** 9),
+                                    ("(f) con el arreglo (caduca a los %d min)" % v.MINUTOS_MEMO_AMAZON, v.MINUTOS_MEMO_AMAZON)):
+                guardado_min = v.MINUTOS_MEMO_AMAZON
+                b = Banco(v)
+                try:
+                    v.MINUTOS_MEMO_AMAZON = minutos
+                    correr(b, mundo_base())
+                    por_corrida, fichas = [], []
+                    for i in range(7):
+                        c, avs, srv, _ = correr(b, solo_ficha)
+                        por_corrida.append([a for a in precio_avisos(avs) if "Amazon" in a])
+                        fichas.append(srv.cuantas(r"amazon\.com\.mx/dp/"))
+                    todos = [a for x in por_corrida for a in x]
+                    if minutos > 10 ** 6:
+                        afirma(todos == [], ("14e: antes del arreglo ya avisaba", por_corrida), b)
+                    else:
+                        cuando = next(i for i, x in enumerate(por_corrida) if x) + 1
+                        afirma(todos == ["GANGA $7,200 · PS5 Digital (sin lector) · Amazon"] and cuando * 15 <= 60,
+                               ("14f", por_corrida), b)
+                    hechos.append("%s: avisos por corrida %s; fichas de Amazon pedidas por corrida %s" % (
+                        nombre, [len(x) for x in por_corrida], fichas))
+                finally:
+                    v.MINUTOS_MEMO_AMAZON = guardado_min
+                    b.borrar()
     finally:
         v.urllib.request.urlopen = orig_urlopen
         pr.mejorar = orig_mejorar
