@@ -69,8 +69,11 @@ ACCESO = re.compile(r"estudiantes?|(?<![a-z])epp(?![a-z])|business|nueva\s+cuent
 
 
 def condicion_de_acceso(o):
-    """El texto de la condicion de acceso que casa en condicion, tienda o nota, o None."""
-    m = ACCESO.search(" | ".join(str(o.get(k) or "") for k in ("condicion", "tienda", "nota")))
+    """El texto de la condicion de acceso que casa en condicion, tienda o nota, o None. En los hilos del foro
+    tambien se mira el titulo, que viaja en la direccion del hilo ("...desde-la-app-nueva-cuenta-mas-paypal-1111739")."""
+    url = str(o.get("url") or "")
+    titulo = url.rstrip("/").rsplit("/", 1)[-1].replace("-", " ") if "promodescuentos.com/" in url else ""
+    m = ACCESO.search(" | ".join([str(o.get(k) or "") for k in ("condicion", "tienda", "nota")] + [titulo]))
     return m.group(0) if m else None
 ULTIMO_TRAMO = re.compile(r"[uú]ltimo\s+d[ií]a\s+del\s+tramo", re.I)
 MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]

@@ -60,19 +60,19 @@ Holgura entre topes (s): 0.120; sesgo del piso: 0.150 (de 2 errores del piso: me
 ## Caso C: Fold8 Ultra 512 GB, del 15 oct 2026 a hoy
 
 - Lo más barato de la temporada: $23,464 el 15 oct 2026 en Samsung (historia/foro_fold8.csv:1198861).
-- Piso pronosticado el 2026-11-15: $21,897 (analogo); lo más bajo real después: $32,399 el 2026-11-23, error -32.4 % (parcial: la temporada no ha terminado).
+- Piso pronosticado el 2026-11-15: $22,109 (analogo); lo más bajo real después: $32,399 el 2026-11-23, error -31.8 % (parcial: la temporada no ha terminado).
 - Topes a mano: VERDE. 1 avisos (comprar 1).
   - Avisos: 2026-10-15 comprar $23,464.
   - Cazó el mínimo.
   - Primer aviso de ganga: no hubo.
   - Primer aviso de comprar o ganga: 2026-10-15, $23,464 (comprar), 0 % arriba del mínimo real.
   - Quien compra en el primer aviso de comprar o ganga paga $23,464 el 2026-10-15, $0 más que el mínimo.
-- Topes calculado: ROJO (no aviso de comprar o ganga el dia del minimo ni antes a menos de 5 % de el). 1 avisos (mirar 1).
-  - Avisos: 2026-10-15 mirar $23,464.
-  - No cazó el mínimo.
+- Topes calculado: VERDE. 1 avisos (comprar 1).
+  - Avisos: 2026-10-15 comprar $23,464.
+  - Cazó el mínimo.
   - Primer aviso de ganga: no hubo.
-  - Primer aviso de comprar o ganga: no hubo.
-  - Nunca avisó de comprar ni de ganga.
+  - Primer aviso de comprar o ganga: 2026-10-15, $23,464 (comprar), 0 % arriba del mínimo real.
+  - Quien compra en el primer aviso de comprar o ganga paga $23,464 el 2026-10-15, $0 más que el mínimo.
   - Avisos de "sin confirmar" enviados: 0. Días con un precio válido real en "sin confirmar": ninguno.
 - Topes activo: VERDE. 1 avisos (comprar 1).
   - Avisos: 2026-10-15 comprar $23,464.
@@ -85,7 +85,7 @@ Holgura entre topes (s): 0.120; sesgo del piso: 0.150 (de 2 errores del piso: me
 ## Caso D: Fold8 512 GB, del 15 oct 2026 a hoy
 
 - Lo más barato de la temporada: $31,020 el 11 nov 2026 en Amazon (historia/keepa_fold8.csv:B0H773GGWG:2026-11-11).
-- Piso pronosticado el 2026-11-15: $21,283 (analogo); lo más bajo real después: $31,639 el 2026-11-19, error -32.7 % (parcial: la temporada no ha terminado).
+- Piso pronosticado el 2026-11-15: $21,489 (analogo); lo más bajo real después: $31,639 el 2026-11-19, error -32.1 % (parcial: la temporada no ha terminado).
 - Topes a mano: ROJO (no aviso de comprar o ganga el dia del minimo ni antes a menos de 5 % de el). 0 avisos (ninguno).
   - No cazó el mínimo.
   - Primer aviso de ganga: no hubo.

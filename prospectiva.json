@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-25T20:20:51-06:00",
+ "generado": "2026-11-25T20:29:38-06:00",
  "metodo": "Precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos (lecturas del vigia y historia/). El piso esperado repite lo que hizo el modelo anterior (o la misma consola el anio pasado) en las mismas fechas, a la escala del precio de hoy; los topes salen de ese piso y del minimo de los ultimos 120 dias.",
  "variantes": {
   "fold8|normal": {
@@ -7,21 +7,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 18686,
-      "7": 18686,
-      "horizonte": 18686
+      "30": 19128,
+      "7": 28580,
+      "horizonte": 19128
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 18686,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 19128,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -60,34 +60,34 @@
    "nombre": "Fold8 (capacidad sin dato)",
    "percentiles": null,
    "piso": {
-    "bajo": 18686,
-    "fecha": "2026-11-27",
+    "bajo": 19128,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 23164,
+    "precio": 23384,
     "rango": [
-     18686,
+     19128,
      27641
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "proporcion"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre (por proporción de lista)",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre (por proporción de lista)",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 24660,
+     "piso": 29607,
      "rango": [
-      18686,
+      28580,
       30634
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -127,7 +127,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 14900,
+   "sin_confirmar_bajo": 15300,
    "tipico": null,
    "topes": [
     19900,
@@ -135,8 +135,8 @@
     28100
    ],
    "topes_calculados": [
-    19000,
-    23600,
+    19500,
+    23800,
     28100
    ],
    "topes_manual": [
@@ -151,21 +151,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 22192,
-      "7": 22192,
-      "horizonte": 22192
+      "30": 22717,
+      "7": 33943,
+      "horizonte": 22717
      },
      "nivel": 40725,
      "nombre": "Fold7",
-     "piso": 22192,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 22717,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -202,34 +202,34 @@
    "nombre": "Fold8 1 TB",
    "percentiles": null,
    "piso": {
-    "bajo": 22192,
-    "fecha": "2026-11-27",
+    "bajo": 22717,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 27511,
+    "precio": 27772,
     "rango": [
-     22192,
+     22717,
      32828
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "proporcion"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre (por proporción de lista)",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre (por proporción de lista)",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 29288,
+     "piso": 35163,
      "rango": [
-      22192,
+      33943,
       36383
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -269,7 +269,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 17600,
+   "sin_confirmar_bajo": 18100,
    "tipico": null,
    "topes": [
     23700,
@@ -277,8 +277,8 @@
     33300
    ],
    "topes_calculados": [
-    22500,
-    28000,
+    23100,
+    28200,
     33300
    ],
    "topes_manual": [
@@ -301,21 +301,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 18686,
-      "7": 18686,
-      "horizonte": 18686
+      "30": 19128,
+      "7": 28580,
+      "horizonte": 19128
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 18686,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 19128,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -343,24 +343,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -373,24 +373,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -403,24 +403,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $18,686",
-       "hasta": 18686,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,128",
+       "hasta": 19128,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -479,34 +479,34 @@
     "p50": 36780
    },
    "piso": {
-    "bajo": 18686,
-    "fecha": "2026-11-27",
+    "bajo": 19128,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 23164,
+    "precio": 23384,
     "rango": [
-     18686,
+     19128,
      27641
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "analogo"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 24660,
+     "piso": 29607,
      "rango": [
-      18686,
+      28580,
       30634
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -546,7 +546,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 14900,
+   "sin_confirmar_bajo": 15300,
    "tipico": {
     "n": 19,
     "precio": 36000
@@ -557,8 +557,8 @@
     28100
    ],
    "topes_calculados": [
-    19000,
-    23600,
+    19500,
+    23800,
     28100
    ],
    "topes_manual": [
@@ -573,21 +573,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 19225,
-      "7": 19225,
-      "horizonte": 19225
+      "30": 19680,
+      "7": 29404,
+      "horizonte": 19680
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 19225,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 19680,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -626,34 +626,34 @@
    "nombre": "Fold8 Ultra (capacidad sin dato)",
    "percentiles": null,
    "piso": {
-    "bajo": 19225,
-    "fecha": "2026-11-27",
+    "bajo": 19680,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 23832,
+    "precio": 24059,
     "rango": [
-     19225,
+     19680,
      28439
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "proporcion"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre (por proporción de lista)",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre (por proporción de lista)",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 25371,
+     "piso": 30461,
      "rango": [
-      19225,
+      29404,
       31518
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -693,7 +693,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 15300,
+   "sin_confirmar_bajo": 15700,
    "tipico": null,
    "topes": [
     22000,
@@ -701,8 +701,8 @@
     29000
    ],
    "topes_calculados": [
-    19600,
-    24300,
+    20000,
+    24500,
     29000
    ],
    "topes_manual": [
@@ -725,21 +725,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 22819,
-      "7": 22819,
-      "horizonte": 22819
+      "30": 23359,
+      "7": 34900,
+      "horizonte": 23359
      },
      "nivel": 40699,
      "nombre": "Fold7",
-     "piso": 22819,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 23359,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -801,34 +801,34 @@
     "p50": 56149.1
    },
    "piso": {
-    "bajo": 22819,
-    "fecha": "2026-11-27",
+    "bajo": 23359,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 28287,
+    "precio": 28556,
     "rango": [
-     22819,
+     23359,
      33755
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "proporcion"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre (por proporción de lista)",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre (por proporción de lista)",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 30113,
+     "piso": 36155,
      "rango": [
-      22819,
+      34900,
       37409
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -868,7 +868,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 18100,
+   "sin_confirmar_bajo": 18600,
    "tipico": null,
    "topes": [
     26100,
@@ -876,8 +876,8 @@
     34400
    ],
    "topes_calculados": [
-    23200,
-    28800,
+    23700,
+    29000,
     34400
    ],
    "topes_manual": [
@@ -900,21 +900,21 @@
    "analogo": "modelo_anterior",
    "analogos": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 (el de 1 TB) llegó a $21,608 en Samsung el 10 dic 2025, 45 % debajo de su nivel de noviembre",
      "desfase": 364,
      "dias_antes": 30,
-     "dias_futuro": 57,
-     "fecha": "2026-11-27",
-     "fecha_analogo": "2025-11-28",
+     "dias_futuro": 55,
+     "fecha": "2026-12-09",
+     "fecha_analogo": "2025-12-10",
      "minimos": {
-      "30": 19225,
-      "7": 19225,
-      "horizonte": 19225
+      "30": 19680,
+      "7": 29404,
+      "horizonte": 19680
      },
      "nivel": 34290,
      "nombre": "Fold7",
-     "piso": 19225,
-     "rastro": "historia/foro_fold7.csv:1111739",
+     "piso": 19680,
+     "rastro": "historia/foro_fold7.csv:1115196",
      "usado": true
     },
     {
@@ -942,24 +942,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -972,24 +972,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -1002,24 +1002,24 @@
       {
        "de": 2,
        "dias": 7,
-       "frase": "en 1 de 2 años parecidos bajó más en los 7 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en ninguno de los 2 años parecidos bajó más en los 7 días siguientes",
+       "hasta": null,
        "hasta_fecha": "2026-12-02",
-       "veces": 1
+       "veces": 0
       },
       {
        "de": 2,
        "dias": 30,
-       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más en los 30 días siguientes, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2026-12-25",
        "veces": 1
       },
       {
        "de": 2,
        "dias": 67,
-       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,225",
-       "hasta": 19225,
+       "frase": "en 1 de 2 años parecidos bajó más de aquí al 31 ene 2027, hasta el equivalente de $19,680",
+       "hasta": 19680,
        "hasta_fecha": "2027-01-31",
        "veces": 1
       }
@@ -1078,34 +1078,34 @@
     "p50": 35754.5
    },
    "piso": {
-    "bajo": 19225,
-    "fecha": "2026-11-27",
+    "bajo": 19680,
+    "fecha": "2026-12-09",
     "horizonte": "2027-01-31",
     "n_analogos": 2,
-    "precio": 23832,
+    "precio": 24059,
     "rango": [
-     19225,
+     19680,
      28439
     ],
     "rastros": [
-     "historia/foro_fold7.csv:1111739",
+     "historia/foro_fold7.csv:1115196",
      "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-08"
     ],
     "tipo": "analogo"
    },
    "pisos_esperados": [
     {
-     "base": "el Fold7 (el de 1 TB) llegó a $21,109 en Samsung el 28 nov 2025, 47 % debajo de su nivel de noviembre",
+     "base": "el Fold7 llegó a $28,000 en Amazon el 28 nov 2025, 18 % debajo de su nivel de noviembre",
      "evento": "Black Friday y Cyber Monday 2026",
      "fin": "2026-11-30",
      "inicio": "2026-11-27",
-     "piso": 25371,
+     "piso": 30461,
      "rango": [
-      19225,
+      29404,
       31518
      ],
      "rastros": [
-      "historia/foro_fold7.csv:1111739",
+      "historia/keepa_fold7.csv:B0FBT97262:2025-11-28",
       "historia/keepa_fold6.csv:B0D74CWNN5:2024-12-03"
      ],
      "tipo": "analogo"
@@ -1145,7 +1145,7 @@
    ],
    "s": 0.12,
    "sesgo": 0.15,
-   "sin_confirmar_bajo": 15300,
+   "sin_confirmar_bajo": 15700,
    "tipico": {
     "n": 16,
     "precio": 35004.5
@@ -1156,8 +1156,8 @@
     29000
    ],
    "topes_calculados": [
-    19600,
-    24300,
+    20000,
+    24500,
     29000
    ],
    "topes_manual": [
@@ -1170,9 +1170,9 @@
   "ps5|digital": {
    "ajeno": {
     "banco": "Santander",
-    "condicion": "Santander",
+    "condicion": "business",
     "fecha": "2025-12-16",
-    "motivo": "banco ajeno",
+    "motivo": "condicion de acceso",
     "precio": 7499,
     "rastro": "historia/foro_ps5.csv:1118379",
     "tienda": "Amazon"
@@ -1322,8 +1322,8 @@
     "tienda": "Walmart"
    },
    "n_datos": {
-    "ajeno": 1,
-    "condicion_de_acceso": 0,
+    "ajeno": 0,
+    "condicion_de_acceso": 1,
     "descartadas": {
      "bajo_piso": 1,
      "garantia_sin_confirmar": 84,
