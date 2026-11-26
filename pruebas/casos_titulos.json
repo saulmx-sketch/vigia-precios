@@ -3734,5 +3734,50 @@
   "vendedor": "Doto",
   "espera": null,
   "origen": "Chedraui, catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital del 25-nov-2026 (sellerName y Price leidos; AvailableQuantity 100)"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Ventilador ABS para Consola for ps5 Digital Edición Negro Ventilador",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "PlayStation 5 Unidad de Disco- Consola Slim digital",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Disc Drive For PS5 Digital Edition Consoles (Slim)",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Unidad de Disco para Consolas PS5 Digital",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": null,
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos"
+ },
+ {
+  "tienda": "Soriana",
+  "producto": "ps5",
+  "titulo": "Consola PS5 Digital + Unidad de Disco",
+  "precio": 7000,
+  "vendedor": "Soriana",
+  "espera": "digital",
+  "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos. Debe entrar: Saul, 'el paquete Digital + unidad de disco cuenta como Digital'"
  }
 ]
