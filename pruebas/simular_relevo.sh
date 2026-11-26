@@ -69,6 +69,24 @@ caso 11_vigia_apagado     "$(printf 'estado=disabled_manually\ncuentas=0 0\nlanz
 caso 12_estado_ilegible   "$(printf 'estado=x\ncuentas=1')"   0 0 0 "se sigue como si estuviera activo"
 # H7: el primer lanzamiento da 500 pero si entro -> antes de reintentar ve la viva, para y avisa.
 caso 13_lanzo_pese_al_500 "$(printf 'cuentas=0 0 1\nlanza=falla\n%s' "$ULT")" 0 1 1 "el lanzamiento anterior si entro"
+
+# Plan B: el relevo lo lanzo la corrida 500 (solo TERMINO_ID); lee su conclusion con "gh run view".
+VISTA_OK="vista=completed${TAB}success${TAB}https://github.com/falso/vigia-precios/actions/runs/500${TAB}2026-11-25T15:30:00Z${TAB}workflow_dispatch"
+VISTA_MAL="vista=completed${TAB}failure${TAB}https://github.com/falso/vigia-precios/actions/runs/500${TAB}2026-11-25T15:30:00Z${TAB}workflow_dispatch"
+# (a) la sucesora N+1 esta esperando: cuenta 1 (excluida la 500) y sale sin hacer nada.
+caso 14_planB_cadena_viva "$(printf 'cuentas=1\n%s' "$VISTA_OK")" 0 0 0 "la cadena siguio" TERMINO_ID=500
+for t in "gh run view 500" "select(.databaseId != 500)"; do
+  grep -Fq -- "$t" "$TMP/14_planB_cadena_viva/log" && echo "OK    14_planB_cadena_viva la consulta lleva [$t]" \
+    || { echo "FALLA 14_planB_cadena_viva sin [$t]"; fallos=$((fallos+1)); }
+done
+# La corrida 500 fallo sin dejar sucesora: relanza y el aviso la nombra con su conclusion leida.
+caso 15_planB_cadena_muerta "$(printf 'cuentas=0 0\nlanza=ok\n%s' "$VISTA_MAL")" 0 1 1 "la número 500, falló el 25-11-2026 a las 09:30" TERMINO_ID=500
+# (b) la sucesora aparece entre las dos cuentas: no lanza.
+caso 16_planB_lanzo_tarde "$(printf 'cuentas=0 1\n%s' "$VISTA_OK")" 0 0 0 "la cadena lanzo tarde" TERMINO_ID=500
+# Sin cuenta y la 500 termino bien (leido con run view): se asume viva.
+caso 17_planB_sin_cuenta_success "$(printf 'cuentas=x x x x x\n%s' "$VISTA_OK")" 0 0 0 "se asume cadena viva" TERMINO_ID=500
+# Si "gh run view" falla: sigue sin conclusion y cuenta normal.
+caso 18_planB_vista_falla "$(printf 'vista=x\ncuentas=1')" 0 0 0 "no se pudo leer la corrida 500" TERMINO_ID=500
 n=$(grep -c "^gh workflow run" "$TMP/13_lanzo_pese_al_500/log")
 [ "$n" = 1 ] && echo "OK    13_lanzo_pese_al_500 lanzo $n vez" || { echo "FALLA 13_lanzo_pese_al_500 lanzo $n veces (esperada 1)"; fallos=$((fallos+1)); }
 

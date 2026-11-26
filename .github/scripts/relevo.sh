@@ -25,6 +25,19 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 : "${TERMINO_ID:=}" "${TERMINO_URL:=}" "${TERMINO_CONCLUSION:=}" "${TERMINO_HORA:=}" "${TERMINO_EVENTO:=}"
 : "${QUIEN_RELANZA:=el relevo automático (flujo relevo)}"
 
+# Plan B: el relevo lo lanzo la propia corrida (TERMINO_ID = inputs.corrida) y no trae como termino.
+# Se pregunta a GitHub, para el texto del aviso y para la regla de "sin cuenta" (success = cadena viva).
+if [ -n "$TERMINO_ID" ] && [ -z "$TERMINO_CONCLUSION" ]; then
+  if vista=$(gh run view "$TERMINO_ID" --repo "$GITHUB_REPOSITORY" --json status,conclusion,url,updatedAt,event \
+      --jq '"\(.status)\t\(.conclusion // "-" | if . == "" then "-" else . end)\t\(.url)\t\(.updatedAt)\t\(.event)"'); then
+    IFS=$'\t' read -r v_estado v_conclusion TERMINO_URL TERMINO_HORA TERMINO_EVENTO <<< "$vista"
+    [ "$v_conclusion" != "-" ] && TERMINO_CONCLUSION="$v_conclusion"
+    echo "la corrida $TERMINO_ID que lanzo este relevo esta: $v_estado ${TERMINO_CONCLUSION:-(sin conclusion aun)}"
+  else
+    echo "no se pudo leer la corrida $TERMINO_ID que lanzo este relevo: se sigue sin su conclusion"
+  fi
+fi
+
 # Una consulta: imprime cuantas corridas de la cadena siguen vivas.
 contar_una() {
   gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --branch main --limit 30 --json databaseId,status,event \
