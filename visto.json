@@ -10,21 +10,19 @@
   }
  },
  "ausente": {
-  "Liverpool|fold8|normal": 1
+  "Liverpool|fold8|normal": 2
  },
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {
-  "Amazon": "2026-11-26T02:49+00:00"
- },
+ "caida_desde": {},
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|fold8|normal-512": {
    "precio": 34394.83,
    "producto": "Fold8 512 GB",
    "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 21:04"
   },
   "Amazon|fold8|ultra-512": {
    "precio": 34394.83,
@@ -36,25 +34,25 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 21:04"
   },
   "Costco|fold8|normal-512": {
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Costco|fold8|ultra-512": {
    "precio": 41999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Liverpool|fold8|normal": {
    "precio": 44999.0,
@@ -66,7 +64,7 @@
    "precio": 44999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Liverpool|fold8|ultra": {
    "precio": 55999.0,
@@ -78,25 +76,25 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Samsung|fold8|ultra-1tb": {
    "precio": 56149.1,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 20:49"
+   "visto": "2026-11-25 21:04"
   }
  },
  "cupones_cosechados": {
@@ -159,7 +157,7 @@
   "fold8|WINDC_600": 1795651895
  },
  "cupones_ultima_busqueda": {
-  "cuando": "2026-11-25 20:49",
+  "cuando": "2026-11-25 21:04",
   "fuentes_leidas": 12,
   "hallados": {
    "AFIHOME": "foro",
@@ -186,8 +184,6 @@
   }
  },
  "diag_amazon": [
-  "11-25 04:26 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
-  "11-25 04:42 busqueda 200 de 2322 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 04:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 04:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 04:59 busqueda ok",
@@ -245,11 +241,13 @@
   "11-25 20:21 busqueda 200 de 2283 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 20:35 busqueda ok; busqueda ok",
   "11-25 20:35 busqueda ok",
-  "11-25 20:51 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW 503 de 322 bytes"
+  "11-25 20:51 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW 503 de 322 bytes",
+  "11-25 21:05 busqueda ok; busqueda ok",
+  "11-25 21:05 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok; ficha B0G76PM4FZ ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 1,
+  "Amazon": 0,
   "Costco": 0,
   "Cupones": 0,
   "Elektra": 0,
@@ -259,9 +257,7 @@
   "Samsung": 0
  },
  "sembrado": true,
- "ultimo_error": {
-  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B0H92G9GNW"
- },
+ "ultimo_error": {},
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    7499.0,
@@ -279,7 +275,8 @@
    18750.0,
    "Tekno Electronicos (FACTURAMOS TODAS LAS COMPRAS)",
    false,
-   "ps5"
+   "ps5",
+   18750.0
   ],
   "B0FTNL3B9F": [
    14599.0,
@@ -291,7 +288,8 @@
    12499.0,
    "Amazon México",
    false,
-   "ps5"
+   "ps5",
+   12499.0
   ],
   "B0G4NPJB3K": [
    15419.11,
@@ -309,19 +307,22 @@
    12948.0,
    "Amazon México",
    false,
-   "ps5"
+   "ps5",
+   12948.0
   ],
   "B0G76569Q9": [
    13319.11,
    "Amazon México",
    false,
-   "ps5"
+   "ps5",
+   13319.11
   ],
   "B0G76PM4FZ": [
    15238.0,
    "Amazon México",
    false,
-   "ps5"
+   "ps5",
+   15238.0
   ],
   "B0G76R6X1Z": [
    15476.78,
@@ -333,7 +334,8 @@
    14498.0,
    "Amazon México",
    false,
-   "ps5"
+   "ps5",
+   14498.0
   ],
   "B0G86XR6F3": [
    15490.0,
