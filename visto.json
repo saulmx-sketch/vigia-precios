@@ -3,14 +3,6 @@
   "Amazon|fold8|ultra-512": {
    "desde": "desde 2026-11-25 09:43",
    "precio": 34394.83
-  },
-  "Liverpool|fold8|normal": {
-   "desde": "desde 2026-11-25 20:34",
-   "precio": 44999.0
-  },
-  "Liverpool|fold8|ultra": {
-   "desde": "desde 2026-11-19 18:57",
-   "precio": 55999.0
   }
  },
  "ausente": {},
@@ -23,8 +15,8 @@
   "Amazon|fold8|normal-512": {
    "precio": 34394.83,
    "producto": "Fold8 512 GB",
-   "url": "https://www.amazon.com.mx/dp/B0H779SQRZ?th=1&psc=1",
-   "visto": "2026-11-26 00:20"
+   "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
+   "visto": "2026-11-26 00:35"
   },
   "Amazon|fold8|ultra-512": {
    "precio": 34394.83,
@@ -36,91 +28,79 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Costco|fold8|normal-512": {
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Costco|fold8|ultra-512": {
    "precio": 41999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Cyberpuerta|fold8|normal-512": {
    "precio": 34319.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-FOLD8-5G-7-6-Dual-SIM-512GB-12GB-RAM-Morado.html",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Cyberpuerta|fold8|ultra-512": {
    "precio": 39999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-Fold8-Ultra-5G-8-Dual-SIM-512GB-12GB-RAM-Negro.html",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-26 00:20"
-  },
-  "Liverpool|fold8|normal": {
-   "precio": 44999.0,
-   "producto": "Fold8 (capacidad sin dato)",
-   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-26 00:35"
   },
   "Liverpool|fold8|normal-512": {
    "precio": 44999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
-   "visto": "2026-11-26 00:20"
-  },
-  "Liverpool|fold8|ultra": {
-   "precio": 55999.0,
-   "producto": "Fold8 Ultra (capacidad sin dato)",
-   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314",
-   "visto": "2026-11-19 18:57"
+   "visto": "2026-11-26 00:35"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Samsung|fold8|ultra-1tb": {
    "precio": 46624.25,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Soriana|fold8|normal-512": {
    "precio": 36990.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-26 00:20"
+   "visto": "2026-11-26 00:35"
   }
  },
  "cupones_cosechados": {
@@ -220,59 +200,59 @@
   "WINDC_600": "cuponera"
  },
  "cupones_reprobados": {
-  "fold8|AFIHOME": 1795663317,
+  "fold8|AFIHOME": 1795675069,
   "fold8|BARRAS-25": 1795669189,
   "fold8|BEFLIVESEM": 1795669189,
-  "fold8|BF26_10": 1795663317,
-  "fold8|BF26_5": 1795663317,
+  "fold8|BF26_10": 1795675069,
+  "fold8|BF26_5": 1795675069,
   "fold8|BFINMP": 1795669189,
   "fold8|BFPLUS30": 1795669189,
   "fold8|BFPLUS40": 1795669189,
   "fold8|BFPLUS45": 1795669189,
   "fold8|BPMAS25": 1795669189,
-  "fold8|CARRITO5": 1795663317,
+  "fold8|CARRITO5": 1795675069,
   "fold8|CART5_EPP": 1795663317,
-  "fold8|CBHOME": 1795663317,
-  "fold8|CENEVAL26": 1795663317,
-  "fold8|CLUB_FOLD30": 1795663317,
-  "fold8|CRP26TV": 1795663317,
+  "fold8|CBHOME": 1795675069,
+  "fold8|CENEVAL26": 1795675069,
+  "fold8|CLUB_FOLD30": 1795675069,
+  "fold8|CRP26TV": 1795675069,
   "fold8|DACRM26": 1795669189,
-  "fold8|ECO_20": 1795663317,
-  "fold8|ECO_25": 1795663317,
-  "fold8|ECO_30": 1795663317,
-  "fold8|ECO_CLUB25": 1795663317,
-  "fold8|ECO_CLUB30": 1795663317,
+  "fold8|ECO_20": 1795675069,
+  "fold8|ECO_25": 1795675069,
+  "fold8|ECO_30": 1795675069,
+  "fold8|ECO_CLUB25": 1795675069,
+  "fold8|ECO_CLUB30": 1795675069,
   "fold8|EPP10_NOV": 1795663317,
   "fold8|EPP1O_NOV": 1795663317,
   "fold8|EPPLIVESEM": 1795663317,
   "fold8|EPPMX_QUINCENA": 1795663317,
   "fold8|EXTRA01": 1795669189,
   "fold8|EXTRA5": 1795669189,
-  "fold8|FLASHBP25": 1795663317,
-  "fold8|FOLD8MEMBER_20": 1795663317,
-  "fold8|FOLD8U_20CLUB": 1795663317,
-  "fold8|FOLD8U_35CLUB": 1795663317,
+  "fold8|FLASHBP25": 1795675069,
+  "fold8|FOLD8MEMBER_20": 1795675069,
+  "fold8|FOLD8U_20CLUB": 1795675069,
+  "fold8|FOLD8U_35CLUB": 1795675069,
   "fold8|GALAXYMP": 1795669189,
   "fold8|HS26_ECO": 1795669189,
   "fold8|KIA_ECOSAMSUNG": 1795669189,
   "fold8|KUESKINUEVO": 1795669189,
-  "fold8|LIVESEM": 1795663317,
-  "fold8|MEMBER_NOV15": 1795663317,
-  "fold8|MEMHOME": 1795663317,
+  "fold8|LIVESEM": 1795675069,
+  "fold8|MEMBER_NOV15": 1795675069,
+  "fold8|MEMHOME": 1795675069,
   "fold8|MOMCLUB_15": 1795669189,
   "fold8|NEWTV26": 1795669189,
-  "fold8|PRO-15": 1795663317,
-  "fold8|PRO-20": 1795663317,
+  "fold8|PRO-15": 1795675069,
+  "fold8|PRO-20": 1795675069,
   "fold8|PRO-25": 1795669189,
   "fold8|PRO-5": 1795669189,
-  "fold8|PROMODESC_FOLD8U": 1795663317,
-  "fold8|S26CLUB_NOV": 1795663317,
-  "fold8|S26CRP_NOV": 1795663317,
+  "fold8|PROMODESC_FOLD8U": 1795675069,
+  "fold8|S26CLUB_NOV": 1795675069,
+  "fold8|S26CRP_NOV": 1795675069,
   "fold8|S26U-CLUBMAMA": 1795669189,
   "fold8|WINDC_600": 1795663317
  },
  "cupones_ultima_busqueda": {
-  "cuando": "2026-11-26 00:20",
+  "cuando": "2026-11-26 00:35",
   "fuentes_leidas": 15,
   "hallados": {
    "AFIHOME": "foro",
@@ -301,8 +281,6 @@
   }
  },
  "diag_amazon": [
-  "11-25 08:05 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
-  "11-25 08:21 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 08:22 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 08:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 08:39 busqueda 503 de 1669 bytes, reintento ok",
@@ -360,7 +338,9 @@
   "11-26 00:05 busqueda 200 de 2327 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 00:06 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-26 00:21 busqueda ok; busqueda ok",
-  "11-26 00:22 busqueda ok; ficha B0G76PM4FZ ok"
+  "11-26 00:22 busqueda ok; ficha B0G76PM4FZ ok",
+  "11-26 00:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-26 00:39 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -1622,105 +1602,120 @@
    "Amazon México",
    false,
    "ps5",
-   15989.99
+   15989.99,
+   1795675109
   ],
   "B0F6968Y5G": [
    18750.0,
    "Tekno Electronicos (FACTURAMOS TODAS LAS COMPRAS)",
    false,
    "ps5",
-   18750.0
+   18750.0,
+   1795675109
   ],
   "B0FTNL3B9F": [
    14599.0,
    "Amazon México",
    false,
    "ps5",
-   14599.0
+   14599.0,
+   1795675109
   ],
   "B0FTP523RH": [
    12499.0,
    "Amazon México",
    false,
    "ps5",
-   12499.0
+   12499.0,
+   1795675109
   ],
   "B0G4NPJB3K": [
    15419.11,
    "Amazon México",
    false,
    "ps5",
-   15419.11
+   15419.11,
+   1795675109
   ],
   "B0G756CBJ1": [
    27098.0,
    "Amazon México",
    false,
    "ps5",
-   27098.0
+   27098.0,
+   1795675109
   ],
   "B0G75WQKTT": [
    12948.0,
    "Amazon México",
    false,
    "ps5",
-   12948.0
+   12948.0,
+   1795675109
   ],
   "B0G76569Q9": [
    13319.11,
    "Amazon México",
    false,
    "ps5",
-   13319.11
+   13319.11,
+   1795675109
   ],
   "B0G76PM4FZ": [
    17998.0,
    "Amazon México",
    false,
    "ps5",
-   17998.0
+   17998.0,
+   1795675109
   ],
   "B0G76R6X1Z": [
    15476.78,
    "Amazon México",
    false,
    "ps5",
-   15476.78
+   15476.78,
+   1795675109
   ],
   "B0G76YF472": [
    14498.0,
    "Amazon México",
    false,
    "ps5",
-   14498.0
+   14498.0,
+   1795675109
   ],
   "B0G86XR6F3": [
-   15490.0,
+   15498.0,
    "Amazon México",
    false,
    "ps5",
-   15490.0
+   15498.0,
+   1795675109
   ],
   "B0GH2GJD6J": [
    16798.0,
    "Amazon México",
    false,
    "ps5",
-   16798.0
+   16798.0,
+   1795675109
   ],
   "B0H76XJTG2": [
    34394.83,
    "Amazon México",
    false,
    "fold8",
-   34394.83
+   34394.83,
+   1795675069
   ],
   "B0H773GGWG": [
    37999.0,
    "Amazon México",
    false,
    "fold8",
-   37999.0
+   37999.0,
+   1795675069
   ],
   "B0H773PLWP": [
    34394.83,
@@ -1733,7 +1728,8 @@
    "Amazon México",
    false,
    "fold8",
-   34394.83
+   34394.83,
+   1795675069
   ],
   "B0H92G9GNW": [
    37999.05,
