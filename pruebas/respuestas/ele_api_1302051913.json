@@ -1,0 +1,40 @@
+[
+ {
+  "productId": "1302051913",
+  "productName": "Samsung Galaxy Z Fold8 12+512GB Lavanda",
+  "link": "https://www.elektra.mx/samsung-galaxy-z-fold8-12512gb-lavanda-1302051913/p",
+  "items": [
+   {
+    "itemId": "1302051913",
+    "name": "Samsung Galaxy Z Fold8 12+512GB Lavanda",
+    "nameComplete": "Samsung Galaxy Z Fold8 12+512GB Lavanda",
+    "sellers": [
+     {
+      "sellerId": "711185",
+      "sellerName": "Systore",
+      "addToCartLink": "https://www.elektra.mx/checkout/cart/add?sku=1302051913&qty=1&seller=711185&sc=1&price=2699900&cv=_&sc=1",
+      "sellerDefault": true,
+      "commertialOffer": {
+       "Price": 26999.0,
+       "ListPrice": 29999.0,
+       "AvailableQuantity": 10,
+       "IsAvailable": true
+      }
+     },
+     {
+      "sellerId": "1",
+      "sellerName": "Elektra",
+      "addToCartLink": "https://www.elektra.mx/checkout/cart/add?sku=1302051913&qty=1&seller=1&sc=1&price=0&cv=_&sc=1",
+      "sellerDefault": false,
+      "commertialOffer": {
+       "Price": 0.0,
+       "ListPrice": 0.0,
+       "AvailableQuantity": 0,
+       "IsAvailable": false
+      }
+     }
+    ]
+   }
+  ]
+ }
+]
