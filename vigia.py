@@ -1725,6 +1725,21 @@ def leer_foro(prods, estado):
     return list(items.values())
 
 
+DEVOLUCION = re.compile(r"bonificaci[oó]n|cashback", re.I)
+
+
+def devolucion_de_banco(texto):
+    """Nombre del banco propio si una misma frase dice que el banco devuelve dinero despues (bonificacion o
+    cashback); '' si no. Saul, 26 nov 2026 (respuesta 3, 'si, obviamente'): una oferta con devolucion de BBVA si
+    cuenta como precio, pero el aviso dice que se paga completo y que la devolucion tiene tope al mes."""
+    for f in re.split(r"(?<=[.!?;])\s+|\n", texto or ""):
+        if DEVOLUCION.search(f):
+            for nombre, pat in BANCOS_PROPIOS.items():
+                if re.search(pat, f, re.I):
+                    return nombre
+    return ""
+
+
 def aviso_foro(prods, it):
     for prod in prods:
         var = variante(prod, it["titulo"])
@@ -1737,23 +1752,36 @@ def aviso_foro(prods, it):
     precio = a_numero(it["precio_txt"])
     if precio is not None and (precio < prod["piso"] or not nivel(precio, prod, var)):
         return None
-    nota, me_aplica = bancos(it["titulo"] + " " + limpio(it["descripcion"], 3000))
+    texto_hilo = it["titulo"] + " " + limpio(it["descripcion"], 3000)
+    nota, me_aplica = bancos(texto_hilo)
     niv = "SIN PRECIO, REVISAR" if precio is None else nivel(precio, prod, var) if me_aplica else "SOLO CON OTRO BANCO"
+    dev = devolucion_de_banco(texto_hilo) if me_aplica and precio is not None else ""
     ptxt = pesos(precio)
     g, c, t = topes(prod, var)
     tienda = it["tienda"] or "tienda sin dato"
+    con_dev = " con devolución {}".format(dev) if dev else ""
     if niv == "SIN CONFIRMAR":
-        asunto = "[foro] SIN CONFIRMAR {} · {} · {} · abre la ficha antes de creerlo".format(ptxt, var["nombre"], tienda)
+        asunto = "[foro] SIN CONFIRMAR {}{} · {} · {} · abre la ficha antes de creerlo".format(ptxt, con_dev, var["nombre"], tienda)
     else:
-        asunto = "[foro] {} {} · {} · {} · ficha sin releer".format(niv, ptxt, var["nombre"], tienda)
+        asunto = "[foro] {} {}{} · {} · {} · ficha sin releer".format(niv, ptxt, con_dev, var["nombre"], tienda)
     raro = niv == "SIN CONFIRMAR"
+    if dev:
+        linea_precio = ("- Precio final después de la devolución de {}: **{}** (lo publicó el foro, no se leyó en la tienda; "
+                        "en la tienda se cobra más)").format(dev, ptxt)
+        linea_banco = ("    2. Banco: {}. Es devolución, no descuento: en la tienda pagas el precio completo y {} te regresa "
+                       "una parte después, en tu estado de cuenta. Esa devolución tiene tope al mes: si ya lo llenaste con "
+                       "otra compra (como el 13 nov), no te regresa nada y pagas el precio completo.").format(nota, dev)
+    else:
+        linea_precio = "- {}: **{}** (precio publicado en el foro, no leído en la tienda)".format(
+            "Precio que se vio" if raro else "Pagas", ptxt)
+        linea_banco = "    2. Banco: {}.".format(nota)
     cuerpo = "\n".join((["Sin confirmar: el precio publicado está muy por debajo de lo que suele costar.", ""] if raro else []) + [
         "**{}**".format(it["titulo"]), "Variante vigilada: {}".format(var["nombre"]), "",
         "- Dónde: {}; quién vende: no se sabe (lo publicó un usuario del foro de ofertas)".format(tienda),
-        "- {}: **{}** (precio publicado en el foro, no leído en la tienda)".format("Precio que se vio" if raro else "Pagas", ptxt),
+        linea_precio,
         "- Cómo se llega:",
         "    1. Abre la publicación del foro (liga de abajo) y de ahí la tienda.",
-        "    2. Banco: {}.".format(nota),
+        linea_banco,
         "    3. Confirma que lo venda la marca o la propia tienda, con garantía en México, y que el total sea {}.".format(ptxt),
         "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
         it["link"], "",
@@ -2082,8 +2110,12 @@ def selftest():
         assert (v["id"] if v else None) == esperado, (titulo, v and v["id"], esperado)
     PROSPECTIVA.clear()   # linea A: las cifras fijas de abajo prueban el camino de fracciones, sin prospectiva.json
     assert topes(p, var_por_id(p, "ultra-512")) == (22000, 24000, 26000), topes(p, var_por_id(p, "ultra-512"))
-    assert topes(p, var_por_id(p, "normal-512")) == (19900, 21800, 23600), topes(p, var_por_id(p, "normal-512"))
-    assert nivel(23999, p, var_por_id(p, "ultra-512")) == "COMPRAR" and nivel(23999, p, var_por_id(p, "normal-512")) is None
+    # Fold8 512 con topes_fijos (Saul, 26 nov 2026: comprar sube a 22,600): ganan tambien sin prospectiva.json
+    assert topes(p, var_por_id(p, "normal-512")) == (19900, 22600, 25600), topes(p, var_por_id(p, "normal-512"))
+    assert topes(p, var_por_id(p, "normal")) == (19900, 22600, 25600), topes(p, var_por_id(p, "normal"))
+    assert nivel(23999, p, var_por_id(p, "ultra-512")) == "COMPRAR" and nivel(23999, p, var_por_id(p, "normal-512")) == "MIRAR"
+    assert nivel(22600, p, var_por_id(p, "normal-512")) == "COMPRAR" and nivel(22601, p, var_por_id(p, "normal-512")) == "MIRAR"
+    assert "Cyberpuerta" not in p["tiendas"] and "Cyberpuerta" in next(x for x in prods if x["id"] == "ps5")["tiendas"]
     # requisitos: tercero e importado fuera cuando el producto lo pide
     assert oferta(p, "Elektra", "Samsung Galaxy Z Fold8 512GB", 26999, "u", "Systore") is None
     assert oferta(p, "Amazon", "Samsung Galaxy Z Fold8 512GB", 30000, "u", "Amazon Remates de Almacén") is None
