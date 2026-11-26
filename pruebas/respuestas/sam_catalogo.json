@@ -1,0 +1,111 @@
+{
+ "response": {
+  "statusCode": 200,
+  "statusMessage": "OK",
+  "siteCode": "mx",
+  "resultData": {
+   "productList": [
+    {
+     "fmyMarketingName": "Galaxy Z Fold8 Ultra",
+     "modelList": [
+      {
+       "modelCode": "SM-F976BZKVLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra",
+       "price": null,
+       "promotionPrice": null,
+       "ctaType": "learnMore"
+      },
+      {
+       "modelCode": "SM-F976BZVMLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra",
+       "price": "53499",
+       "promotionPrice": "43999",
+       "ctaType": "inStock"
+      },
+      {
+       "modelCode": "SM-F976BZVVLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra",
+       "price": null,
+       "promotionPrice": null,
+       "ctaType": "learnMore"
+      },
+      {
+       "modelCode": "SM-F976BZKMLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra",
+       "price": "53499",
+       "promotionPrice": "43999",
+       "ctaType": "inStock"
+      }
+     ]
+    },
+    {
+     "fmyMarketingName": "Galaxy Z Fold8 Ultra (Disponible solo en Samsung.com)",
+     "modelList": [
+      {
+       "modelCode": "SM-F976BDGMLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra (Disponible solo en Samsung.com)",
+       "price": null,
+       "promotionPrice": null,
+       "ctaType": "learnMore"
+      },
+      {
+       "modelCode": "SM-F976BDGVLTM",
+       "modelName": "SM-F976B",
+       "displayName": "Galaxy Z Fold8 Ultra (Disponible solo en Samsung.com)",
+       "price": "63499",
+       "promotionPrice": "63499",
+       "ctaType": "inStock"
+      }
+     ]
+    },
+    {
+     "fmyMarketingName": "Galaxy Z Fold8",
+     "modelList": [
+      {
+       "modelCode": "SM-F971BLVMLTM",
+       "modelName": "SM-F971B",
+       "displayName": "Galaxy Z Fold8",
+       "price": "48499",
+       "promotionPrice": "40799",
+       "ctaType": "inStock"
+      },
+      {
+       "modelCode": "SM-F971BZKMLTM",
+       "modelName": "SM-F971B",
+       "displayName": "Galaxy Z Fold8",
+       "price": "48499",
+       "promotionPrice": "40799",
+       "ctaType": "inStock"
+      },
+      {
+       "modelCode": "SM-F971BZWMLTM",
+       "modelName": "SM-F971B",
+       "displayName": "Galaxy Z Fold8",
+       "price": "48499",
+       "promotionPrice": "40799",
+       "ctaType": "inStock"
+      }
+     ]
+    },
+    {
+     "fmyMarketingName": "Galaxy Z Fold8 (Disponible solo en Samsung.com)",
+     "modelList": [
+      {
+       "modelCode": "SM-F971BZGMLTM",
+       "modelName": "SM-F971B",
+       "displayName": "Galaxy Z Fold8 (Disponible solo en Samsung.com)",
+       "price": "48499",
+       "promotionPrice": "40799",
+       "ctaType": "inStock"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
