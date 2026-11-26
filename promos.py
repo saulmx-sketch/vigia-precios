@@ -262,8 +262,9 @@ def amazon_precio(precio, promo):
     if baja <= 0 or final < precio * TOPE_CUPON:
         return precio, _une("cupon de ficha de ${:,.0f} sin restar: quitaria mas de la mitad (lectura dudosa)"
                             .format(baja), extra)
-    return final, _une("con cupon de ficha ${:,.0f} (se recorta en la ficha); sin cupon ${:,.0f}".format(baja, precio),
-                       extra)
+    # E6b (N2): "sin cupón $N" se conserva tal cual: vigia.notas_compra lo convierte en "Sin cupones cuesta $N."
+    return final, _une("ya restado un cupón de ${:,.0f} que se marca en la página del producto; sin cupón ${:,.0f}"
+                       .format(baja, precio), extra)
 
 
 # ------------------------------------------------------------------------------- bancos de primera fuente
@@ -1033,12 +1034,28 @@ MARGEN_PETICION = 30.0    # una peticion nueva solo arranca si le quedan estos s
 AHORRO_APARTE = 3000      # con otro banco o con la tienda cerrada: aviso aparte desde esta rebaja
 AHORRO_PROPIO = 500       # con un banco o medio propio: aviso aparte desde esta rebaja; por debajo, solo la nota
 BAJA_APARTE = 300         # un aviso aparte ya mandado vuelve a salir solo si baja esto mas
-NOTA_MAX = 220            # nota mas larga que esto tras los anadidos: se omiten primero los de meses sin intereses
+NOTA_MAX = 160            # nota mas larga que esto tras los anadidos: se omiten primero los de meses (E6b: era 220)
 # Membresia Dorada de Costco, leido el 25 nov 2026 en https://www.costco.com.mx/membresias ("Individual Dorada $600")
 COSTCO_MEMBRESIA = 600
-CIERRE_PAGO = "No lo he probado: se ve al pagar."
-CIERRE_CERRADA = ("No lo he probado: comprar ahí pide una cuenta de esa tienda (estudiantes y docentes se verifican "
-                  "con su correo institucional).")
+# Textos de los avisos aparte (E6b, cola\2_lector_lego.md). Los avisos son issues publicos: no nombran los bancos de
+# Saul ni su institucion.
+CIERRE_PAGO = "No lo he probado: el descuento solo aparece en la última pantalla del pago."
+CIERRE_PAGO_TARJETA = " La fuente no dice si vale con débito o solo con crédito."
+CIERRE_CERRADA = "No lo he probado: no sé si tu correo institucional abre esa tienda ni si ahí valen los mismos cupones."
+
+
+def _condicion(f):
+    """'el descuento es de 10 % y como máximo $700, en compras de $6,000 o más' (lo que la fila trae)."""
+    partes = []
+    if f.get("valor") is not None:
+        partes.append("el {} es de {}".format("descuento" if f.get("tipo") == "descuento" else "reembolso",
+                                              "{:g} %".format(f["valor"]) if f.get("unidad") == "%" else "${:,.0f}".format(f["valor"])))
+    if f.get("tope"):
+        partes.append("como máximo ${:,.0f}".format(f["tope"]))
+    txt = " y ".join(partes)
+    if f.get("minimo"):
+        txt += (", " if txt else "") + "en compras de ${:,.0f} o más".format(f["minimo"])
+    return txt
 
 
 def _anade(extras, o, texto, meses=False):
@@ -1073,24 +1090,33 @@ def _mejores(ofertas):
     return m
 
 
-def _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, literal, url, cierre=CIERRE_PAGO):
+def _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, literal, url, cierre=CIERRE_PAGO,
+           hasta="", pasos="", otra_tienda=""):
     hechos = estado.setdefault("promos_avisado", {})
     prev = hechos.get(clave)
     antes = prev.get("precio") if isinstance(prev, dict) else prev   # formato viejo: solo el precio
     if antes is not None and nuevo > float(antes) - BAJA_APARTE:
         return
     precio = float(o["precio"])
-    asunto = "{} saldria en ${:,.0f} en {} con {} · aviso aparte (no cuenta para tu tope)".format(
-        o.get("nombre") or o.get("var"), nuevo, o.get("tienda"), requisito)
-    cuerpo = "\n".join([
-        "**{}**".format(o.get("titulo") or o.get("nombre") or ""), "",
-        "- Precio normal leído ahora en {}: **${:,.0f}** (este es el que cuenta para tu tope).".format(o.get("tienda"), precio),
-        "- Con {}: **${:,.0f}**, ${:,.0f} menos.".format(requisito, nuevo, precio - nuevo),
+    nombre = o.get("nombre") or o.get("var")
+    if otra_tienda:   # E6b: el asunto se distingue a primera vista del aviso normal de precio
+        asunto = "Otra tienda de Samsung: {} a ${:,.0f} en {}".format(nombre, nuevo, otra_tienda)
+    else:
+        asunto = "Otra forma de pago: {} a ${:,.0f} en {} con {}".format(nombre, nuevo, o.get("tienda"), requisito)
+    lineas = [
+        o.get("titulo") or nombre or "", "",
+        "Por qué te llega: {}, este teléfono bajaría ${:,.0f}. Es aparte del aviso de precio.".format(
+            "en otra tienda de Samsung" if otra_tienda else "pagando de otra forma", precio - nuevo),
+        "- Precio normal en {} ahora: ${:,.0f}. Este es el que se compara con tu precio límite.".format(o.get("tienda"), precio),
+        "- Con {}: ${:,.0f} (${:,.0f} menos).".format(requisito, nuevo, precio - nuevo),
         "- Qué pide: {}.".format(pide),
-        "- Lo que dice la fuente: \"{}\" ({})".format(literal, url),
-        "- Liga de la oferta: {}".format(o.get("url") or ""), "",
-        cierre,
-        "Este aviso va aparte del aviso de precio y no cuenta para tu tope."])
+        "- Vale hasta: {}.".format(hasta or "la fuente no da fecha legible"),
+        "- Qué harías tú: {}".format(pasos or "revisa el total en la última pantalla del pago, antes de confirmar."),
+        "- Lo que dice la fuente, tal cual: \"{}\" ({})".format(literal, url)]
+    if otra_tienda:
+        lineas.append("- Liga de {}: {}".format(otra_tienda, url))
+    lineas += ["- Liga de la oferta: {}".format(o.get("url") or ""), "", cierre]
+    cuerpo = "\n".join(lineas)
     av = {"clave": clave, "asunto": asunto, "cuerpo": cuerpo, "precio": nuevo, "tienda": o.get("tienda"),
           "prod": o.get("prod"), "var": o.get("var"), "requisito": requisito}
     print("  + APARTE " + asunto)
@@ -1204,7 +1230,7 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             de_ficha = (prod_costco.get(_codigo_costco(o.get("url"))) or {}).get("filas") or []
             for f in de_ficha:
                 if f.get("codigo") and f.get("valor") is None and vigente(f, ahora) is not False:
-                    _anade(extras, o, "hay promocion de pago %s sin cifra publica" % f["codigo"])
+                    _anade(extras, o, "Costco anuncia otra promoción al pagar (%s) sin decir de cuánto" % f["codigo"])
             propias += de_ficha
         por_banco = {}
         for f in propias:
@@ -1212,7 +1238,7 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                 continue
             vig = vigente(f, ahora)   # solo lo vigente da precio alterno o aviso; lo vencido se descarta
             if vig is None and de_quien(f.get("banco")) == "propio" and f.get("valor") is not None:
-                _anade(extras, o, "promocion con %s sin fecha legible: revisa la pagina" % f.get("banco"))
+                _anade(extras, o, "%s tiene promoción aquí, pero no leí hasta cuándo vale: revísala" % f.get("banco"))
             if vig is not True:
                 continue
             nuevo = precio_con_fila(precio, f)
@@ -1222,24 +1248,51 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
         for (banco, codigo), (nuevo, f) in sorted(por_banco.items()):
             quien = de_quien(banco)
             clave = "%s|%s|%s|%s" % (tienda, pid, vid, banco + ("|" + codigo if codigo else ""))
+            fin = rango(f.get("vigencia"), ahora)[1]
+            hasta = fin.isoformat() if fin else ""
+            cond = _condicion(f)
+            lit = f.get("beneficio", "")
+            cierre = CIERRE_PAGO + ("" if banco == "PayPal" or re.search(r"cr[eé]dito|d[eé]bito", lit, re.I)
+                                    else CIERRE_PAGO_TARJETA)
             if quien == "ajeno" and precio - nuevo >= AHORRO_APARTE:
                 _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, "tarjeta %s" % banco,
-                       "pagar con tarjeta %s, que no es de tus bancos (los tuyos: BBVA, Revolut, PayPal)" % banco,
-                       f.get("beneficio", ""), f.get("url", ""))
+                       "pagar con una tarjeta %s, que no tienes%s" % (banco, ("; " + cond) if cond else ""),
+                       lit, f.get("url", ""), cierre=cierre, hasta=hasta,
+                       pasos="solo te sirve si alguien de confianza con tarjeta %s paga por ti, o si sacas una; te "
+                             "aviso porque la diferencia pasa de ${:,.0f}.".format(AHORRO_APARTE) % banco)
             elif quien == "propio":
-                if codigo:
-                    fin = rango(f.get("vigencia"), ahora)[1]
-                    _anade(extras, o, "con {} saldria en ${:,.0f} (codigo {}, hasta {}; no probado: {})".format(
-                        banco, nuevo, codigo, fin.isoformat() if fin else "?", f.get("pide") or "se ve al pagar"))
-                    requisito = "%s (codigo %s)" % (banco, codigo)
-                    pide = ("elegir %s como forma de pago al pagar; la promocion %s se aplica ahi" % (banco, codigo)
-                            if f.get("pide") else "pagar con tu tarjeta %s y teclear el codigo %s" % (banco, codigo))
+                if codigo and banco == "PayPal":
+                    _anade(extras, o, "pagando con PayPal quedaría en ${:,.0f}, hasta {}; se aplica sola al elegir "
+                                      "PayPal (no probado)".format(nuevo, hasta or "?"))
+                    requisito = "PayPal"
+                    pide = "elegir PayPal como forma de pago; la promoción (%s la llama %s) se aplica sola, no se teclea" % (
+                        tienda, codigo)
+                    pasos = "pon el teléfono en el carrito, elige PayPal y revisa que el total baje a ${:,.0f} antes de " \
+                            "confirmar.".format(nuevo)
+                    if tienda == "Costco":
+                        pide += "; y ser socio de Costco (membresía Dorada ${:,.0f} al año)".format(COSTCO_MEMBRESIA)
+                        pasos = ("entra con tu cuenta de Costco, " + pasos +
+                                 " Si no eres socio, súmale ${:,.0f}.".format(COSTCO_MEMBRESIA))
+                elif codigo:
+                    _anade(extras, o, "pagando con {} y el código {} quedaría en ${:,.0f}, hasta {} (no probado: se ve "
+                                      "al pagar)".format(banco, codigo, nuevo, hasta or "?"))
+                    requisito = "tarjeta %s (código %s)" % (banco, codigo)
+                    pide = "pagar con una tarjeta %s y teclear el código %s al pagar%s" % (banco, codigo,
+                                                                                           ("; " + cond) if cond else "")
+                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s, teclea el código %s y mira el total en "
+                             "la última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
+                             % (banco, codigo))
                 else:
-                    _anade(extras, o, "con {} saldria en ${:,.0f} (no probado: se ve al pagar)".format(banco, nuevo))
-                    requisito, pide = "tu tarjeta %s" % banco, "pagar con tu tarjeta %s" % banco
+                    _anade(extras, o, "pagando con {} quedaría en ${:,.0f}, hasta {} (no probado: se ve al pagar)".format(
+                        banco, nuevo, hasta or "?"))
+                    requisito = "tarjeta %s" % banco
+                    pide = "pagar con una tarjeta %s%s" % (banco, ("; " + cond) if cond else "")
+                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s como forma de pago y mira el total en la "
+                             "última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
+                             % banco)
                 if precio - nuevo >= AHORRO_PROPIO:
-                    _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide,
-                           f.get("beneficio", ""), f.get("url", ""))
+                    _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, lit,
+                           f.get("url", ""), cierre=cierre, hasta=hasta, pasos=pasos)
         if tienda != "Samsung":
             continue
         cer = caja.get("cerradas") or {}
@@ -1250,20 +1303,36 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                     continue
                 nuevo = float(d["precio"])
                 viejo = _vencido(cer.get("precios_leido"), ahora, HORAS_CERRADA_AVISO * 60)
+                cuenta = "pide cuenta con correo institucional" if tc == "estudiantes_mx" else "pide cuenta de empleado"
                 if viejo and nuevo < precio - MARGEN:   # E6/A6: precio viejo (relectura fallida): nota, nunca aviso
-                    _anade(extras, o, "{} ${:,.0f} sin cupones (pide cuenta; visto el {})".format(
-                        nombre_tc, nuevo, cer.get("precios_leido") or "?"))
+                    _anade(extras, o, "en la {} ${:,.0f}, sin cupones ({}; visto el {})".format(
+                        nombre_tc, nuevo, cuenta, cer.get("precios_leido") or "?"))
                 elif viejo:
                     pass
                 elif precio - nuevo >= AHORRO_APARTE:
+                    corta = nombre_tc.replace(" de Samsung", "")   # "tienda de estudiantes"
+                    cups = " y ".join(o.get("cupones") or [])
+                    if tc == "estudiantes_mx":
+                        pide = ("una cuenta en la tienda de estudiantes y docentes de Samsung, que se verifica con un "
+                                "correo institucional (el tuyo podría servir; no está probado)")
+                        pasos = "entra a la liga de la tienda de estudiantes, regístrate con tu correo institucional y " \
+                                "mira si el precio es ${:,.0f}".format(nuevo)
+                    else:
+                        pide = "una cuenta en la tienda de empleados de Samsung, que pide ser empleado (no está probado)"
+                        pasos = "si tienes acceso, entra a la liga de la tienda de empleados y mira si el precio es " \
+                                "${:,.0f}".format(nuevo)
+                    pasos += ("; luego prueba ahí los cupones %s, que en la tienda normal ya están restados." % cups
+                              if cups else ".")
                     _aviso(ahora, estado, seco, abrir_issue, avisos, o, "%s|%s|%s|%s" % (tienda, pid, vid, tc), nuevo,
-                           "cuenta de la %s" % nombre_tc,
-                           "una cuenta de la %s (se entra con el correo de tu cuenta Samsung)" % nombre_tc,
-                           "precio de la ficha de esa tienda, sin cupones", d.get("url", ""), cierre=CIERRE_CERRADA)
+                           "la %s" % nombre_tc, pide,
+                           "precio publicado en la ficha de esa tienda, sin cupones (no es una frase de la página: es "
+                           "el precio que leí)", d.get("url", ""), cierre=CIERRE_CERRADA,
+                           hasta="la página no da fecha; precio leído el %s" % (cer.get("precios_leido") or "?"),
+                           pasos=pasos, otra_tienda="la " + corta)
                 elif nuevo < precio - MARGEN:
-                    _anade(extras, o, "{} ${:,.0f} sin cupones (pide cuenta)".format(nombre_tc, nuevo))
+                    _anade(extras, o, "en la {} ${:,.0f}, sin cupones ({})".format(nombre_tc, nuevo, cuenta))
     for o in costco:
-        _anade(extras, o, "membresia Dorada ${:,.0f} al año si no eres socio".format(COSTCO_MEMBRESIA))
+        _anade(extras, o, "Costco pide ser socio: membresía Dorada ${:,.0f} al año si no lo eres".format(COSTCO_MEMBRESIA))
     _componer(extras)
 
 
@@ -1580,7 +1649,7 @@ def selftest():
         assert len(globals()[nombre]) <= 600, (nombre, len(globals()[nombre]))
     f = amazon_ficha(FICHA_CUPON)
     assert (f["precio"], f["cupon_pesos"], f["condicionado"], f["promo_id"]) == (34394.83, 220.01, False, "A29HLK1CVST1ZX"), f
-    assert amazon_precio(f["precio"], f) == (34174.82, "con cupon de ficha $220 (se recorta en la ficha); sin cupon $34,395")
+    assert amazon_precio(f["precio"], f) == (34174.82, "ya restado un cupón de $220 que se marca en la página del producto; sin cupón $34,395")
     f = amazon_ficha(FICHA_SIN)
     assert amazon_precio(f["precio"], f) == (38171.64, ""), amazon_precio(f["precio"], f)
     b = amazon_busqueda(BUSQ_CUPON)
@@ -1644,7 +1713,7 @@ def selftest():
     fin, nota = amazon_precio(34394.83, amazon_ficha(FICHA_CUPON.replace("$220.01", "10%")))
     assert fin == 34394.83 and "cupon de ficha de 10 % sin restar: revisa el tope en la pagina" in nota, (fin, nota)
     b10 = amazon_busqueda(BUSQ_CUPON.replace("de descuento de $220.01", "de descuento de 10 %").replace("34,174.82", "30,955.35"))
-    assert amazon_precio(34394.83, b10) == (30955.35, "con cupon de ficha $3,439 (se recorta en la ficha); sin cupon $34,395"), \
+    assert amazon_precio(34394.83, b10) == (30955.35, "ya restado un cupón de $3,439 que se marca en la página del producto; sin cupón $34,395"), \
         amazon_precio(34394.83, b10)                                                           # con "Paga" que cuadra si
     # E6/M11: pagina de Samsung sin MSI cuenta como fallo
     try:
@@ -1836,15 +1905,22 @@ def selftest():
     assert [o["precio"] for o in of] == [34199.2, 34174.82, 36000.0] and len(of) == 3   # no cambia precios ni quita
     assert sorted(a["clave"] for a in av) == ["Amazon|fold8|normal-512|BBVA", "Amazon|fold8|normal-512|Banorte",
                                               "Samsung|fold8|ultra-512|estudiantes_mx"], av
-    assert len(mandados) == 3 and all("aviso aparte (no cuenta para tu tope)" in a for a in mandados), mandados
-    assert "Fold8 512 GB saldria en $30,757 en Amazon con tarjeta Banorte · aviso aparte (no cuenta para tu tope)" \
+    assert len(mandados) == 3 and all(a.startswith("Otra ") for a in mandados), mandados
+    assert "Otra forma de pago: Fold8 512 GB a $30,757 en Amazon con tarjeta Banorte" \
         in mandados, mandados
     banorte = next(a for a in av if a["requisito"] == "tarjeta Banorte")
-    assert "No lo he probado: se ve al pagar." in banorte["cuerpo"] and "uf" in banorte["cuerpo"]
+    assert CIERRE_PAGO in banorte["cuerpo"] and "uf" in banorte["cuerpo"], banorte["cuerpo"]
+    # E6b: texto publico sin los bancos de Saul ni su institucion, sin negritas; con vigencia, pasos y todos los datos
+    for a in [banorte] + [x for x in av if x is not banorte]:
+        assert "**" not in a["cuerpo"] and "los tuyos" not in a["cuerpo"] and "Colmex" not in a["cuerpo"], a["cuerpo"]
+        assert all(s in a["cuerpo"] for s in ("Precio normal en", "Vale hasta:", "Qué harías tú:", "tal cual:",
+                                               "Liga de la oferta:", "No lo he probado")), a["cuerpo"]
+    assert "una tarjeta Banorte, que no tienes; el descuento es de 10 % y como máximo $5,000" in banorte["cuerpo"]
+    assert "Vale hasta: 2026-11-30." in banorte["cuerpo"] and "$3,417 menos" in banorte["cuerpo"], banorte["cuerpo"]
     assert "hasta 15 meses sin intereses con BBVA" in of[1]["nota"] and "hasta 15 meses" in of[2]["nota"], of
-    assert "con BBVA saldria en $33,175 (no probado: se ve al pagar)" in of[1]["nota"], of[1]["nota"]
+    assert "pagando con BBVA quedaría en $33,175, hasta 2026-11-30 (no probado: se ve al pagar)" in of[1]["nota"], of[1]["nota"]
     assert "HSBC" not in of[1]["nota"] and not any("HSBC" in a for a in mandados)     # $1,709 menos: no avisa
-    assert "tienda de empleados de Samsung $33,500 sin cupones (pide cuenta)" in of[0]["nota"], of[0]["nota"]
+    assert "en la tienda de empleados de Samsung $33,500, sin cupones (pide cuenta de empleado)" in of[0]["nota"], of[0]["nota"]
     assert "cupones" not in of[1] and "vigencia" not in of[1] and of[0]["cupones"] == ["FOLD8_20CLUB", "BF1000"]
     # no repite; vuelve solo si baja $300 mas
     av = mejorar(of, est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
@@ -1891,7 +1967,7 @@ def selftest():
     of = ofertas_falsas()
     av = mejorar(of, est, prods, ahora, True, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
     assert not any(a["clave"].endswith("_mx") for a in av), av
-    assert "tienda de estudiantes de Samsung $30,999 sin cupones (pide cuenta; visto el 2026-11-26 09:00)" in of[0]["nota"]
+    assert "en la tienda de estudiantes de Samsung $30,999, sin cupones (pide cuenta con correo institucional; visto el 2026-11-26 09:00)" in of[0]["nota"]
     # E6/M10: un aviso aparte de hace mas de 7 dias se olvida y puede volver a salir; el nuevo guarda la fecha
     est = estado_fresco()
     est["promos_avisado"] = {"Amazon|fold8|normal-512|Banorte": {"precio": 30757.34, "fecha": "2026-11-10"},
@@ -1927,7 +2003,7 @@ def selftest():
     est["promos_bancos"]["tiendas"]["Amazon"]["filas"] = [_fila("BBVA", "1% con BBVA", "descuento", "uf", valor=1, unidad="%", vigencia=BF)]
     of = ofertas_falsas()
     av = mejorar(of, est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
-    assert not any("BBVA" in a["clave"] for a in av) and "con BBVA saldria en $33,833" in of[1]["nota"], (av, of[1]["nota"])
+    assert not any("BBVA" in a["clave"] for a in av) and "pagando con BBVA quedaría en $33,833" in of[1]["nota"], (av, of[1]["nota"])
     est["promos_bancos"]["tiendas"]["Amazon"]["filas"] = [_fila("BBVA", "2% con BBVA", "descuento", "uf", valor=2, unidad="%", vigencia=BF)]
     av = mejorar(ofertas_falsas(), est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
     assert [a["clave"] for a in av if "BBVA" in a["clave"]] == ["Amazon|fold8|normal-512|BBVA"], av   # $683.50 menos
@@ -1935,7 +2011,7 @@ def selftest():
     of = ofertas_falsas()
     of[1]["nota"] = "x" * 180
     mejorar(of, estado_fresco(), prods, ahora, True, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
-    assert "meses sin intereses" not in of[1]["nota"] and "con BBVA saldria en $33,175" in of[1]["nota"], of[1]["nota"]
+    assert "meses sin intereses" not in of[1]["nota"] and "pagando con BBVA quedaría en $33,175" in of[1]["nota"], of[1]["nota"]
     assert "hasta 15 meses sin intereses con BBVA" in of[2]["nota"] and len(of[2]["nota"]) <= NOTA_MAX
     # Costco: nota y aviso aparte de PayPal en la mejor oferta; membresia en toda oferta de Costco
     url_c = "https://www.costco.com.mx/Electronicos/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/%s"
@@ -1954,12 +2030,12 @@ def selftest():
                  dormir=lambda s: None)
     assert len(llamadas) == 3 and est["promos"]["costco"]["leido"] == "2026-11-27 12:00", (llamadas, est["promos"])
     assert [o["precio"] for o in of_c] == [o["precio"] for o in base_c]
-    assert "con PayPal saldria en $31,999 (codigo PP177, hasta 2026-12-02; no probado: pide elegir PayPal al pagar)" \
+    assert "pagando con PayPal quedaría en $31,999, hasta 2026-12-02; se aplica sola al elegir PayPal (no probado)" \
         in of_c[0]["nota"], of_c[0]["nota"]
-    assert "hay promocion de pago VS178 sin cifra publica" in of_c[0]["nota"] and "VS178" in of_c[2]["nota"]
-    assert all("membresia Dorada $600 al año si no eres socio" in o["nota"] for o in of_c), of_c
+    assert "Costco anuncia otra promoción al pagar (VS178) sin decir de cuánto" in of_c[0]["nota"] and "VS178" in of_c[2]["nota"]
+    assert all("Costco pide ser socio: membresía Dorada $600 al año si no lo eres" in o["nota"] for o in of_c), of_c
     assert "PayPal" not in of_c[1]["nota"]                                    # no es la mejor de su variante
-    assert [(a["clave"], a["requisito"]) for a in av] == [("Costco|fold8|normal-512|PayPal|PP177", "PayPal (codigo PP177)")], av
+    assert [(a["clave"], a["requisito"]) for a in av] == [("Costco|fold8|normal-512|PayPal|PP177", "PayPal")], av
     assert "PP177" in av[0]["cuerpo"] and CIERRE_PAGO in av[0]["cuerpo"]
     mejorar(of_c, est, prods_c, ahora + dt.timedelta(minutes=30), False, _pedir_falso(pag_cc, llamadas=llamadas), abrir,
             reloj=_Reloj(), dormir=lambda s: None)
@@ -1973,9 +2049,9 @@ def selftest():
         of = ofertas_falsas()
         av = mejorar(of, est, prods_a, cuando, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
         assert [a["clave"] for a in av] == espera, (dia, av)
-        assert ("BBVA saldria" in of[1]["nota"]) == bool(espera) and "sin fecha" not in of[1]["nota"], (dia, of[1]["nota"])
-    assert av[0]["precio"] == 33674.82 and "con BBVA saldria en $33,675 (codigo BBVABF26, hasta 2026-11-17; no probado: " \
-        "se ve al pagar)" in of[1]["nota"], (av, of[1]["nota"])
+        assert ("BBVA y el código" in of[1]["nota"]) == bool(espera) and "sin fecha" not in of[1]["nota"], (dia, of[1]["nota"])
+    assert av[0]["precio"] == 33674.82 and "pagando con BBVA y el código BBVABF26 quedaría en $33,675, hasta 2026-11-17 (no " \
+        "probado: se ve al pagar)" in of[1]["nota"], (av, of[1]["nota"])
     # Modo Black: nota solo el 27 de noviembre, en ofertas de $3,500 o mas; nunca aviso
     for cuando, sale in ((ahora, True), (ahora - dt.timedelta(days=1), False)):
         est = {"promos_bancos": {"tiendas": {t: {"leido": _hora(cuando), "error": "", "filas": f}
@@ -1989,8 +2065,8 @@ def selftest():
         ("Amazon", [_fila("BBVA", "5% con BBVA", "descuento", "uf", valor=5, unidad="%")]), ("BBVA", []))}}}
     of = ofertas_falsas()
     av = mejorar(of, est, prods_a, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
-    assert av == [] and "promocion con BBVA sin fecha legible: revisa la pagina" in of[1]["nota"], (av, of[1]["nota"])
-    assert "saldria" not in of[1]["nota"]
+    assert av == [] and "BBVA tiene promoción aquí, pero no leí hasta cuándo vale: revísala" in of[1]["nota"], (av, of[1]["nota"])
+    assert "quedaría" not in of[1]["nota"]
     # Liverpool: la fila del PDF de BBVA da aviso de banco propio
     of = [{"prod": "fold8", "var": "ultra-512", "nombre": "Fold8 Ultra 512 GB", "tienda": "Liverpool", "precio": 44999.0,
            "url": "ul", "vendedor": "Liverpool", "nota": "", "titulo": "t"}]
