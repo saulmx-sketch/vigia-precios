@@ -9,7 +9,9 @@
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {},
+ "caida_desde": {
+  "Amazon": "2026-11-26T15:18+00:00"
+ },
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|fold8|normal-512": {
@@ -34,61 +36,61 @@
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Costco|fold8|ultra-512": {
    "precio": 41999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Liverpool|fold8|normal-512": {
    "precio": 44999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Samsung|fold8|ultra-1tb": {
    "precio": 46624.25,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Soriana|fold8|normal-512": {
    "precio": 36990.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-26 09:01"
+   "visto": "2026-11-26 09:18"
   }
  },
  "cupones_cosechados": {
@@ -240,7 +242,7 @@
   "fold8|WINDC_600": 1795663317
  },
  "cupones_ultima_busqueda": {
-  "cuando": "2026-11-26 09:01",
+  "cuando": "2026-11-26 09:18",
   "fuentes_leidas": 15,
   "hallados": {
    "AFIHOME": "foro",
@@ -268,7 +270,6 @@
   }
  },
  "diag_amazon": [
-  "11-26 00:22 busqueda ok; ficha B0G76PM4FZ ok",
   "11-26 00:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 00:39 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-26 00:55 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
@@ -327,11 +328,12 @@
   "11-26 08:46 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-26 08:47 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-26 09:03 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
-  "11-26 09:04 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok"
+  "11-26 09:04 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-26 09:20 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 503 de 322 bytes"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 0,
+  "Amazon": 1,
   "Chedraui": 0,
   "Costco": 0,
   "Cupones": 0,
@@ -346,7 +348,7 @@
  "promos": {
   "cerradas": {
    "error": "",
-   "leido": "2026-11-26 08:11",
+   "leido": "2026-11-26 09:18",
    "precios": {
     "empleados_mx": {
      "SM-F976BZKMLTM": {
@@ -365,7 +367,7 @@
      }
     }
    },
-   "precios_leido": "2026-11-26 08:11",
+   "precios_leido": "2026-11-26 09:18",
    "variantes": {
     "SM-F971BZKMLTM": [
      "fold8",
@@ -527,7 +529,7 @@
   },
   "costco": {
    "error": "",
-   "leido": "2026-11-26 08:11",
+   "leido": "2026-11-26 09:18",
    "productos": {
     "648321": {
      "filas": [
@@ -546,7 +548,7 @@
        "vigente": true
       }
      ],
-     "leido": "2026-11-26 08:11"
+     "leido": "2026-11-26 09:18"
     },
     "648324": {
      "filas": [
@@ -580,7 +582,7 @@
        "vigente": true
       }
      ],
-     "leido": "2026-11-26 08:11"
+     "leido": "2026-11-26 09:18"
     },
     "648325": {
      "filas": [
@@ -614,7 +616,7 @@
        "vigente": true
       }
      ],
-     "leido": "2026-11-26 08:11"
+     "leido": "2026-11-26 09:18"
     },
     "648326": {
      "filas": [
@@ -648,7 +650,7 @@
        "vigente": true
       }
      ],
-     "leido": "2026-11-26 08:11"
+     "leido": "2026-11-26 09:18"
     }
    }
   },
@@ -1576,7 +1578,9 @@
   }
  },
  "sembrado": true,
- "ultimo_error": {},
+ "ultimo_error": {
+  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B0H76XJTG2"
+ },
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    7499.0,
