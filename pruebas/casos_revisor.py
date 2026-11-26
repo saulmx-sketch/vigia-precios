@@ -86,7 +86,8 @@ def _correr(v):
         assert v.avisos_de_precio({K_AMZ: out[0]}, por_id, est.setdefault("avisado", {}), est, AHORA) == [], corrida
         fichas = sum("/dp/" in u for u in v.pedir.pedidas)
         assert fichas == (1 if corrida == 1 else 0), (corrida, fichas)   # la segunda usa lo recordado, con la ficha
-    assert est["vendedor_amazon"]["B0FTP523RH"] == [8999.0, "Amazon México", False, "ps5", 12499.0], est["vendedor_amazon"]
+    # sexto elemento: hora (epoch) de la lectura de la ficha (caducidad de lo recordado, pendiente H8)
+    assert est["vendedor_amazon"]["B0FTP523RH"][:5] == [8999.0, "Amazon México", False, "ps5", 12499.0], est["vendedor_amazon"]
     # lo recordado con cuatro elementos (antes de este arreglo) no basta: se relee la ficha
     est = {"vendedor_amazon": {"B0FTP523RH": [8999.0, "Amazon México", False, "ps5"]}}
     v.pedir = Red(AMZ)

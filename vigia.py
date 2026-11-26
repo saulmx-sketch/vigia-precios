@@ -395,7 +395,7 @@ def cosechar_cupones(prods, estado, ahora):
         sam = p["tiendas"].get("Samsung")
         if not sam:
             continue
-        for info in sam["skus"].values():
+        for info in (sam.get("skus") or {}).values():   # C8: un producto de Samsung sin skus no tumba la cosecha
             if len(info) > 2 and info[2] not in paginas:
                 paginas.append(info[2])
         for b in sam.get("cupones_foro", [p["nombre"]]):
@@ -688,8 +688,18 @@ def leer_amazon(prod, cfg, estado):
         del d[:-60]
 
 
+# Lo recordado de una ficha de Amazon caduca (pendiente H8, 25 nov 2026): con la misma cifra de busqueda se reusaba
+# el precio de ficha para siempre y una baja que solo se ve en la ficha nunca se avisaba. Pasados estos minutos se
+# relee la ficha aunque la busqueda no cambie, a lo mas TOPE_RELEER_AMAZON por producto y corrida (sin rafagas).
+# La hora va como sexto elemento de vendedor_amazon: la version publicada solo lee los cinco primeros.
+MINUTOS_MEMO_AMAZON = 60
+TOPE_RELEER_AMAZON = 3
+
+
 def _leer_amazon(prod, cfg, estado, diag):
     memo = estado.setdefault("vendedor_amazon", {})
+    ahora_ts = int(dt.datetime.now(dt.timezone.utc).timestamp())
+    releidas = 0
     solo_oficial = prod["requisitos"].get("solo_vendedor_oficial")
     candidatas, visto, fallo = [], set(), ""
     for q in cfg["consultas"]:
@@ -737,9 +747,14 @@ def _leer_amazon(prod, cfg, estado, diag):
             paga, leida = precio, False
             # quinto elemento: el precio que dio la ficha (la version d6ab147 solo lee los cuatro primeros). Lo
             # recordado sin el (escrito antes del 25 nov) se trata como no recordado: se relee la ficha una vez.
-            if previo and previo[0] == precio and len(previo) > 4 and previo[4]:
+            igual = bool(previo and previo[0] == precio and len(previo) > 4 and previo[4])
+            fresco = igual and len(previo) > 5 and isinstance(previo[5], (int, float)) and \
+                ahora_ts - previo[5] < MINUTOS_MEMO_AMAZON * 60
+            if igual and (fresco or releidas >= TOPE_RELEER_AMAZON):
                 vend, importado, paga = previo[1], bool(previo[2]), previo[4]
             else:
+                if igual:
+                    releidas += 1   # recordado vencido: se relee aunque la busqueda no cambio
                 e, t = pedir(url, pausa=1.0)
                 r = amazon_rechazo(e, t, 'id="productTitle"')
                 diag.append("ficha %s %s" % (asin, r or "ok"))
@@ -754,12 +769,15 @@ def _leer_amazon(prod, cfg, estado, diag):
                     # ficha rechazada (pasa en la nube) y lo recordado es viejo, sin precio de ficha: como antes, el
                     # vendedor recordado con el precio de busqueda, para no vaciar la tabla; no se reescribe la memoria
                     vend, importado = previo[1], bool(previo[2]) if len(previo) > 2 else False
+                    if len(previo) > 4 and previo[4]:   # recordado vencido y ficha rechazada: queda el precio de ficha
+                        paga = previo[4]               # recordado y se reintenta en la corrida siguiente
                     of = oferta(prod, "Amazon", titulo, paga, url, vend, nota, importado=importado)
                     if of:
                         salida.append(of)
                     continue
             if vend:
-                memo[asin] = [precio, vend, importado, prod["id"], paga]   # la memoria guarda el precio sin cupon
+                if leida or not igual:
+                    memo[asin] = [precio, vend, importado, prod["id"], paga, ahora_ts]   # precio sin cupon y su hora
             final = paga
             if not RESTAR_CUPON_FICHA_AMAZON:
                 nota = nota_cupon_amazon(nota, t if leida else "")
@@ -794,7 +812,7 @@ def _leer_amazon(prod, cfg, estado, diag):
         if precio is None or not marca_ok(prod, titulo):
             continue   # agotado o sin precio a la vista: hoy no se ofrece
         if vend:
-            memo[asin] = [precio, vend, importado, prod["id"], precio]
+            memo[asin] = [precio, vend, importado, prod["id"], precio, ahora_ts]
         nota, final = "", precio
         if not RESTAR_CUPON_FICHA_AMAZON:
             nota = nota_cupon_amazon("", t)
