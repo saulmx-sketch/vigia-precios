@@ -6,7 +6,7 @@ Uso:
     py -X utf8 historia\\cosechar_foro.py --sin-red         solo con lo que ya esta en el cache
     py -X utf8 historia\\cosechar_foro.py --salida <carpeta>  donde van los CSV (por omision, esta carpeta historia)
 
-Fuente: la busqueda del foro (https://www.promodescuentos.com/search?q=...&sortBy=new&page=N). Cada hilo de la
+Fuente: la busqueda del foro (https://www.promodescuentos.com/search?q=...&sortBy=new&time_frame=0&page=N, toda la historia). Cada hilo de la
 lista viene como JSON en el atributo data-vue3 del componente ThreadMainListItemNormalizer (titulo, precio,
 tienda, fecha de publicacion, expirado, temperatura, cupon). La descripcion completa solo esta en la pagina del
 hilo (window.__INITIAL_STATE__.threadDetail.threadDetails.preparedHtmlDescription); se baja para los hilos que
@@ -33,7 +33,10 @@ import vigia  # noqa: E402  (pedir, decodificar, BANCOS_PROPIOS, BANCOS_AJENOS, 
 
 CACHE = os.path.join(os.path.dirname(os.path.dirname(AQUI)), "_cache_A", "foro")
 PAUSA = 2.0
-TOPE_PAGINAS = 40
+TOPE_PAGINAS = 60
+# Sin este filtro la busqueda solo devuelve el ultimo año (time_frame=365 por omision; opciones 365, 30, 7 y 0 =
+# "Todas", leidas del HTML de la busqueda el 25 nov 2026).
+FILTRO_FECHA = "&time_frame=0"
 TOPE_HILOS = 300
 BASE = "https://www.promodescuentos.com"
 COLUMNAS = ["fecha", "producto", "variante", "tienda", "precio", "lista", "condicion", "banco", "tipo_banco",
@@ -99,7 +102,7 @@ def bajar(url, archivo, sin_red):
 
 
 def nombre_cache(consulta, pagina):
-    return "busq_%s_p%02d.html" % (re.sub(r"\W+", "-", consulta.strip().lower()), pagina)
+    return "busqtodas_%s_p%02d.html" % (re.sub(r"\W+", "-", consulta.strip().lower()), pagina)
 
 
 # ------------------------------------------------------------------------------- lectura
@@ -273,7 +276,7 @@ def cosechar(producto, sin_red, salida, revision):
         for q in cfg["consultas"]:
             propios = set()
             for pag in range(1, TOPE_PAGINAS + 1):
-                url = BASE + "/search?q=" + urllib.parse.quote(q) + "&sortBy=new" + ("&page=%d" % pag if pag > 1 else "")
+                url = BASE + "/search?q=" + urllib.parse.quote(q) + "&sortBy=new" + FILTRO_FECHA + ("&page=%d" % pag if pag > 1 else "")
                 texto = bajar(url, nombre_cache(q, pag), sin_red)
                 if texto is None:
                     break

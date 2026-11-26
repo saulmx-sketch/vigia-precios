@@ -1,7 +1,7 @@
-Con dos años parecidos hubo 6 pronósticos que se pudieron comparar (casos F, J). El precio más bajo real cayó dentro del rango esperado en 2, por debajo de lo más bajo esperado en 4 y por encima en 0. El piso central se equivocó en promedio 29 % (sin importar el signo) y quedó por arriba del real en 6 de 6.
-Con un solo año parecido hubo 8 pronósticos comparables (casos G, H, I, K): el real cayó dentro del rango en 3, debajo en 3 y encima en 2; error promedio del central 17 %, alto en 5 de 8.
-Error promedio del central según la fecha del pronóstico (todos los casos comparables): 1 nov: 24 % en 3 pronósticos; 15 nov: 23 % en 6 pronósticos; 25 nov: 20 % en 5 pronósticos.
-El mismo pronóstico del Fold7 acierta o falla según qué precios cuenten como reales: con solo Amazon (caso J) lo más barato fue $28,000 y el central quedó +6 %; contando la tienda de Samsung con cupón (caso F) lo más barato fue $19,985 el 23 dic 2025 y el central quedó +48 %, y ese día el vigía lo habría marcado "sin confirmar".
+Con dos años parecidos hubo 6 pronósticos que se pudieron comparar (casos F, J). El precio más bajo real cayó dentro del rango esperado en 2, por debajo de lo más bajo esperado en 4 y por encima en 0. El piso central se equivocó en promedio 24 % (sin importar el signo) y quedó por arriba del real en 6 de 6.
+Con un solo año parecido hubo 8 pronósticos comparables (casos G, H, I, K): el real cayó dentro del rango en 2, debajo en 4 y encima en 2; error promedio del central 25 %, alto en 5 de 8.
+Error promedio del central según la fecha del pronóstico (todos los casos comparables): 1 nov: 29 % en 3 pronósticos; 15 nov: 26 % en 6 pronósticos; 25 nov: 21 % en 5 pronósticos.
+El mismo pronóstico del Fold7 acierta o falla según qué precios cuenten como reales: con solo Amazon (caso J) lo más barato fue $28,000 y el central quedó +6 %; contando la tienda de Samsung con cupón (caso F) lo más barato fue $19,985 el 23 dic 2025 y el central quedó +35 %, y ese día el vigía lo habría marcado "sin confirmar".
 
 # Banco de prueba del pronóstico (2026-11-25)
 
@@ -15,18 +15,18 @@ Cómo leer la tabla: "Topes calculados ese día" son los del día del pronóstic
 
 | Caso | Pronóstico del | Años parecidos usados | Piso esperado: bajo / central / alto | Lo más barato real después | Error del central | ¿Dónde cayó? | Topes calculados ese día (ganga / comprar / mirar) | Primer aviso de ganga | Primer aviso de comprar | ¿Avisó de comprar el día más barato? |
 |---|---|---|---|---|---|---|---|---|---|---|
-| F Fold7 512 GB, temporada 2025-26 | 1 nov 2025 | Fold6, Fold5 | $27,201 / $29,544 / $31,886 | $19,985 el 23 dic 2025 (Samsung) | +48 % | por debajo de lo más bajo esperado | $27,700 / $30,100 / $32,500 | $28,000 el 28 nov 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
-| F Fold7 512 GB, temporada 2025-26 | 15 nov 2025 | Fold6, Fold5 | $26,461 / $29,608 / $32,756 | $19,985 el 23 dic 2025 (Samsung) | +48 % | por debajo de lo más bajo esperado | $26,900 / $30,200 / $33,400 | $28,000 el 28 nov 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
-| F Fold7 512 GB, temporada 2025-26 | 25 nov 2025 | Fold6, Fold5 | $29,071 / $31,058 / $33,045 | $19,985 el 23 dic 2025 (Samsung) | +55 % | por debajo de lo más bajo esperado | $29,600 / $31,600 / $33,700 | $28,000 el 28 nov 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
+| F Fold7 512 GB, temporada 2025-26 | 1 nov 2025 | Fold6, Fold5 | $21,920 / $26,903 / $31,886 | $19,985 el 23 dic 2025 (Samsung) | +35 % | por debajo de lo más bajo esperado | $22,300 / $27,400 / $32,500 | $28,000 el 9 dic 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
+| F Fold7 512 GB, temporada 2025-26 | 15 nov 2025 | Fold6, Fold5 | $21,324 / $27,040 / $32,756 | $19,985 el 23 dic 2025 (Samsung) | +35 % | por debajo de lo más bajo esperado | $21,700 / $27,500 / $33,400 | $28,000 el 9 dic 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
+| F Fold7 512 GB, temporada 2025-26 | 25 nov 2025 | Fold6, Fold5 | $26,495 / $29,770 / $33,045 | $19,985 el 23 dic 2025 (Samsung) | +49 % | por debajo de lo más bajo esperado | $27,000 / $30,300 / $33,700 | $28,000 el 9 dic 2025 (+40 % sobre el real) | $28,000 el 28 nov 2025 (+40 % sobre el real) | no (ese día ya estaba en sin confirmar) |
 | G S25 Ultra 256 GB, temporada 2025-26 | 1 nov 2025 | ninguno (G quedó sin año parecido; se previeron 2) | sin pronóstico | $21,100 el 17 dic 2025 (Amazon) | - | - | sin topes | $22,760 el 18 nov 2025 (+8 % sobre el real) | $28,600 el 12 nov 2025 (+36 % sobre el real) | no |
 | G S25 Ultra 256 GB, temporada 2025-26 | 15 nov 2025 | S23 Ultra (G quedó con un año; se previeron 2) | $25,759 / $29,623 / $33,178 | $21,100 el 17 dic 2025 (Amazon) | +40 % | por debajo de lo más bajo esperado | $23,000 / $30,200 / $32,000 | $22,760 el 18 nov 2025 (+8 % sobre el real) | $28,600 el 16 nov 2025 (+36 % sobre el real) | no |
 | G S25 Ultra 256 GB, temporada 2025-26 | 25 nov 2025 | ninguno (G quedó sin año parecido; se previeron 2) | sin pronóstico | $21,100 el 17 dic 2025 (Amazon) | - | - | sin topes | $21,100 el 19 dic 2025 (+0 % sobre el real) | $21,100 el 19 dic 2025 (+0 % sobre el real) | no |
 | H S24 Ultra 256 GB, temporada 2024-25 | 1 nov 2024 | ninguno (H quedó sin año parecido; se previeron 1) | sin pronóstico | $17,610 el 12 nov 2024 (Amazon) | - | - | sin topes | no hubo | $17,610 el 13 nov 2024 (+0 % sobre el real) | no (ese día ya estaba en mirar) |
 | H S24 Ultra 256 GB, temporada 2024-25 | 15 nov 2024 | S23 Ultra | $15,381 / $17,688 / $19,810 | $20,030 el 22 ene 2025 (Amazon) | -12 % | por encima de lo más alto esperado | $15,600 / $18,000 / $19,100 | no hubo | no hubo | no |
 | H S24 Ultra 256 GB, temporada 2024-25 | 25 nov 2024 | S23 Ultra | $15,297 / $17,591 / $19,702 | $20,030 el 22 ene 2025 (Amazon) | -12 % | por encima de lo más alto esperado | $15,600 / $17,900 / $19,100 | no hubo | no hubo | no |
-| I Fold6 512 GB, temporada 2024-25 | 1 nov 2024 | Fold5 | $31,874 / $36,655 / $41,054 | $31,270 el 16 nov 2024 (Amazon) | +17 % | por debajo de lo más bajo esperado | $32,500 / $37,300 / $41,800 | $31,270 el 16 nov 2024 (+0 % sobre el real) | $35,010 el 12 nov 2024 (+12 % sobre el real) | sí |
-| I Fold6 512 GB, temporada 2024-25 | 15 nov 2024 | Fold5 | $33,660 / $38,709 / $43,354 | $31,270 el 16 nov 2024 (Amazon) | +24 % | por debajo de lo más bajo esperado | $34,300 / $39,400 / $42,100 | $31,270 el 16 nov 2024 (+0 % sobre el real) | $31,270 el 16 nov 2024 (+0 % sobre el real) | sí |
-| I Fold6 512 GB, temporada 2024-25 | 25 nov 2024 | Fold5 | $31,130 / $35,800 / $40,096 | $31,590 el 8 dic 2024 (Amazon) | +13 % | dentro del rango | $31,200 / $36,500 / $38,800 | no hubo | $35,010 el 3 dic 2024 (+11 % sobre el real) | sí |
+| I Fold6 512 GB, temporada 2024-25 | 1 nov 2024 | Fold5 | $31,874 / $36,655 / $41,054 | $25,199 el 7 dic 2024 (Mercado Libre) | +45 % | por debajo de lo más bajo esperado | $32,500 / $37,300 / $41,800 | $29,461 el 5 nov 2024 (+17 % sobre el real) | $29,461 el 5 nov 2024 (+17 % sobre el real) | sí |
+| I Fold6 512 GB, temporada 2024-25 | 15 nov 2024 | Fold5 | $33,660 / $38,709 / $43,354 | $25,199 el 7 dic 2024 (Mercado Libre) | +54 % | por debajo de lo más bajo esperado | $29,400 / $39,400 / $42,100 | $25,199 el 7 dic 2024 (+0 % sobre el real) | $31,270 el 16 nov 2024 (+24 % sobre el real) | sí |
+| I Fold6 512 GB, temporada 2024-25 | 25 nov 2024 | Fold5 | $27,247 / $31,334 / $35,094 | $25,199 el 7 dic 2024 (Mercado Libre) | +24 % | por debajo de lo más bajo esperado | $27,700 / $31,900 / $33,900 | $25,199 el 7 dic 2024 (+0 % sobre el real) | $25,199 el 7 dic 2024 (+0 % sobre el real) | sí |
 | J Fold7 512 GB, temporada 2025-26, solo Amazon | 1 nov 2025 | Fold6, Fold5 | $27,201 / $29,544 / $31,886 | $28,000 el 28 nov 2025 (Amazon) | +6 % | dentro del rango | $27,700 / $30,100 / $32,500 | $28,000 el 28 nov 2025 (+0 % sobre el real) | $28,000 el 28 nov 2025 (+0 % sobre el real) | sí |
 | J Fold7 512 GB, temporada 2025-26, solo Amazon | 15 nov 2025 | Fold6, Fold5 | $26,461 / $29,608 / $32,756 | $28,000 el 28 nov 2025 (Amazon) | +6 % | dentro del rango | $26,900 / $30,200 / $33,400 | $28,000 el 28 nov 2025 (+0 % sobre el real) | $28,000 el 28 nov 2025 (+0 % sobre el real) | sí |
 | J Fold7 512 GB, temporada 2025-26, solo Amazon | 25 nov 2025 | Fold6, Fold5 | $29,071 / $31,058 / $33,045 | $28,000 el 28 nov 2025 (Amazon) | +11 % | por debajo de lo más bajo esperado | $29,600 / $31,600 / $33,700 | $28,000 el 28 nov 2025 (+0 % sobre el real) | $28,000 el 28 nov 2025 (+0 % sobre el real) | sí |
@@ -51,12 +51,12 @@ Años parecidos que no se pudieron usar, y por qué:
 
 | Variante | Años parecidos usados | Bajo | Central | Alto | Cambio del central contra la base |
 |---|---|---|---|---|---|
-| Base (lo que usa prospectiva.py: Fold7 a 364 días y Fold6 a 728) | Fold7 ($19,680), Fold6 ($28,439) | $19,680 | $24,059 | $28,439 | +0 (+0 %) |
-| (a) se añade el Fold5 a 1,092 días | Fold7 ($19,680), Fold6 ($28,439), Fold5 ($32,327) | $19,680 | $28,439 | $32,327 | +4380 (+18 %) |
-| (b) se quita el Fold6 | Fold7 ($19,680) | $17,113 | $19,680 | $22,041 | -4380 (-18 %) |
-| (c) se quita el Fold7 | Fold6 ($28,439) | $24,729 | $28,439 | $31,852 | +4380 (+18 %) |
-| (d) desfases 7 días antes (357 y 721) | Fold7 ($20,455), Fold6 ($32,492) | $20,455 | $26,474 | $32,492 | +2414 (+10 %) |
-| (d) desfases 7 días después (371 y 735) | Fold7 ($18,768), Fold6 ($25,886) | $18,768 | $22,327 | $25,886 | -1732 (-7 %) |
+| Base (lo que usa prospectiva.py: Fold7 a 364 días y Fold6 a 728) | Fold7 ($19,680), Fold6 ($25,919) | $19,680 | $22,799 | $25,919 | +0 (+0 %) |
+| (a) se añade el Fold5 a 1,092 días | Fold7 ($19,680), Fold6 ($25,919), Fold5 ($32,327) | $19,680 | $25,919 | $32,327 | +3120 (+14 %) |
+| (b) se quita el Fold6 | Fold7 ($19,680) | $17,113 | $19,680 | $22,041 | -3120 (-14 %) |
+| (c) se quita el Fold7 | Fold6 ($25,919) | $22,538 | $25,919 | $29,029 | +3120 (+14 %) |
+| (d) desfases 7 días antes (357 y 721) | Fold7 ($20,455), Fold6 ($25,919) | $20,455 | $23,187 | $25,919 | +388 (+2 %) |
+| (d) desfases 7 días después (371 y 735) | Fold7 ($18,768), Fold6 ($21,735) | $18,768 | $20,252 | $21,735 | -2548 (-11 %) |
 
 Con un solo año parecido el rango ya no sale de dos años: lo más bajo esperado es el central entre (1 + sesgo) y lo más alto, el central por (1 + holgura).
 

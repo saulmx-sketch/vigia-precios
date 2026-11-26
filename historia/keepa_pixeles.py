@@ -309,13 +309,27 @@ def renglones(producto, variante, asin, png_largo, png_90=None):
                 salida[-1]["nota"] += "; último día del tramo"
             if sig is not None and sig_p is None:
                 prev = None
+    if asin in PAQUETE:
+        for r in salida:
+            r["nota"] += "; " + PAQUETE[asin]
     salida.sort(key=lambda r: (r["fecha"], r["vendedor"] != "Amazon México"))
     return salida
 
 
+# Que es cada ASIN cuando no es la consola sola (va a la nota de cada renglon). Encargo C5, 25 nov 2026.
+PAQUETE = {
+    "B0C2JR9JGR": "PS5 Digital Edición Nacional (modelo anterior al Slim), consola sola",
+    "B0CTD14KQ6": "paquete PS5 Slim Digital con 2 juegos",
+    "B0F6968Y5G": "paquete PS5 Digital con Call of Duty Black Ops 6",
+    "B0G76569Q9": "paquete PS5 Digital 825GB con EA Sports FC 26",
+    "B0G76PM4FZ": "paquete PS5 Digital 825GB con Ghost of Yotei Collector's Edition (el juego encarece el paquete)",
+}
+
 # ASIN confirmados por el titulo que imprime la grafica (25 nov 2026)
 ASINS = {
-    "ps5": [("digital", "B0FTP523RH"), ("digital", "B0CLQ729TY")],
+    "ps5": [("digital", "B0FTP523RH"), ("digital", "B0CLQ729TY"), ("digital", "B0C2JR9JGR"),
+            ("digital", "B0CTD14KQ6"), ("digital", "B0F6968Y5G"), ("digital", "B0G76569Q9"),
+            ("digital", "B0G76PM4FZ")],
     "fold8": [("ultra-512", "B0H92G9GNW"), ("ultra-512", "B0H773PLWP"), ("normal-512", "B0H76XJTG2"),
               ("normal-512", "B0H773GGWG"), ("normal-512", "B0H779SQRZ")],
     "fold7": [("512", "B0FBTK7ZVB"), ("512", "B0FBT97262")],
