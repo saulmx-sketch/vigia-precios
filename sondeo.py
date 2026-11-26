@@ -78,6 +78,28 @@ URLS = {
     "pcel_ps5": "https://pcel.com/index.php?route=product/search&search=playstation%205",
     "intercompras_inicio": "https://intercompras.com/",
     "zegucom_inicio": "https://www.zegucom.com.mx/",
+    # --- ronda 2 ---
+    "elektra_ficha_fold8": "https://www.elektra.mx/api/catalog_system/pub/products/search?fq=productId:1302051914",
+    "elektra_ps5_digital": "https://www.elektra.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital",
+    "costco_ficha_fold8": "https://www.costco.com.mx/rest/v2/mexico/products/648321?fields=FULL&lang=es_MX&curr=MXN",
+    "ml_tienda_sony": "https://www.mercadolibre.com.mx/tienda/sony",
+    "ml_tienda_playstation": "https://www.mercadolibre.com.mx/tienda/playstation",
+    "sony_vtex_consola": "https://store.sony.com.mx/api/catalog_system/pub/products/search?ft=consola",
+    "sony_vtex_ps5": "https://store.sony.com.mx/api/catalog_system/pub/products/search?ft=ps5",
+    "chedraui_ps5_digital": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205%20digital",
+    "chedraui_fold8": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=galaxy%20z%20fold8",
+    "doto_ps5_digital": "https://doto.com.mx/search/suggest.json?q=consola%20ps5%20digital&resources%5Btype%5D=product",
+    "doto_fold8": "https://doto.com.mx/search/suggest.json?q=galaxy%20fold8&resources%5Btype%5D=product",
+    "soriana_ficha_ps5": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
+    "soriana_fold8": "https://www.soriana.com/buscar?q=galaxy+z+fold8",
+    "claroshop_consolas": "https://www.claroshop.com/cat/videojuegos/playstation/consolas?id=20129",
+    "cyberpuerta_fold8": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=galaxy+z+fold8",
+    "officedepot_fold8": "https://www.officedepot.com.mx/officedepot/en/search/?text=galaxy+z+fold8",
+    "movistar_fold8": "https://tienda.movistar.com.mx/catalogsearch/result/?q=fold8",
+    "att_celulares": "https://www.att.com.mx/celulares",
+    "heb_busca_ps5": "https://www.heb.com.mx/catalogsearch/result/?q=playstation+5",
+    "mixup_inicio": "https://www.mixup.com/",
+    "profeco_qqp": "https://datos.profeco.gob.mx/datos_abiertos/qqp.php",
 }
 
 FOLD = re.compile(r"fold\s?-?8", re.I)
