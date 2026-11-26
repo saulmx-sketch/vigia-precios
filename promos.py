@@ -2056,17 +2056,21 @@ def selftest():
     av = mejorar(ofertas_falsas(), est, prods, ahora, False, _pedir_falso({}), abrir, reloj=_Reloj(), dormir=lambda s: None)
     assert sorted(a["clave"] for a in av) == ["Amazon|fold8|normal-512|Banorte", "Samsung|fold8|ultra-512|estudiantes_mx"], av
     assert est["promos_avisado"]["Amazon|fold8|normal-512|Banorte"] == {"precio": 30757.34, "fecha": "2026-11-27"}
-    # E6/A7: la relectura de confirmacion de vigia resta el mismo cupon de ficha
-    guardado = v_mod.pedir
-    try:
-        v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' + FICHA_CUPON)
-        fa = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
-        v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' +
-                                            FICHA_CUPON.replace("$220.01", "10%"))
-        fp = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
-    finally:
-        v_mod.pedir = guardado
-    assert (fa["precio"], fp["precio"]) == (34174.82, 34394.83), (fa, fp)   # pesos se resta; % sin cuadre no
+    # E6/A7: la relectura de confirmacion de vigia resta el mismo cupon de ficha. Solo con el cupon prendido en vigia
+    # (RESTAR_CUPON_FICHA_AMAZON; si vigia o la constante faltan, cuenta como prendido): linea C lo apago el 25 nov 2026
+    if getattr(v_mod, "RESTAR_CUPON_FICHA_AMAZON", True):
+        guardado = v_mod.pedir
+        try:
+            v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' + FICHA_CUPON)
+            fa = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
+            v_mod.pedir = lambda url, *a, **k: (200, '<span id="productTitle">Samsung Galaxy Z Fold8 512GB</span>' +
+                                                FICHA_CUPON.replace("$220.01", "10%"))
+            fp = v_mod.ficha_amazon("https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1")
+        finally:
+            v_mod.pedir = guardado
+        assert (fa["precio"], fp["precio"]) == (34174.82, 34394.83), (fa, fp)   # pesos se resta; % sin cuadre no
+    else:
+        print("cupon de ficha de Amazon apagado el 25 nov 2026: caso saltado", file=sys.__stdout__)
     # frase del aviso de tienda cerrada: no dice "se ve al pagar"
     av = mejorar(ofertas_falsas(), estado_fresco(), prods, ahora, True, _pedir_falso({}), abrir, reloj=_Reloj(),
                  dormir=lambda s: None)
