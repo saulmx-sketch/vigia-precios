@@ -14,6 +14,8 @@ Uso:
   py -X utf8 prospectiva.py --retroprueba [--csv ruta]
   py -X utf8 prospectiva.py --veredicto fold8 ultra-512 32000 [--fecha 2026-11-25]
   py -X utf8 prospectiva.py --rastro fold8 ultra-512
+  py -X utf8 prospectiva.py --pregunta fold8 --entre "black friday" "cyber monday" [--variante ultra-512]
+      [--fecha 2026-11-25] [--config productos.json] [--historia carpeta;carpeta2] [--guardar]
 """
 import csv
 import datetime as dt
@@ -2430,6 +2432,569 @@ def selftest():
             for hh in (hoy, None, "2026-11-25", "malo"):
                 r = razon(prc, dd, hh)
                 assert isinstance(r, str) and len(r) <= MAX_RAZON and not PROHIBIDAS.search(r), (prc, dd, r)
+    _selftest_pregunta()
+    return True
+
+
+# ---------------------------------------------------------------- --pregunta: "¿compro en A o espero a B?"
+# Nada de nombres de producto ni de tienda aqui: todo sale de productos.json, historia/antecesores.json y los CSV.
+
+ANTECESORES = "antecesores.json"
+CAMBIO_MINIMO = 0.01      # B "mejora" a A si es mas de 1 % mas barato
+BAJA_ESPERAR = 0.05       # el minimo de la temporada debe ser al menos 5 % mas bajo que A para "esperar a otra fecha"
+CONTINUAS = ("keepa", "propio")
+VIGENTE_HASTA = re.compile(r"vigente\s+hasta\s+(\d{4}-\d{2}-\d{2})", re.I)
+MOMENTOS = ["black friday", "cyber monday", "fin de semana de black friday", "buen fin", "hot sale", "prime day",
+            "navidad", "enero", "ahora"]
+MOMENTOS_CALENDARIO = ("buen fin", "hot sale", "prime day")
+NOMBRE_MOMENTO = {"black friday": "el Black Friday (viernes)", "cyber monday": "el Cyber Monday (lunes)",
+                  "fin de semana de black friday": "el fin de semana de Black Friday", "buen fin": "el Buen Fin",
+                  "hot sale": "el Hot Sale", "prime day": "el Prime Day", "navidad": "Navidad (16 dic a 6 ene)",
+                  "enero": "enero (7 a 31 ene)", "ahora": "hoy"}
+
+
+def _sin_acentos(s):
+    import unicodedata
+    return "".join(c for c in unicodedata.normalize("NFD", str(s).lower())
+                   if unicodedata.category(c) != "Mn").strip()
+
+
+def black_friday(anio):
+    """El viernes siguiente al cuarto jueves de noviembre."""
+    d = dt.date(anio, 11, 1)
+    return d + dt.timedelta(days=(3 - d.weekday()) % 7 + 21) + UN_DIA
+
+
+def momento(nombre, anio, eventos, fecha=None):
+    """(inicio, fin) del momento en el anio dado, o None si el calendario no lo tiene. ValueError si no se conoce."""
+    n = _sin_acentos(nombre)
+    if n == "black friday":
+        b = black_friday(anio)
+        return (b, b)
+    if n == "cyber monday":
+        c = black_friday(anio) + dt.timedelta(days=3)
+        return (c, c)
+    if n == "fin de semana de black friday":
+        b = black_friday(anio)
+        return (b, b + dt.timedelta(days=2))
+    if n == "navidad":
+        return (dt.date(anio, 12, 16), dt.date(anio + 1, 1, 6))
+    if n == "enero":
+        return (dt.date(anio + 1, 1, 7), dt.date(anio + 1, 1, 31))
+    if n == "ahora":
+        f = _hoy(fecha)
+        try:
+            x = f.replace(year=anio)
+        except ValueError:
+            x = dt.date(anio, f.month, 28)
+        return (x, x)
+    if n in MOMENTOS_CALENDARIO:
+        for e in eventos:
+            if e.get("tipo") != "temporada" or not e.get("fin"):
+                continue
+            if _sin_acentos(e.get("evento", "")).startswith(n) and e["inicio"][:4] == str(anio):
+                return (_d(e["inicio"]), _d(e["fin"]))
+        return None
+    raise ValueError('No conozco el momento "%s". Los que sé calcular: %s.' % (nombre, ", ".join(MOMENTOS)))
+
+
+def _momento_tras(nombre, anio, eventos, desde, fecha=None):
+    """El momento en el anio dado, o en el siguiente si cae antes de 'desde' (p. ej. hot sale despues de noviembre)."""
+    for a in (anio, anio + 1):
+        m = momento(nombre, a, eventos, fecha)
+        if m and m[1] >= desde:
+            return m
+    return None
+
+
+def _pesos(x):
+    return "-" if x is None else _dinero(x)
+
+
+def _dia(d):
+    return "%d %s %d" % (d.day, MESES[d.month - 1], d.year)
+
+
+def _al(nombre_largo):
+    return "al " + nombre_largo[3:] if nombre_largo.startswith("el ") else "a " + nombre_largo
+
+
+def _del(nombre_largo):
+    return "del " + nombre_largo[3:] if nombre_largo.startswith("el ") else "de " + nombre_largo
+
+
+def cargar_antecesores(carpetas, producto, variante):
+    """(lista de antecesores, sucesor, origen). Sin entrada: el mismo producto uno, dos y tres anios antes."""
+    for c in carpetas:
+        ruta = os.path.join(c, ANTECESORES)
+        if not os.path.exists(ruta):
+            continue
+        try:
+            with open(ruta, encoding="utf-8") as f:
+                doc = json.load(f)
+            p = (doc.get("productos") or {}).get(producto)
+        except Exception as e:
+            _aviso("%s no se pudo leer (%s)" % (ruta, e))
+            continue
+        if p:
+            vs = p.get("variantes") or {}
+            lista = vs.get(variante) or vs.get("*")
+            if lista:
+                return lista, p.get("sucesor"), "historia/" + ANTECESORES
+    return ([{"producto": producto, "nombre": "el mismo producto %d año%s antes" % (k, "s" if k > 1 else ""),
+              "factores": {variante: 1.0}, "desfase": 364 * k} for k in (1, 2, 3)], None,
+            "el mismo producto en años anteriores (no está en %s)" % ANTECESORES)
+
+
+def _variantes_explicitas(carpetas, producto):
+    for c in carpetas:
+        ruta = os.path.join(c, ANTECESORES)
+        if os.path.exists(ruta):
+            try:
+                with open(ruta, encoding="utf-8") as f:
+                    vs = ((json.load(f).get("productos") or {}).get(producto) or {}).get("variantes") or {}
+                return [v for v in vs if v != "*"]
+            except Exception:
+                pass
+    return []
+
+
+class Datos(object):
+    """Lo que la pregunta necesita: productos, observaciones de varias carpetas, calendario, listas y cupones."""
+
+    def __init__(self, config, carpetas, fecha):
+        self.config, self.carpetas, self.fecha = config, carpetas, _hoy(fecha)
+        self.prods = leer_productos(config)
+        self.por_id = {p["id"]: p for p in self.prods}
+        obs = []
+        for c in carpetas:
+            obs += cargar_historia(c)
+        vigia, _ = cargar_historial(os.path.join(os.path.dirname(os.path.abspath(config)), HISTORIAL), self.prods)
+        self.obs = vigia + obs
+        self.eventos, self.listas, self.cupones = [], [], []
+        for c in carpetas:
+            ev, origen = cargar_calendario(c)
+            if origen != "respaldo":
+                self.eventos += ev
+            ls, origen = cargar_listas(c, [])
+            if origen != "productos.json":
+                self.listas += ls
+            for ruta in sorted(glob.glob(os.path.join(c, "cupones_*.csv"))):
+                try:
+                    with open(ruta, encoding="utf-8-sig", newline="") as f:
+                        for fila in csv.DictReader(f):
+                            fila["archivo"] = "historia/" + os.path.basename(ruta)
+                            self.cupones.append(fila)
+                except Exception as e:
+                    _aviso("%s no se pudo leer (%s)" % (ruta, e))
+        if not self.eventos:
+            self.eventos = cargar_calendario(os.path.join(AQUI, HISTORIA))[0]
+        self._series = {}
+
+    def serie(self, producto, factores, piso, solo_fuente=None):
+        clave = (producto, tuple(sorted(factores.items())), piso, solo_fuente)
+        if clave not in self._series:
+            hasta = self.fecha.isoformat()
+            todas = [o for o in self.obs if o["producto"] == producto]
+            validas = [o for o in todas if o["fecha"] <= hasta and clasificar(o, {producto: piso}) == "valida"
+                       and (solo_fuente is None or o["fuente"] == solo_fuente)]
+            self._series[clave] = (serie_diaria(validas, factores, self.fecha, todas), validas)
+        return self._series[clave]
+
+
+def _min_ventana(serie, ini, fin):
+    mejor, d = None, ini
+    while d <= fin:
+        v = serie.get(d)
+        if v and (mejor is None or v[0] < mejor[0]):
+            mejor = (v[0], d, v[1])
+        d += UN_DIA
+    return mejor
+
+
+def _duracion(serie, m):
+    precio, d0, o = m
+    if o.get("fuente") not in CONTINUAS:
+        return "un día, oferta publicada"
+    n = 1
+    for paso in (-UN_DIA, UN_DIA):
+        d = d0 + paso
+        while d in serie and serie[d][0] <= precio * (1 + CAMBIO_MINIMO) and serie[d][1].get("fuente") in CONTINUAS:
+            n += 1
+            d += paso
+    return "%d día%s seguido%s" % (n, "s" if n > 1 else "", "s" if n > 1 else "")
+
+
+def _existencias(serie_g, validas_g, ini, fin):
+    """Con la grafica de una tienda: dias del tramo sin precio de la tienda misma (se quedo sin existencia)."""
+    if not validas_g:
+        return "sin dato de existencias"
+    antes = any(o["fecha"] < ini.isoformat() for o in validas_g)
+    despues = any(o["fecha"] > fin.isoformat() for o in validas_g)
+    dias = (fin - ini).days + 1
+    con = sum(1 for k in range(dias) if (ini + dt.timedelta(days=k)) in serie_g)
+    tienda = validas_g[0].get("tienda") or "la tienda"
+    if con == dias:
+        return "%s con existencia" % tienda
+    if antes and despues:
+        return "%s sin existencia %d de %d día%s" % (tienda, dias - con, dias, "s" if dias > 1 else "")
+    return "sin dato de existencias"
+
+
+def temporada(serie, A, B, ventanas, fin, grafica=None):
+    """Lo que paso en una temporada. A, B: (inicio, fin). ventanas: [(nombre, inicio, fin)]. grafica: (serie, validas)
+    de las graficas de precio (para existencias)."""
+    r = {"A": _min_ventana(serie, *A), "B": _min_ventana(serie, *B), "normal": nivel_en(serie, A[0] - UN_DIA)[0],
+         "ventanas": [(nm, _min_ventana(serie, i, f)) for nm, i, f in ventanas]}
+    r["con_dato"] = bool(r["A"] and r["B"])
+    if r["con_dato"]:
+        pa, pb = r["A"][0], r["B"][0]
+        r["mejora"] = (pa - pb) / pa
+        r["b_mejor"] = r["mejora"] > CAMBIO_MINIMO
+        r["a_igual_o_mejor"] = not r["b_mejor"]
+    m = _min_ventana(serie, A[0], fin)
+    r["min"] = m
+    if m:
+        r["min_ventana"] = "otra fecha de %s" % MESES_LARGOS[m[1].month - 1]
+        for nm, i, f in [("A", A[0], A[1]), ("B", B[0], B[1])] + list(ventanas):
+            if i <= m[1] <= f:
+                r["min_ventana"] = nm
+                break
+        r["min_dur"] = _duracion(serie, m)
+        if r["A"]:
+            r["min_vs_A"] = (r["A"][0] - m[0]) / r["A"][0]
+            r["min_despues_B"] = m[1] > B[1]
+    for k in ("A", "B"):
+        if r[k]:
+            r[k + "_dur"] = _duracion(serie, r[k])
+    if grafica is not None:
+        r["exist_A"] = _existencias(grafica[0], grafica[1], *A)
+        r["exist_B"] = _existencias(grafica[0], grafica[1], *B)
+    return r
+
+
+def recomendar(temps, nombre_a, nombre_b):
+    """(codigo, frase) con la regla fija de la orden --pregunta."""
+    con = [t for t in temps if t.get("con_dato")]
+    n = len(con)
+    if n < 2:
+        return "sin_historial", "sin historial suficiente: no hay base para preferir un día; vale la regla de precio"
+    esperar = [t for t in con if t.get("min_despues_B") and t.get("min_vs_A", 0) >= BAJA_ESPERAR]
+    if 3 * len(esperar) >= 2 * n:
+        cuenta = {}
+        for t in esperar:
+            cuenta[t["min_ventana"]] = cuenta.get(t["min_ventana"], 0) + 1
+        ventana = max(sorted(cuenta), key=lambda k: cuenta[k])
+        return "esperar_otra", "esperar a %s" % ventana
+    if 3 * sum(1 for t in con if t["b_mejor"]) >= 2 * n:
+        return "esperar_b", "esperar " + _al(nombre_b)
+    if 3 * sum(1 for t in con if t["a_igual_o_mejor"]) >= 2 * n:
+        return "comprar_a", "comprar en " + nombre_a
+    return "sin_patron", "no hay patrón: compra cuando toque tu precio"
+
+
+def _celda(m, fuente=True):
+    if not m:
+        return "sin dato"
+    p, d, o = m
+    partes = [_pesos(p), "%d %s" % (d.day, MESES[d.month - 1]), o.get("tienda") or "tienda sin dato"]
+    cond = (o.get("condicion") or "").strip()
+    if cond:
+        partes.append(cond[:45] + ("…" if len(cond) > 45 else ""))
+    if (o.get("tipo_banco") or "") == "propio":
+        partes.append("banco propio (%s)" % (o.get("banco") or "sin nombre"))
+    if fuente:
+        partes.append(o.get("fuente") or "")
+    return " · ".join(x for x in partes if x).replace("|", "/")
+
+
+def _tope_comprar(datos, prod, var):
+    if os.path.abspath(datos.config) == os.path.abspath(os.path.join(AQUI, CONFIG)):
+        f = cargar_json(hoy=datos.fecha).get("%s|%s" % (prod["id"], var["id"]))
+        if f and f.get("topes"):
+            return f["topes"][1], "tope de comprar vigente (prospectiva.json)"
+    return topes_vigia(prod, var)[0][1], "tope de comprar de productos.json"
+
+
+def pregunta(datos, producto, variante, nombre_a, nombre_b):
+    """Texto de la respuesta (lo que paso, otras probabilidades, estimacion y recomendacion)."""
+    prod = datos.por_id.get(producto)
+    if prod is None:
+        raise ValueError('No conozco el producto "%s". Los que hay: %s.' % (producto, ", ".join(datos.por_id)))
+    var = next((v for v in prod["variantes"] if v["id"] == variante), None)
+    if var is None:
+        raise ValueError('El producto %s no tiene la variante "%s". Las que tiene: %s.' % (
+            producto, variante, ", ".join(v["id"] for v in prod["variantes"])))
+    na, nb = _sin_acentos(nombre_a), _sin_acentos(nombre_b)
+    for n in (na, nb):
+        momento(n, datos.fecha.year, datos.eventos, datos.fecha)   # valida el nombre
+    la, lb = NOMBRE_MOMENTO.get(na, na), NOMBRE_MOMENTO.get(nb, nb)
+    hoy = datos.fecha
+    anio0 = hoy.year if hoy.month >= 2 else hoy.year - 1
+    antecesores, sucesor, origen_ant = cargar_antecesores(datos.carpetas, producto, variante)
+    filas = []
+    for a in antecesores:
+        k = max(1, int(round(a["desfase"] / 364.0)))
+        Y = anio0 - k
+        A = momento(na, Y, datos.eventos, hoy)
+        B = _momento_tras(nb, Y, datos.eventos, A[0], hoy) if A else None
+        piso = a.get("piso", prod["piso"])
+        serie, _ = datos.serie(a["producto"], a["factores"], piso)
+        if not A or not B:
+            filas.append((Y, a, None, None, None))
+            continue
+        fin = max(horizonte(A[0]), B[1] + dt.timedelta(days=7))
+        semana = (B[1] + UN_DIA, B[1] + dt.timedelta(days=7))
+        nav, ene = momento("navidad", Y, []), momento("enero", Y, [])
+        ventanas = [("la semana siguiente", semana[0], semana[1]), ("Navidad", nav[0], nav[1]), ("enero", ene[0], ene[1])]
+        grafica = datos.serie(a["producto"], a["factores"], piso, "keepa")
+        t = temporada(serie, A, B, ventanas, fin, grafica)
+        t["etiquetas"] = {"A": la, "B": lb}
+        if t.get("min_ventana") in ("A", "B"):
+            t["min_ventana"] = t["etiquetas"][t["min_ventana"]]
+        filas.append((Y, a, A, B, t))
+    temps = [f[4] for f in filas if f[4]]
+    codigo, frase = recomendar(temps, la, lb)
+    L = ["## %s, %s: ¿%s o %s?" % (prod["nombre"], var["nombre"], la, lb), ""]
+    L.append("Comparado con: %s (de %s). Fecha de la pregunta: %s." % (
+        ", ".join(a["nombre"] for a in antecesores), origen_ant, _dia(hoy)))
+    L += ["", "### Lo que pasó (dato)", ""]
+    L.append("| Temporada | Comparado con | %s | %s | Semana siguiente | Navidad | Enero | Precio normal del mes anterior | "
+             "Cambio de un día al otro | Más barato de la temporada | Cuánto duró | Existencias |" % (la, lb))
+    L.append("|" + "---|" * 12)
+    con = 0
+    for Y, a, A, B, t in filas:
+        if t is None:
+            L.append("| %d | %s | sin dato (el calendario no trae la fecha) |  |  |  |  |  |  |  |  |  |" % (Y, a["nombre"]))
+            continue
+        vs = dict(t["ventanas"])
+        if t["con_dato"]:
+            con += 1
+            camb = ("bajó %.1f %%" % (100 * t["mejora"])) if t["b_mejor"] else (
+                "subió %.1f %%" % (-100 * t["mejora"]) if t["mejora"] < -CAMBIO_MINIMO else "igual (±1 %)")
+        else:
+            camb = "sin dato"
+        if t["min"]:
+            mn = "%s; %s%s" % (_celda(t["min"]), t["min_ventana"],
+                               ("; %.1f %% abajo del primer día" % (100 * t["min_vs_A"])) if "min_vs_A" in t else "")
+        else:
+            mn = "sin dato"
+        dur = "; ".join(x for x in ("primer día: " + t["A_dur"] if t.get("A_dur") else "",
+                                    "segundo: " + t["B_dur"] if t.get("B_dur") else "",
+                                    "el más barato: " + t["min_dur"] if t.get("min_dur") else "") if x) or "sin dato"
+        ex = "primer día: %s; segundo: %s" % (t.get("exist_A", "sin dato"), t.get("exist_B", "sin dato"))
+        L.append("| %d (%s a %s) | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+            Y, "%d %s" % (A[0].day, MESES[A[0].month - 1]), "%d %s" % (B[1].day, MESES[B[1].month - 1]),
+            a["nombre"], _celda(t["A"]), _celda(t["B"]), _celda(vs.get("la semana siguiente")), _celda(vs.get("Navidad")),
+            _celda(vs.get("enero")), _pesos(t["normal"]), camb, mn, dur, ex))
+    L.append("")
+    n = len([t for t in temps if t["con_dato"]])
+    if n:
+        mejoras = [t["mejora"] for t in temps if t["con_dato"] and t["b_mejor"]]
+        L.append("- En %d de %d temporadas con dato, %s mejoró %s%s." % (
+            len(mejoras), n, lb, _al(la),(" (mediana de la mejora: %.1f %%)" % (100 * _pct(mejoras, 50))) if mejoras else ""))
+        tarde = [t for t in temps if t["con_dato"] and t.get("min_despues_B")]
+        if tarde:
+            L.append("- En %d de %d el precio más barato llegó después %s: %s." % (
+                len(tarde), n, _del(lb), "; ".join("%s (%s), %.1f %% abajo del primer día" % (
+                    t["min_ventana"], _dia(t["min"][1]), 100 * t.get("min_vs_A", 0)) for t in tarde)))
+        else:
+            L.append("- En 0 de %d el precio más barato llegó después %s." % (n, _del(lb)))
+    else:
+        L.append("- Ninguna temporada pasada tiene dato en los dos días.")
+    L.append("- Precios con garantía en México, sin canje y sin bancos ajenos; 1 TB llevado a 512 GB con las listas de "
+             "lanzamiento cuando el antecesor no tiene 512 GB." if any(len(a["factores"]) > 1 for a in antecesores)
+             else "- Precios con garantía en México, sin canje y sin bancos ajenos.")
+    # otras probabilidades
+    L += ["", "### Otras probabilidades (dato)", ""]
+    for Y, a, A, B, t in filas:
+        if t:
+            L.append("- %d (%s): existencias, primer día %s, segundo %s; el más barato duró %s." % (
+                Y, a["nombre"], t.get("exist_A", "sin dato"), t.get("exist_B", "sin dato"), t.get("min_dur", "sin dato")))
+    vig = [o for o in datos.obs if o["producto"] == producto and o["variante"] == variante
+           and VIGENTE_HASTA.search(o.get("condicion") or "")]
+    if vig:
+        o = max(vig, key=lambda x: x["fecha"])
+        L.append("- Promoción con fecha de fin: el %s %s anunciaba \"vigente hasta %s\" (%s)." % (
+            o["fecha"], o.get("tienda") or "", VIGENTE_HASTA.search(o["condicion"]).group(1), o.get("archivo", "")))
+    prods_cup = {producto} | {a["producto"] for a in antecesores}
+    cups = [c for c in datos.cupones if (c.get("producto") or "").lower() in prods_cup]
+    if cups:
+        con_fin = [c for c in cups if (c.get("duracion") or "").strip()]
+        L.append("- Cupones registrados de este producto o sus antecesores: %d (%s); %d con duración anotada%s." % (
+            len(cups), cups[0]["archivo"], len(con_fin),
+            (": " + "; ".join("%s %s" % (c.get("fecha", ""), c["duracion"]) for c in con_fin[:3])) if con_fin else ""))
+    else:
+        L.append("- Sin cupones registrados para este producto.")
+    ls = sorted([l for l in datos.listas if l.get("producto") in prods_cup and l.get("desde")], key=lambda l: l["desde"])
+    if ls:
+        L.append("- Cambios de precio de lista (historia/listas.csv): " + "; ".join(
+            "%s %s %s: %s" % (l["desde"], l["producto"], l["variante"], _pesos(l["lista"])) for l in ls[-4:]) + ".")
+    else:
+        L.append("- Sin cambios de precio de lista registrados.")
+    suc = [e for e in datos.eventos if sucesor and e.get("producto") == sucesor]
+    if suc:
+        L.append("- Llegada del sucesor: " + "; ".join("%s (%s%s)" % (e["evento"], e["inicio"],
+                                                                    (" a " + e["fin"]) if e.get("fin") else "") for e in suc) + ".")
+    else:
+        L.append("- Llegada del sucesor: sin fecha en el calendario.")
+    # estimacion
+    L += ["", "### Estimación (no es dato)", ""]
+    A0 = momento(na, anio0, datos.eventos, hoy)
+    B0 = _momento_tras(nb, anio0, datos.eventos, A0[0], hoy) if A0 else None
+    est = None
+    try:
+        if A0 and B0:
+            propia, _ = datos.serie(producto, {variante: 1.0}, prod["piso"])
+            analogos = [dict(a, corto=a["nombre"], serie=datos.serie(a["producto"], a["factores"],
+                                                                      a.get("piso", prod["piso"]))[0]) for a in antecesores]
+            evs = [{"evento": "A", "inicio": A0[0].isoformat(), "fin": A0[1].isoformat()},
+                   {"evento": "B", "inicio": B0[0].isoformat(), "fin": B0[1].isoformat()}]
+            pron = pronostico(propia, analogos, hoy, evs)
+            est = {pe["evento"]: pe for pe in pron["pisos_esperados"]}
+    except Exception as e:
+        _aviso("estimación no calculada (%s: %s)" % (type(e).__name__, e))
+    if est:
+        for k, nm in (("A", la), ("B", lb)):
+            pe = est.get(k)
+            if pe:
+                L.append("- Estimación para %s: alrededor de %s (rango %s a %s), repitiendo lo que hicieron los años "
+                         "anteriores en las mismas fechas a la escala del precio de hoy." % (
+                             nm, _pesos(pe["piso"]), _pesos(pe["rango"][0]), _pesos(pe["rango"][1])))
+            else:
+                L.append("- Estimación para %s: sin cálculo (la fecha ya pasó o falta dato de años anteriores)." % nm)
+    else:
+        L.append("- Sin estimación: faltan datos de este año o de los anteriores para simular las fechas.")
+    X, origen_x = _tope_comprar(datos, prod, var)
+    L += ["", "### Recomendación", "", "%s." % (frase[0].upper() + frase[1:]),
+          "Regla práctica: compra sin esperar, sea el día que sea, si baja de %s (%s)." % (_pesos(X), origen_x), ""]
+    texto = "\n".join(L)
+    if PROHIBIDAS.search(texto.replace("llevado a 512", "")):
+        _aviso("la respuesta trae una palabra de la lista de jerga: %s" % PROHIBIDAS.search(texto).group(0))
+    return texto, codigo
+
+
+def _variantes_con_datos(datos, producto):
+    prod = datos.por_id[producto]
+    explicitas = _variantes_explicitas(datos.carpetas, producto)
+    propias = {o["variante"] for o in datos.obs if o["producto"] == producto}
+    vs = [v["id"] for v in prod["variantes"] if v["id"] in explicitas or (not explicitas and v["id"] in propias)]
+    return vs or [v["id"] for v in prod["variantes"]]
+
+
+def _slug(s):
+    return re.sub(r"[^a-z0-9]+", "-", _sin_acentos(s)).strip("-")
+
+
+def orden_pregunta(argv):
+    def opc(nombre, defecto=None):
+        return argv[argv.index(nombre) + 1] if nombre in argv[:-1] else defecto
+    producto = argv[1] if len(argv) > 1 else ""
+    if "--entre" not in argv or argv.index("--entre") + 2 >= len(argv):
+        print('Falta --entre "<momento A>" "<momento B>". Los momentos que sé calcular: %s.' % ", ".join(MOMENTOS))
+        return 2
+    i = argv.index("--entre")
+    a, b = argv[i + 1], argv[i + 2]
+    config = opc("--config", os.path.join(AQUI, CONFIG))
+    hist = opc("--historia")
+    carpetas = hist.split(";") if hist else [c for c in (os.path.join(AQUI, HISTORIA), os.path.join(AQUI, HISTORIA, "banco"))
+                                             if os.path.isdir(c)]
+    datos = Datos(config, carpetas, opc("--fecha"))
+    try:
+        if "--guardar" in argv:
+            bloques = []
+            for p in datos.prods:
+                for v in _variantes_con_datos(datos, p["id"]):
+                    bloques.append(pregunta(datos, p["id"], v, a, b)[0])
+            ruta = os.path.join(carpetas[0], "PREGUNTA_%s_%s.md" % (_slug(a), _slug(b)))
+            _escribir(ruta, "# ¿%s o %s?\n\n%s\n" % (a, b, "\n\n".join(bloques)))
+            print("escrito %s" % ruta)
+        if producto not in datos.por_id:
+            raise ValueError('No conozco el producto "%s". Los que hay: %s.' % (producto, ", ".join(datos.por_id)))
+        vs = [opc("--variante")] if opc("--variante") else _variantes_con_datos(datos, producto)
+        for v in vs:
+            print(pregunta(datos, producto, v, a, b)[0])
+    except ValueError as e:
+        print(str(e))
+        return 2
+    return 0
+
+
+def _selftest_pregunta():
+    D = dt.date
+    for anio, bf, cm in ((2023, D(2023, 11, 24), D(2023, 11, 27)), (2024, D(2024, 11, 29), D(2024, 12, 2)),
+                         (2025, D(2025, 11, 28), D(2025, 12, 1)), (2026, D(2026, 11, 27), D(2026, 11, 30))):
+        assert momento("black friday", anio, []) == (bf, bf), anio
+        assert momento("Cyber Monday", anio, []) == (cm, cm), anio
+    try:
+        momento("día del niño", 2026, [])
+        assert False
+    except ValueError as e:
+        assert "black friday" in str(e)
+    assert momento("hot sale", 2025, [{"evento": "Hot Sale 2025", "tipo": "temporada", "inicio": "2025-05-26",
+                                       "fin": "2025-06-03"}]) == (D(2025, 5, 26), D(2025, 6, 3))
+
+    def serie(cambios):
+        s, d = {}, D(2025, 10, 1)
+        while d <= D(2026, 1, 31):
+            s[d] = (cambios.get(d, 10000), {"fuente": "keepa", "tienda": "T", "condicion": "", "tipo_banco": "ninguno"})
+            d += UN_DIA
+        return s
+    A, B = (D(2025, 11, 28),) * 2, (D(2025, 12, 1),) * 2
+    ven = [("la semana siguiente", D(2025, 12, 2), D(2025, 12, 8)), ("Navidad", D(2025, 12, 16), D(2026, 1, 6)),
+           ("enero", D(2026, 1, 7), D(2026, 1, 31))]
+    fin = D(2026, 1, 31)
+    t_mejora = temporada(serie({A[0]: 9000, B[0]: 8500}), A, B, ven, fin)
+    assert t_mejora["con_dato"] and t_mejora["b_mejor"] and abs(t_mejora["mejora"] - 500 / 9000.0) < 1e-9
+    assert t_mejora["min_ventana"] == "B" and not t_mejora["min_despues_B"]
+    t_igual = temporada(serie({A[0]: 9000, B[0]: 9000}), A, B, ven, fin)
+    assert t_igual["con_dato"] and not t_igual["b_mejor"] and t_igual["a_igual_o_mejor"]
+    s_hueco = {d: v for d, v in serie({}).items() if not (D(2025, 11, 20) <= d <= D(2025, 12, 5))}
+    t_sin = temporada(s_hueco, A, B, ven, fin)
+    assert not t_sin["con_dato"]
+    t_nav = temporada(serie({A[0]: 9000, B[0]: 9000, D(2025, 12, 20): 8000}), A, B, ven, fin)
+    assert t_nav["min_despues_B"] and t_nav["min_ventana"] == "Navidad" and t_nav["min_vs_A"] > 0.1
+    la, lb = "el Black Friday (viernes)", "el Cyber Monday (lunes)"
+    assert recomendar([t_mejora, t_sin], la, lb)[0] == "sin_historial"
+    assert recomendar([t_nav, t_nav, t_mejora], la, lb) == ("esperar_otra", "esperar a Navidad")
+    assert recomendar([t_mejora, t_mejora, t_igual], la, lb) == ("esperar_b", "esperar al Cyber Monday (lunes)")
+    assert recomendar([t_igual, t_igual, t_mejora], la, lb)[0] == "comprar_a"
+    assert recomendar([t_mejora, t_igual], la, lb)[0] == "sin_patron"
+    # producto de muestra (otra marca y otra categoria), sin tocar el programa
+    muestra = {"productos": [{"id": "tableta-muestra", "nombre": "Tableta de muestra", "marca": "otra", "piso": 3000,
+                              "fracciones": [0.6, 0.7, 0.8], "topes_fijos": {},
+                              "variantes": [{"id": "128", "nombre": "Tableta de muestra 128 GB", "lista": 9999},
+                                            {"id": "256", "nombre": "Tableta de muestra 256 GB", "lista": 11999}]}]}
+    with tempfile.TemporaryDirectory() as tmp:
+        cfg = os.path.join(tmp, "productos.json")
+        _escribir(cfg, json.dumps(muestra))
+        vacia = os.path.join(tmp, "vacia")
+        os.makedirs(vacia)
+        dv = Datos(cfg, [vacia], "2026-11-25")
+        txt, cod = pregunta(dv, "tableta-muestra", "128", "black friday", "cyber monday")
+        assert cod == "sin_historial" and "sin historial suficiente" in txt.lower(), txt
+        assert not PROHIBIDAS.search(txt), PROHIBIDAS.search(txt).group(0)
+        llena = os.path.join(tmp, "llena")
+        os.makedirs(llena)
+        filas = [",".join(COLUMNAS)]
+        for Y in (2023, 2024, 2025):
+            bf = black_friday(Y)
+            for d, p in ((D(Y, 10, 1), 8000), (bf, 7000), (bf + dt.timedelta(days=3), 6800),
+                         (bf + dt.timedelta(days=4), 8000)):
+                filas.append("%s,tableta-muestra,128,TiendaX,%d,,,,ninguno,TiendaX,si,keepa,https://ejemplo,"
+                             "MUESTRA:%s,inventado para la prueba" % (d.isoformat(), p, d.isoformat()))
+        filas.append("2026-01-31,tableta-muestra,128,TiendaX,8000,,,,ninguno,TiendaX,si,keepa,https://ejemplo,"
+                     "MUESTRA:2026-01-31,inventado para la prueba")
+        _escribir(os.path.join(llena, "keepa_muestra.csv"), "\n".join(filas) + "\n")
+        dl = Datos(cfg, [llena], "2026-11-25")
+        txt, cod = pregunta(dl, "tableta-muestra", "128", "black friday", "cyber monday")
+        assert cod == "esperar_b" and "Lo que pasó (dato)" in txt and "En 3 de 3 temporadas" in txt, txt
+        assert not PROHIBIDAS.search(txt), PROHIBIDAS.search(txt).group(0)
+        try:
+            pregunta(dl, "tableta-muestra", "128", "black friday", "día del niño")
+            assert False
+        except ValueError as e:
+            assert "cyber monday" in str(e)
     return True
 
 
@@ -2589,6 +3154,8 @@ def main(argv):
         return 0
     if orden == "--rastro" and len(argv) >= 3:
         return _rastro(argv[1], argv[2])
+    if orden == "--pregunta":
+        return orden_pregunta(argv)
     print(__doc__)
     return 2
 

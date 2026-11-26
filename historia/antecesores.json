@@ -1,0 +1,29 @@
+{
+ "_como_usar": "Parentesco de cada producto con los modelos o anios anteriores con que se compara (orden --pregunta de prospectiva.py). desfase = dias entre la misma fecha de este anio y la del antecesor (364 = un anio). factores pasan la variante del antecesor a la de este producto (1 TB a su equivalente de 512 GB, por las listas de lanzamiento de historia/listas.csv). '*' vale para todas las variantes. Un producto que no este aqui se compara consigo mismo uno, dos y tres anios antes.",
+ "productos": {
+  "fold8": {
+   "sucesor": "fold9",
+   "variantes": {
+    "ultra-512": [
+     {"producto": "fold7", "nombre": "Fold7", "factores": {"512": 1.0, "1tb": 0.867254}, "desfase": 364, "piso": 12000},
+     {"producto": "fold6", "nombre": "Fold6", "factores": {"512": 1.0, "1tb": 0.884613}, "desfase": 728, "piso": 12000},
+     {"producto": "fold5", "nombre": "Fold5", "factores": {"512": 1.0}, "desfase": 1092, "piso": 12000}
+    ],
+    "normal-512": [
+     {"producto": "fold7", "nombre": "Fold7", "factores": {"512": 1.0, "1tb": 0.867254}, "desfase": 364, "piso": 12000},
+     {"producto": "fold6", "nombre": "Fold6", "factores": {"512": 1.0, "1tb": 0.884613}, "desfase": 728, "piso": 12000},
+     {"producto": "fold5", "nombre": "Fold5", "factores": {"512": 1.0}, "desfase": 1092, "piso": 12000}
+    ]
+   }
+  },
+  "ps5": {
+   "variantes": {
+    "digital": [
+     {"producto": "ps5", "nombre": "la misma consola un año antes", "factores": {"digital": 1.0}, "desfase": 364},
+     {"producto": "ps5", "nombre": "la misma consola dos años antes", "factores": {"digital": 1.0}, "desfase": 728},
+     {"producto": "ps5", "nombre": "la misma consola tres años antes", "factores": {"digital": 1.0}, "desfase": 1092}
+    ]
+   }
+  }
+ }
+}

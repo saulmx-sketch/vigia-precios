@@ -347,6 +347,8 @@ ASINS_BANCO = {
                ("s25ultra", "256", "B0DNTX93TX"), ("s25ultra", "256", "B0FB2TLPSH")],
     "fold5": [("fold5", "512", "B0CBTG1624")],
     "xbox": [("xboxs", "unica", "B08H71MRV7"), ("xboxs", "unica", "B0DG6G4WST"), ("xboxx", "unica", "B0DFZMY6RL")],
+    # P3: el M2 Wi-Fi 128 GB no aparecio en las 3 busquedas permitidas (solo 1 TB y reacondicionados)
+    "ipadair": [("ipadair-m3", "128", "B0DZ7L435G")],
 }
 # Sin precio de lista aproximado: Keepa empieza despues del lanzamiento y sus primeros 60 dias no son el lanzamiento
 # (S23 Ultra Verde: $23,750 sostenido, pero el lanzamiento se ve en $31,000 pocos dias).
