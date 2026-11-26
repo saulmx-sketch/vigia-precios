@@ -1007,6 +1007,11 @@ def e17_producto_apagado(v):
         visto0, precios0 = b0.json(), b0.json(b0.precios)
     finally:
         b0.borrar()
+    # memoria vieja del Fold8 que, dormida, daria avisos falsos al reencender (revisor del apagado, H1)
+    visto0.setdefault("agotados", {})["Amazon|fold8|ultra-512"] = {"desde": "desde 2026-11-01 10:00", "precio": 40000.0}
+    visto0.setdefault("avisado", {})["Samsung|fold8|normal-512"] = 30000.0
+    visto0.setdefault("caida_avisada", []).append("Liverpool (fold8)")
+    visto0.setdefault("caida_desde", {})["Liverpool (fold8)"] = "2026-11-26T10:00+00:00"
     afirma(any("|fold8|" in k for k in precios0) and any("|fold8|" in k for k in visto0.get("conocidos", {})),
            ("17: la corrida encendida no dejo claves del Fold8", sorted(precios0)))
     b = Banco(v, visto=visto0, apagar=("fold8",))
@@ -1056,9 +1061,12 @@ def e17_producto_apagado(v):
         afirma(ps5 >= n, ("17: peticiones de la PS5", ps5), b)
         caidas = {k: x for k, x in est.get("fallos_fuente", {}).items() if x}
         afirma(not caidas, ("17: fuentes con falla", caidas, est.get("ultimo_error")), b)
-        dormidas = [k for k in est.get("conocidos", {}) if "|fold8|" in k]
-        afirma(dormidas and not [k for k in est.get("agotados", {}) if "|fold8|" in k],
-               ("17: claves del Fold8 en el estado", dormidas, est.get("agotados")), b)
+        quedan = [(campo, k) for campo in ("conocidos", "agotados", "ausente", "avisado", "avisado_nivel")
+                  for k in est.get(campo, {}) if "|fold8|" in k]
+        quedan += [n for n in est.get("caida_avisada", []) + list(est.get("caida_desde", {})) if "(fold8)" in n]
+        afirma(not quedan, ("17: memoria del Fold8 en el estado", quedan), b)
+        afirma([k for k in est.get("conocidos", {}) if "|ps5|" in k], ("17: se borro la memoria de la PS5", est.get("conocidos")), b)
+        dormidas = [k for k in visto0.get("conocidos", {}) if "|fold8|" in k]
         # cobertura: lo dice apagado y no lista sus topes
         sal = io.StringIO()
         with contextlib.redirect_stdout(sal):
@@ -1070,13 +1078,20 @@ def e17_producto_apagado(v):
         for p in cfg["productos"]:
             p.pop("apagado", None)
         b.escribe(b.config, json.dumps(cfg, ensure_ascii=False))
-        c, avs, srv, _ = b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        # mientras estuvo apagado, Costco dejo de vender el Fold8: al reencender no debe salir "Agotado" (H1)
+        sin_costco = con(mundo_base(), cos=costco_busqueda())
+        reenc = []
+        for i in range(v.AUSENCIAS_AGOTADO + 1):
+            c, avs, srv, _ = b.correr(sin_costco, avanza=_dt.timedelta(hours=1))
+            afirma(c == 0, ("17: reencendido, codigo", i, c), b)
+            reenc += asuntos(avs)
         tabla = b.json(b.precios)
-        afirma(c == 0 and asuntos(avs) == [] and any("|fold8|" in k for k in tabla) and srv.cuantas(FOLD8_URL) > 0,
-               ("17: reencendido", asuntos(avs), sorted(tabla)), b)
+        afirma(reenc == [] and any("|fold8|" in k for k in tabla) and srv.cuantas(FOLD8_URL) > 0,
+               ("17: reencendido", reenc, sorted(tabla)), b)
         return ("%d corridas apagado (Fold8 de ganga y sus tiendas caidas; la ultima con promos): 0 peticiones y 0 avisos "
-                "del Fold8, %d peticiones de la PS5, Fold8 fuera de precios.json, %d claves dormidas; reencendido: se "
-                "lee de nuevo sin avisos" % (n, ps5, len(dormidas)))
+                "del Fold8, %d peticiones de la PS5, Fold8 fuera de precios.json, su memoria borrada (%d claves) y la de "
+                "la PS5 intacta; reencendido con Costco sin Fold8: %d corridas, se lee de nuevo y 0 avisos"
+                % (n, ps5, len(dormidas), v.AUSENCIAS_AGOTADO + 1))
     finally:
         b.borrar()
 

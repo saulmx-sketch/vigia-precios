@@ -260,6 +260,31 @@ def vigilados(prods):
     return [p for p in prods if not p.get("apagado")]
 
 
+def olvidar_apagados(estado, apagados):
+    """Borra del estado la memoria de los productos apagados (revisor del apagado, H1, 26 nov 2026): dormida, al
+    reencender daba "Agotado" falsos (lo que dejo de venderse durante semanas contaba como "4 corridas seguidas"), un
+    "Volvio a la venta" con fecha vieja y un precio ya avisado que tapaba el aviso nuevo. Al reencender, el producto
+    empieza limpio: lo que se vea entra a conocidos sin aviso y los avisos de precio salen por su nivel."""
+    if not apagados:
+        return
+    def suya(clave):
+        return (str(clave).split("|") + [""])[1] in apagados
+    for campo in ("conocidos", "agotados", "ausente", "avisado", "avisado_nivel", "promos_avisado"):
+        caja = estado.get(campo)
+        if isinstance(caja, dict):
+            for c in [c for c in caja if suya(c)]:
+                caja.pop(c)
+    # fuentes "Tienda (producto)" del apagado (H2): sin ellas, al reencender no sale un "volvio a leer" viejo
+    propias = lambda n: any(str(n).endswith(" (%s)" % a) for a in apagados)
+    for campo in ("fallos_fuente", "caida_desde", "ultimo_error"):
+        caja = estado.get(campo)
+        if isinstance(caja, dict):
+            for n in [n for n in caja if propias(n)]:
+                caja.pop(n)
+    if isinstance(estado.get("caida_avisada"), list):
+        estado["caida_avisada"] = [n for n in estado["caida_avisada"] if not propias(n)]
+
+
 def variante(prod, titulo):
     """La variante del producto que casa con el titulo, o None si no interesa."""
     if not re.search(prod["patron"], titulo, re.I) or re.search(EXCLUIR, titulo, re.I):
@@ -2628,6 +2653,7 @@ def _main():
     if not es_principal(CONFIG):   # archivo de muestra: no se mezcla con la memoria de los productos vigilados
         estado = {}
     antes = json.dumps(estado, sort_keys=True)
+    olvidar_apagados(estado, apagados)   # despues de "antes": si borra algo, visto.json se reescribe
     fallos = estado.setdefault("fallos_fuente", {})
     avisado, avisado_nivel = normalizar_avisado(estado)   # avisado: solo numeros (vuelta atras segura)
     vistos = estado.setdefault("vistos", {})
