@@ -226,6 +226,7 @@ def cargar_prospectiva():
     Devuelve {} si el modulo o el archivo faltan, el archivo vencio o no pasa su validacion: entonces topes()
     usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia."""
     try:
+        sys.dont_write_bytecode = True   # sin __pycache__: el paso que guarda el estado en la nube hace "git add -A"
         import prospectiva
         return prospectiva.cargar_json() or {}
     except Exception as ex:
@@ -254,7 +255,8 @@ def topes(prod, var):
 def nivel(precio, prod, var):
     g, c, t = topes(prod, var)
     bajo = prospectiva_de(prod, var).get("sin_confirmar_bajo")
-    if bajo and precio < bajo:   # muy por debajo de todo lo visto con garantia: se avisa, pero no como GANGA
+    # muy por debajo de todo lo visto con garantia: se avisa, pero no como GANGA (el umbral nunca alcanza a la ganga)
+    if type(bajo) in (int, float) and 0 < bajo < g and precio < bajo:
         return "SIN CONFIRMAR"
     return "GANGA" if precio <= g else "COMPRAR" if precio <= c else "MIRAR" if precio <= t else None
 
@@ -1673,7 +1675,7 @@ def aviso_foro(prods, it):
         "- Vigencia: no se sabe (publicada {})".format(it["fecha"]), "",
         it["link"], "",
         "No se pudo releer la ficha (esta tienda no deja releer la ficha): ábrela antes de comprar.", "",
-        *["- Por qué: " + r for r in [(globals().get("razon") or (lambda *a: ""))(precio, prod, var) if precio is not None else ""] if r],   # linea A (si falta razon, el aviso sale sin ese renglon)
+        *["- Por qué: " + r for r in [(globals().get("razon") or (lambda *a: ""))(precio, prod, var) if precio is not None and me_aplica else ""] if r],   # linea A (si falta razon, el aviso sale sin ese renglon)
         "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t), "",
         "> " + limpio(it["descripcion"]).replace("\n", "\n> ")])
     return asunto, cuerpo
