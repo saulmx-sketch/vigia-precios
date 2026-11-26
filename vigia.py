@@ -97,6 +97,29 @@ NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BB
 
 
 # ------------------------------------------------------------------------------- utilidades
+# Tope duro de la corrida: pasado esto desde el arranque de main() ya no empieza ninguna peticion ni reintento, para
+# que siempre alcance a guardar visto.json y precios.json antes de los 12 min del trabajo de GitHub (una tienda o el
+# foro colgados la hacian morir sin guardar). Fuera de main() (_ARRANQUE sin fijar) nada cambia.
+SEGUNDOS_DUROS = 600
+_ARRANQUE = [None]
+
+
+def reloj():
+    """Reloj de los topes de tiempo (sustituible en pruebas)."""
+    return time.monotonic()
+
+
+def tiempo_de_peticion(tope=30):
+    """Timeout de la siguiente peticion: `tope`, recortado a lo que quede del tope duro (minimo 5 s); pasado el tope
+    duro, RuntimeError. Fuera de main(), `tope` sin mas."""
+    if _ARRANQUE[0] is None:
+        return tope
+    queda = SEGUNDOS_DUROS - (reloj() - _ARRANQUE[0])
+    if queda <= 0:
+        raise RuntimeError("se acabo el tiempo de la corrida")
+    return max(5, min(tope, queda))
+
+
 def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
     """(estado, texto). Un corte de red o un tope de tiempo se reintenta una vez tras `reintento` segundos; si vuelve
     a fallar, RuntimeError("sin respuesta: <host>: <causa>"). Una respuesta HTTP con error no lanza: da su codigo."""
@@ -114,10 +137,12 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0,
     req = urllib.request.Request(url, data=cuerpo, headers=cab, method=metodo)
     abre = abridor.open if abridor else urllib.request.urlopen
     if pausa:
+        tiempo_de_peticion()   # pasado el tope duro no se espera la pausa: se lanza ya
         time.sleep(pausa)
     for intento in (1, 2):
+        espera = tiempo_de_peticion(30)   # pasado el tope duro: no se empieza (ni el reintento)
         try:
-            with abre(req, timeout=30) as r:
+            with abre(req, timeout=espera) as r:
                 b = r.read()
                 if r.headers.get("Content-Encoding") == "gzip":
                     b = gzip.decompress(b)
@@ -134,6 +159,7 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0,
                 causa = getattr(e, "reason", None) or e
                 raise RuntimeError("sin respuesta: %s: %s" % (urllib.parse.urlsplit(url).hostname, causa))
             if reintento:
+                tiempo_de_peticion()
                 time.sleep(reintento)
 
 
@@ -872,9 +898,9 @@ def leer_liverpool(prod, cfg, estado):
            (pid not in cands or precio < cands[pid][1]):
             cands[pid] = (titulo, precio)
     elegidos = sorted(cands.items(), key=lambda kv: kv[1][1])[:LIVERPOOL_FICHAS]
-    salida, leidas, seguidas, t0 = [], 0, 0, time.monotonic()
+    salida, leidas, seguidas, t0 = [], 0, 0, reloj()
     for i, (pid, (titulo, precio)) in enumerate(elegidos):
-        if i and (seguidas >= 2 or time.monotonic() - t0 > LIVERPOOL_SEGUNDOS):
+        if i and (seguidas >= 2 or reloj() - t0 > LIVERPOOL_SEGUNDOS):
             print("   Liverpool: se dejan de abrir fichas (%s); no se publican %d articulos" % (
                 "2 fallas seguidas" if seguidas >= 2 else "pasaron %d s" % LIVERPOOL_SEGUNDOS, len(elegidos) - i))
             break
@@ -1037,7 +1063,7 @@ def confirmar(o, prod, estado):
         return "sin_releer", o, "esta tienda no deja releer la ficha"
     if estado.get("_confirmaciones", 0) >= TOPE_CONFIRMAR:
         return "sin_releer", o, "sin tiempo"
-    if estado.get("_arranque") is not None and time.monotonic() - estado["_arranque"] > SEGUNDOS_CONFIRMAR:
+    if estado.get("_arranque") is not None and reloj() - estado["_arranque"] > SEGUNDOS_CONFIRMAR:
         return "sin_releer", o, "sin tiempo"
     try:
         return _confirmar(o, prod, estado, lector)
@@ -1566,7 +1592,8 @@ def abrir_issue(titulo, texto):
     req = urllib.request.Request("https://api.github.com/repos/%s/issues" % repo, data=datos, method="POST", headers={
         "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios", "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
+    # mismo tope duro que pedir(): un aviso que no sale por tiempo no se marca y sale en la corrida siguiente
+    with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
         print("   aviso abierto:", json.loads(r.read()).get("html_url"))
     return True
 
@@ -1707,7 +1734,7 @@ SEGUNDOS_CORRIDA = 420
 
 
 def reloj_vencido(arranque, ahora=None):
-    return (time.monotonic() if ahora is None else ahora) - arranque > SEGUNDOS_CORRIDA
+    return (reloj() if ahora is None else ahora) - arranque > SEGUNDOS_CORRIDA
 
 
 def recortar_vistos(vistos, tope=400):
@@ -2120,6 +2147,13 @@ def selftest():
 
 
 def main():
+    try:
+        return _main()
+    finally:
+        _ARRANQUE[0] = None   # el tope duro solo vale dentro de una corrida
+
+
+def _main():
     if "--selftest" in sys.argv:
         return selftest()
     if "--cobertura" in sys.argv:
@@ -2131,7 +2165,8 @@ def main():
         return 3
     prueba = os.environ.get("PRUEBA", "").lower() in ("1", "true", "yes")
     ahora = dt.datetime.now(dt.timezone.utc)
-    arranque = time.monotonic()   # reloj general de la corrida (SEGUNDOS_CORRIDA)
+    arranque = reloj()   # reloj general de la corrida (SEGUNDOS_CORRIDA) y del tope duro (SEGUNDOS_DUROS)
+    _ARRANQUE[0] = arranque
     LIVERPOOL_LEIDAS.clear()
     prods = cargar_config(CONFIG)
     por_id = {p["id"]: p for p in prods}

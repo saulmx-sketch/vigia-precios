@@ -26,6 +26,7 @@ import sys
 import tempfile
 import time
 import types
+import urllib.error
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
@@ -224,9 +225,12 @@ class Banco:
         self.issues.append((asunto, cuerpo))
         return True
 
-    def correr(self, mapa, args=(), env=None, avanza=_dt.timedelta(minutes=15)):
-        """Una corrida de main(). Devuelve (codigo, avisos de esta corrida, servidor, salida impresa)."""
+    def correr(self, mapa, args=(), env=None, avanza=_dt.timedelta(minutes=15), lento=0, lento_si=None):
+        """Una corrida de main(). Devuelve (codigo, avisos de esta corrida, servidor, salida impresa).
+        lento=N: se usa el pedir() de verdad sobre un transporte falso; cada peticion (cuya direccion case con
+        lento_si, o todas) adelanta N segundos el reloj falso de vigia.reloj(). srv.inicios = [(segundo, url)]."""
         v, banco = self.v, self
+        self.mono = getattr(self, "mono", 1000.0)
 
         class Ahora(_dt.datetime):
             @classmethod
@@ -237,12 +241,25 @@ class Banco:
         dt_falso.datetime = Ahora
 
         srv = Servidor(mapa)
+        srv.inicios, mono0 = [], self.mono
+
+        def transporte(req, timeout=None):
+            url = req.full_url
+            srv.inicios.append((banco.mono - mono0, url, timeout))
+            if not lento_si or re.search(lento_si, url):
+                banco.mono += lento
+            estado, texto = srv(url)
+            cuerpo = texto.encode("utf-8")
+            if estado >= 400:
+                raise urllib.error.HTTPError(url, estado, "falso", {}, io.BytesIO(cuerpo))
+            return Respuesta(estado, cuerpo)
         env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None, "VIGIA_CONFIG": None}, **(env or {}))
         # VIGIA_CONFIG se lee al importar (v.CONFIG): si quedo puesta, main() se negaria a escribir estado y avisar.
         # Durante cada corrida v.CONFIG es la copia de la escena (que cargar_config lee de todos modos).
         guardado = (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
                     list(sys.argv), {k: os.environ.get(k) for k in env}, v.urllib.request.build_opener,
-                    getattr(v, "CONFIG", None), getattr(v, "CONFIG_PRINCIPAL", None))
+                    getattr(v, "CONFIG", None), getattr(v, "CONFIG_PRINCIPAL", None), getattr(v, "reloj", None),
+                    v.urllib.request.urlopen)
         original_config = v.cargar_config
         n0 = len(self.issues)
         salida = io.StringIO()
@@ -256,7 +273,12 @@ class Banco:
             time.sleep = lambda *a, **k: None
             # el carrito de Samsung arma un abridor con cookies (carga los certificados de Windows: 30 ms cada vez);
             # el servidor falso no lo usa, asi que basta un objeto vacio
-            v.urllib.request.build_opener = lambda *a, **k: types.SimpleNamespace(open=None)
+            v.urllib.request.build_opener = lambda *a, **k: types.SimpleNamespace(open=transporte if lento else None)
+            if guardado[13] is not None:
+                v.reloj = lambda: banco.mono      # reloj falso de los topes de tiempo (solo avanza con lento)
+            if lento:
+                v.pedir = pedir_de_verdad(v)
+                v.urllib.request.urlopen = transporte
             sys.argv = ["vigia.py"] + list(args)
             for k, x in env.items():
                 if x is None:
@@ -272,6 +294,9 @@ class Banco:
             v.CONFIG = guardado[11]
             if guardado[12] is not None:
                 v.CONFIG_PRINCIPAL = guardado[12]
+            if guardado[13] is not None:
+                v.reloj = guardado[13]
+            v.urllib.request.urlopen = guardado[14]
             for k, x in guardado[9].items():
                 if x is None:
                     os.environ.pop(k, None)
@@ -280,6 +305,32 @@ class Banco:
             self.reloj += avanza
         self.ultima = salida.getvalue()
         return codigo, self.issues[n0:], srv, self.ultima
+
+
+class Respuesta:
+    def __init__(self, status, cuerpo):
+        self.status, self._b, self.headers = status, cuerpo, {"Content-Type": "text/html; charset=utf-8"}
+
+    def read(self):
+        return self._b
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def pedir_de_verdad(v):
+    """El pedir() de vigia.py, recompilado de su fuente con los globales del modulo: durante --selftest v.pedir esta
+    sustituido por una funcion que prohibe la red, y la escena 13 necesita el de verdad (con su tope duro)."""
+    import ast
+    with open(v.__file__, encoding="utf-8") as f:
+        arbol = ast.parse(f.read())
+    nodo = next(n for n in arbol.body if isinstance(n, ast.FunctionDef) and n.name == "pedir")
+    local = {}
+    exec(compile(ast.Module(body=[nodo], type_ignores=[]), v.__file__, "exec"), v.__dict__, local)
+    return local["pedir"]
 
 
 def asuntos(avs):
@@ -660,12 +711,53 @@ def e12_lectores_apagados(v):
         b.borrar()
 
 
+def e13_servidor_lento(v):
+    """Cada peticion tarda 40 s (reloj falso): la corrida termina y guarda; ninguna peticion empieza pasado el segundo
+    SEGUNDOS_DUROS; lo no alcanzado no suma ausencias ni da "Agotado"; la siguiente, normal, lee todo.
+    13a: todo lento (el foro y los cupones se comen el tiempo). 13b: solo las tiendas lentas (se leen algunas)."""
+    if not hasattr(v, "SEGUNDOS_DUROS"):
+        return "sin tope duro en vigia.py (escena saltada)"
+    hechos = []
+    for nombre, lento_si in (("13a todo lento", None), ("13b tiendas lentas", r"samsung|amazon|costco|elektra|liverpool|"
+                                                        r"gameplanet|soriana|cyberpuerta|chedraui")):
+        b = Banco(v)
+        try:
+            b.correr(mundo_base())
+            antes = b.json()
+            con_avisos = len(b.issues)
+            with open(b.precios, encoding="utf-8") as f:
+                tabla0 = json.load(f)
+            m0 = os.stat(b.estado).st_mtime_ns
+            c, avs, srv, sal = b.correr(mundo_base(), lento=40, lento_si=lento_si)
+            est = b.json()
+            tarde = [(round(t), u) for t, u, _ in srv.inicios if t >= v.SEGUNDOS_DUROS]
+            afirma(c == 0 and not tarde, ("%s: peticiones empezadas pasado el tope" % nombre, tarde[:3]), b)
+            afirma(os.stat(b.estado).st_mtime_ns != m0 and est != antes, ("%s: no guardo visto.json" % nombre), b)
+            afirma(os.path.exists(b.precios), nombre, b)
+            afirma(not any(a.startswith("Agotado") for a in asuntos(avs)), ("%s: Agotado" % nombre, asuntos(avs)), b)
+            nuevas = {k: n for k, n in est.get("ausente", {}).items() if n > antes.get("ausente", {}).get(k, 0)}
+            afirma(not nuevas, ("%s: ausencias por tiendas no alcanzadas" % nombre, nuevas), b)
+            afirma(min(t for _, _, t in srv.inicios) >= 5, ("%s: timeout menor a 5 s" % nombre), b)
+            tabla = b.json(b.precios)
+            perdidas = sorted(set(tabla0) - set(tabla))
+            c, avs2, srv2, _ = b.correr(mundo_base())
+            est2 = b.json()
+            afirma(c == 0 and not any(est2["fallos_fuente"].get(t) for t in ["Foro", "Cupones"] + b.tiendas),
+                   ("%s: la corrida siguiente no leyo todo" % nombre, est2["fallos_fuente"]), b)
+            afirma(set(b.json(b.precios)) == set(tabla0), ("%s: la tabla no volvio" % nombre), b)
+            hechos.append("%s: %d peticiones, la ultima empezo en el s %d, 0 despues del %d; claves perdidas de la tabla: %s" % (
+                nombre, len(srv.inicios), max(t for t, _, _ in srv.inicios), v.SEGUNDOS_DUROS, perdidas or "ninguna"))
+        finally:
+            b.borrar()
+    return "; ".join(hechos) + "; despues, corrida normal: todo leido"
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
            ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
            ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
-           ("12 lectores apagados", e12_lectores_apagados)]
+           ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento)]
 
 
 def foto_repo():
