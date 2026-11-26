@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# gh falso para pruebas/simular_relevo.sh. Responde segun el archivo de escenario $ESCENARIO
+# (renglones clave=valor) y anota cada llamada en $FALSO_LOG.
+#   cuentas=0 1 x     respuestas sucesivas a la cuenta de corridas vivas ("x" = la consulta falla)
+#   lanza=ok|falla    resultado de "gh workflow run"
+#   abiertos=Titulo   titulo de un issue ya abierto (puede repetirse el renglon)
+#   ultima=ID<TAB>URL<TAB>CONCLUSION<TAB>HORA   ultima corrida terminada de la cadena
+valor() { grep -m1 "^$1=" "$ESCENARIO" | cut -d= -f2-; }
+echo "gh $*" >> "$FALSO_LOG"
+case "$1 $2" in
+  "run list")
+    if printf '%s\n' "$@" | grep -qx -- "--status"; then
+      printf '%b\n' "$(valor ultima)"
+      exit 0
+    fi
+    n=$(cat "$FALSO_DIR/n_cuentas" 2>/dev/null || echo 0)
+    echo $((n + 1)) > "$FALSO_DIR/n_cuentas"
+    set -- $(valor cuentas)
+    shift "$n" 2>/dev/null || set --
+    r="${1:-x}"
+    if [ "$r" = "x" ]; then echo "HTTP 500: Server Error" >&2; exit 1; fi
+    echo "$r"
+    ;;
+  "workflow run")
+    if [ "$(valor lanza)" = "ok" ]; then exit 0; fi
+    echo "could not create workflow dispatch event: HTTP 500" >&2
+    exit 1
+    ;;
+  "issue list")
+    grep "^abiertos=" "$ESCENARIO" | cut -d= -f2-
+    ;;
+  "issue create")
+    echo "https://github.com/falso/falso/issues/1"
+    ;;
+  *)
+    echo "gh falso: llamada no prevista: $*" >&2
+    exit 3
+    ;;
+esac
