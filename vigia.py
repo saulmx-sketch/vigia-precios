@@ -104,7 +104,9 @@ HORAS_REPROBADO_CUPONERA = 12   # el que solo publica una cuponera y no bajo nad
 TOPE_CUPONES = 30        # codigos probados por corrida y producto (los recien hallados primero). Era 40; con 40 la
 #                          corrida de ensayo del 25 nov 2026 tardo 243 s (101 s con 24). Lo que no cabe entra en la corrida
 #                          siguiente, porque lo ya probado sin exito descansa.
-SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
+SEGUNDOS_COSECHA = 45    # linea B (E11): tope de las paginas de Samsung y busquedas del foro en cosechar_cupones
+MARGEN_COSECHA = 15      # una peticion de cosecha solo arranca antes de los 30 s: con su timeout de 30 s, peor caso 60 s
+SEGUNDOS_CARRITO = 90   # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
 # Codigos de tienda cerrada (empleados o estudiantes: llevan "EPP"). En el carrito normal se rechazaron 24 de 24 el
 # 25 nov 2026 (8 codigos x 3 modelos). Se siguen cosechando (quedan en visto.json), pero no se prueban en el carrito.
 # Expresion acotada: "EPP" como pieza del codigo (CART5_EPP, EPP10_NOV, EPPLIVESEM), no dentro de una palabra (PEPPER10).
@@ -137,7 +139,7 @@ def tiempo_de_peticion(tope=30):
     return max(5, min(tope, queda))
 
 
-def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
+def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0, intentos=2):
     """(estado, texto). Un corte de red o un tope de tiempo se reintenta una vez tras `reintento` segundos; si vuelve
     a fallar, RuntimeError("sin respuesta: <host>: <causa>"). Una respuesta HTTP con error no lanza: da su codigo."""
     import socket
@@ -156,7 +158,8 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0,
     if pausa:
         tiempo_de_peticion()   # pasado el tope duro no se espera la pausa: se lanza ya
         time.sleep(pausa)
-    for intento in (1, 2):
+    ultimo = 1 if intentos == 1 else 2   # linea B: intentos=1 abre una sola vez (C4: un cuelgue costaba 60 s, no 30)
+    for intento in range(1, ultimo + 1):
         espera = tiempo_de_peticion(30)   # pasado el tope duro: no se empieza (ni el reintento)
         try:
             with abre(req, timeout=espera) as r:
@@ -172,7 +175,7 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0,
                 pass
             return e.code, decodificar(b, e.headers.get("Content-Type", "") if e.headers else "")
         except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError) as e:
-            if intento == 2:
+            if intento == ultimo:
                 causa = getattr(e, "reason", None) or e
                 raise RuntimeError("sin respuesta: %s: %s" % (urllib.parse.urlsplit(url).hostname, causa))
             if reintento:
@@ -385,9 +388,25 @@ def cosechar_cupones(prods, estado, ahora):
             if b not in busquedas:
                 busquedas.append(b)
     hallados, leidas = {}, 0
+    # linea B (E11, simulacro C4): con samsung.com o el foro colgados la cosecha tardaba 930 s y dejaba sin leer todas
+    # las tiendas. Ahora: un solo intento por peticion, tope total, y tras el primer cuelgue de un host no se le pide mas.
+    t0, caidos = time.monotonic(), set()
+
+    def pide(u):
+        host = urllib.parse.urlsplit(u).hostname
+        if host in caidos:
+            raise RuntimeError("host caido en esta corrida: %s" % host)
+        if time.monotonic() - t0 + MARGEN_COSECHA >= SEGUNDOS_COSECHA:
+            raise RuntimeError("sin tiempo de cosecha")
+        try:
+            return pedir(u, reintento=0, intentos=1)
+        except Exception:
+            caidos.add(host)
+            raise
+
     for u in paginas:
         try:
-            e, t = pedir(u)
+            e, t = pide(u)
         except Exception:
             continue
         if e != 200:
@@ -398,7 +417,7 @@ def cosechar_cupones(prods, estado, ahora):
             hallados.setdefault(c, "Samsung")
     for b in busquedas:
         try:
-            e, t = pedir("https://www.promodescuentos.com/search?q=" + urllib.parse.quote(b) + "&sortBy=new")
+            e, t = pide("https://www.promodescuentos.com/search?q=" + urllib.parse.quote(b) + "&sortBy=new")
         except Exception:
             continue
         if e != 200:
@@ -2178,6 +2197,13 @@ def selftest():
             assert str(ex).startswith("sin respuesta: x.example: ") and a.veces == 2, ex
     a = Abridor(0, None)
     assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 1
+    # linea B: intentos=1 abre una sola vez y lanza al primer corte
+    a = Abridor(1, TimeoutError("tope"))
+    try:
+        pedir("https://x.example/a", abridor=a, reintento=0, intentos=1)
+        raise AssertionError("pedir con intentos=1 no lanzo")
+    except RuntimeError:
+        assert a.veces == 1, a.veces
     # avisos de disponibilidad: si el aviso no se abre, la proxima corrida lo vuelve a intentar
     def falla(asunto, cuerpo):
         raise RuntimeError("GitHub no responde")
