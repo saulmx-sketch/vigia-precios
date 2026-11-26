@@ -32,3 +32,8 @@ Recortadas a los bloques `ld+json` (y, en Soriana, las tarjetas del listado; en 
 | `cyberpuerta_busca_galaxy_z_fold8.html` | busqueda Cyberpuerta "galaxy z fold8" (16 articulos) | vendedor cambiado a un tercero o borrado |
 | `cyberpuerta_busca_playstation_5_digital.html` | busqueda Cyberpuerta "playstation 5 digital" (las Slim Digital, agotadas hoy) | ALTERADA en una prueba: todo OutOfStock a InStock, para probar que con existencia entran solo las Slim Digital |
 | `cyberpuerta_ficha_fold8_morado.html` | ficha Cyberpuerta del Fold8 512 Morado ($34,319) | availability a OutOfStock y a PreOrder |
+| `chedraui_busca_consola_playstation_5_digital.json` | catalogo VTEX de Chedraui "consola playstation 5 digital" (7 productos, todos con AvailableQuantity 0 hoy) | ALTERADA en una prueba: AvailableQuantity a 10 en todo, para probar que con existencia entra solo la Edicion Digital; en otra, el vendedor de la Digital cambiado a "Doto" o vacio |
+| `chedraui_busca_playstation_5_digital.json` | catalogo VTEX "playstation 5 digital" (crudo de casa; solo productos PlayStation; trae a "Doto" real) | ninguna |
+| `chedraui_ficha_3879487.json` | catalogo VTEX por articulo de la PS5 Edicion Digital ($12,499, agotada) | AvailableQuantity a 10 |
+
+Los `.json` de Chedraui guardan la respuesta en la clave `respuesta`, junto a `_origen`; la prueba sirve solo `respuesta`.

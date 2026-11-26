@@ -84,7 +84,8 @@
     "Liverpool": {"consulta": "playstation+5"},
     "Gameplanet": {"consulta": "consola playstation 5"},
     "Soriana": {"consulta": "playstation 5 digital"},
-    "Cyberpuerta": {"consulta": "playstation 5 digital"}
+    "Cyberpuerta": {"consulta": "playstation 5 digital"},
+    "Chedraui": {"consulta": "consola playstation 5 digital"}
    },
    "foro": {
     "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]

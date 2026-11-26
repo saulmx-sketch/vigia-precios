@@ -166,7 +166,82 @@ def correr(v):
         assert "Soriana" in v.FICHAS, "FICHAS existe pero Soriana no quedo registrada"
         _probar_fichas_soriana(v, f_fold)
     _probar_cyberpuerta(v, fold, ps5)
+    _probar_chedraui(v, ps5)
     return 1
+
+
+CH_API = "https://www.chedraui.com.mx/api/catalog_system/pub/products/search"
+CH_BUSCA = CH_API + "?ft=consola%20playstation%205%20digital&_from=0&_to=49"
+CH_FICHA = ("https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7"
+            "-3879487/p")
+
+
+def _ch(nombre):
+    """La respuesta grabada de Chedraui (lista de productos), como la da la API."""
+    import json
+    with open(os.path.join(RESP, nombre), encoding="utf-8") as f:
+        return json.load(f)["respuesta"]
+
+
+def _probar_chedraui(v, ps5):
+    import copy
+    import json
+    assert "Chedraui" in v.LECTORES, "Chedraui no quedo registrada"
+    leer = v.LECTORES["Chedraui"]
+    busca, ficha = _ch("chedraui_busca_consola_playstation_5_digital.json"), _ch("chedraui_ficha_3879487.json")
+    otra = _ch("chedraui_busca_playstation_5_digital.json")
+
+    def con_existencia(lista, vendedor=None, ids=None):
+        """Copia con AvailableQuantity 10 (y, si se pide, otro vendedor) en los productos indicados (todos si None)."""
+        lista = copy.deepcopy(lista)
+        for p in lista:
+            if ids is None or p["productId"] in ids:
+                for it in p["items"]:
+                    for s in it["sellers"]:
+                        s["commertialOffer"]["AvailableQuantity"] = 10
+                        if vendedor is not None:
+                            s["sellerName"] = vendedor
+        return json.dumps(lista)
+    tabla = {CH_BUSCA: (200, json.dumps(busca)), CH_API + "?fq=productId:3879487": (200, json.dumps(ficha))}
+    guardado = v.pedir
+    try:
+        v.pedir = Servidor(tabla)
+        cfg = {"consulta": "consola playstation 5 digital"}
+        # hoy todo agotado (AvailableQuantity 0): lista vacia, sin error
+        assert leer(ps5, cfg, {}) == []
+        # (a) la misma respuesta alterada a "en existencia" (LEEME): entra solo la Edicion Digital, $12,499, Chedraui;
+        # (e) "Bundle ... Astro Bot y Gran Turismo 7" ($11,490, no dice digital) y el "Pack ... Slim 1TB Standard"
+        # ($8,990, de disco) no entran aunque pasan el piso
+        tabla[CH_BUSCA] = (200, con_existencia(busca))
+        r = leer(ps5, cfg, {})
+        assert [(o["var"], o["precio"], o["vendedor"], o["url"], o["tienda"]) for o in r] == \
+            [("digital", 12499.0, "Chedraui", CH_FICHA, "Chedraui")], r
+        # (b) la Digital vendida por "Doto" (tercero real del marketplace de Chedraui): no hay oferta
+        tabla[CH_BUSCA] = (200, con_existencia(busca, vendedor="Doto", ids={"3879487"}))
+        assert leer(ps5, cfg, {}) == [], "un tercero (Doto) en Chedraui paso"
+        tabla[CH_BUSCA] = (200, con_existencia(busca, vendedor="", ids={"3879487"}))
+        assert leer(ps5, cfg, {}) == [], "sin vendedor leido se publico"
+        # respuesta real con terceros (Doto) en existencia: juegos y control, nada entra
+        tabla[CH_API + "?ft=playstation%205%20digital&_from=0&_to=49"] = (200, json.dumps(otra))
+        assert leer(ps5, {"consulta": "playstation 5 digital"}, {}) == []
+        # (d) 403, 503, HTML en vez de JSON, objeto en vez de lista: RuntimeError
+        for resp in ((403, "<html>Access Denied</html>"), (503, ""), (200, "<html>sin datos</html>"), (200, '{"error":1}')):
+            tabla[CH_BUSCA] = resp
+            _espera_error(lambda: leer(ps5, cfg, {}), "busqueda Chedraui %s" % (resp,))
+        # FICHAS["Chedraui"]: hoy agotada -> existencia False; alterada a 10 piezas -> True
+        if isinstance(getattr(v, "FICHAS", None), dict):
+            f = v.FICHAS["Chedraui"](CH_FICHA)
+            assert (f["precio"], f["vendedor"], f["existencia"]) == (12499.0, "Chedraui", False), f
+            tabla[CH_API + "?fq=productId:3879487"] = (200, con_existencia(ficha))
+            f = v.FICHAS["Chedraui"](CH_FICHA)
+            assert (f["precio"], f["vendedor"], f["existencia"]) == (12499.0, "Chedraui", True), f
+            assert v.variante(ps5, f["titulo"])["id"] == "digital", f
+            for resp in ((403, "x"), (200, "[]")):
+                tabla[CH_API + "?fq=productId:3879487"] = resp
+                _espera_error(lambda: v.FICHAS["Chedraui"](CH_FICHA), "ficha Chedraui %s" % (resp,))
+    finally:
+        v.pedir = guardado
+    assert v.vendedor_oficial(ps5, "Chedraui", "Chedraui ") and not v.vendedor_oficial(ps5, "Chedraui", "Doto")
 
 
 def _espera_error(funcion, que):

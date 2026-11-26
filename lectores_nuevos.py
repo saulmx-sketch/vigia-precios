@@ -14,6 +14,11 @@ Cyberpuerta (medido el 25 nov 2026; nube 200 segun TIENDAS_2026-11-25.md):
   busqueda https://www.cyberpuerta.mx/index.php?cl=search&searchparam=<consulta> -> ld+json @graph -> ItemList ->
   itemListElement[].item (Product): name, url, offers.price (numero), offers.availability, offers.itemCondition,
   offers.seller.name ("Cyberpuerta"). La ficha trae Product con los mismos offers, pero name = modelo; titulo en <h1>.
+
+Chedraui (medido el 25 nov 2026; solo PS5, el Fold8 no lo vende: "galaxy z fold8" responde []):
+  catalogo VTEX https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=<consulta>; ficha ?fq=productId:<id>.
+  productName; items[].sellers[]: sellerName ("Chedraui"; en su marketplace hay "Doto" y otros), commertialOffer.Price,
+  commertialOffer.AvailableQuantity.
 """
 import html
 import json
@@ -25,6 +30,7 @@ SORIANA_MAX_FICHAS = 6
 SORIANA_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas"}
 CYBERPUERTA = "https://www.cyberpuerta.mx"
 CP_EN_VENTA = {"InStock": "", "LimitedAvailability": "pocas piezas"}
+CHEDRAUI_API = "https://www.chedraui.com.mx/api/catalog_system/pub/products/search"
 LD = r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>'
 
 
@@ -195,10 +201,61 @@ def registrar(v):
                 "existencia": existencia_si_no(o.get("availability")) if nuevo else False,
                 "importado": bool(re.search(v.SENAL_IMPORTADO, titulo)), "url": url}
 
-    lectores = {"Soriana": leer_soriana, "Cyberpuerta": leer_cyberpuerta}
+    # ------------------------------------------------------------------ Chedraui
+    def _ch_json(e, t, que):
+        if e not in (200, 206):
+            raise RuntimeError("Chedraui respondio %s en %s (%d bytes)" % (e, que, len(t)))
+        try:
+            d = json.loads(t)
+        except ValueError:
+            raise RuntimeError("Chedraui: %s no es JSON (%d bytes)" % (que, len(t)))
+        if not isinstance(d, list):
+            raise RuntimeError("Chedraui: %s no trae la lista de productos" % que)
+        return d
+
+    def _ch_opciones(p):
+        """Una opcion por vendedor de cada item: titulo, precio, vendedor, existencia (AvailableQuantity > 0)."""
+        salida = []
+        for it in p.get("items") or []:
+            for s in it.get("sellers") or []:
+                co = s.get("commertialOffer") or {}
+                salida.append({"titulo": p.get("productName") or it.get("nameComplete") or "",
+                               "precio": float(co["Price"]) if co.get("Price") else None,
+                               "vendedor": (s.get("sellerName") or "").strip(),
+                               "existencia": (co.get("AvailableQuantity") or 0) > 0, "importado": False,
+                               "url": p.get("link") or "", "defecto": bool(s.get("sellerDefault"))})
+        return salida
+
+    def leer_chedraui(prod, cfg, estado):
+        """Catalogo publico VTEX (como Elektra): por cada vendedor de cada item, precio y existencia; vendedor real."""
+        e, t = v.pedir(CHEDRAUI_API + "?ft=%s&_from=0&_to=49" % urllib.parse.quote(cfg["consulta"]))
+        salida = []
+        for p in _ch_json(e, t, "la busqueda"):
+            for op in _ch_opciones(p):
+                if op["existencia"] and op["precio"] and op["vendedor"]:
+                    of = v.oferta(prod, "Chedraui", op["titulo"], op["precio"], op["url"], op["vendedor"])
+                    if of:
+                        salida.append(of)
+        return salida
+
+    def ficha_chedraui(url_o_id):
+        """Para v.FICHAS: el catalogo por numero de articulo (?fq=productId:<id>), con todas sus opciones."""
+        m = re.search(r"(\d{6,})(?:/p)?/?$", str(url_o_id))
+        if not m:
+            raise RuntimeError("liga de Chedraui sin numero de articulo")
+        d = _ch_json(*v.pedir(CHEDRAUI_API + "?fq=productId:" + m.group(1), pausa=1.0), que="la ficha " + m.group(1))
+        opciones = _ch_opciones(d[0]) if d else []
+        if not opciones:
+            raise RuntimeError("Chedraui no devolvio vendedores del articulo %s" % m.group(1))
+        top = next((o for o in opciones if o["existencia"] and o["defecto"]), None) or \
+            next((o for o in opciones if o["existencia"]), opciones[0])
+        return dict(top, opciones=opciones)
+
+    lectores = {"Soriana": leer_soriana, "Cyberpuerta": leer_cyberpuerta, "Chedraui": leer_chedraui}
     vendedores = {"Soriana": r"^\s*soriana\s*$",       # solo Soriana misma; sin terceros
-                  "Cyberpuerta": r"^\s*cyberpuerta\s*$"}
-    fichas = {"Soriana": ficha_soriana_si_no, "Cyberpuerta": ficha_cyberpuerta}
+                  "Cyberpuerta": r"^\s*cyberpuerta\s*$",
+                  "Chedraui": r"^\s*chedraui\s*$"}     # no "Doto" ni otros vendedores de su marketplace
+    fichas = {"Soriana": ficha_soriana_si_no, "Cyberpuerta": ficha_cyberpuerta, "Chedraui": ficha_chedraui}
     v.LECTORES.update(lectores)
     v.VENDEDOR_OFICIAL.update(vendedores)
     if isinstance(getattr(v, "FICHAS", None), dict):
