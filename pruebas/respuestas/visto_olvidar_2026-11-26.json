@@ -1,0 +1,16 @@
+{
+ "_origen": "Congelado a mano el 26 nov 2026 con las claves y precios del visto.json de origin/main (b8d0bd0): las dos claves sin capacidad de Liverpool, conocidas y con 3 ausencias (a una de mandar Agotado), mas la clave nueva del mismo telefono. Lo usa pruebas/casos_olvidar.py.",
+ "agotados": {},
+ "ausente": {"Liverpool|fold8|normal": 3, "Liverpool|fold8|ultra": 3},
+ "avisado": {},
+ "conocidos": {
+  "Liverpool|fold8|normal": {"precio": 44999.0, "producto": "Fold8 (capacidad sin dato)",
+                             "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349", "visto": "2026-11-25 20:34"},
+  "Liverpool|fold8|ultra": {"precio": 55999.0, "producto": "Fold8 Ultra (capacidad sin dato)",
+                            "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314", "visto": "2026-11-19 18:57"},
+  "Liverpool|fold8|normal-512": {"precio": 44999.0, "producto": "Fold8 512 GB",
+                                 "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
+                                 "visto": "2026-11-25 23:15"}
+ },
+ "sembrado": true
+}
