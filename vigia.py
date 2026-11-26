@@ -251,6 +251,15 @@ def cargar_config(ruta=None):
     return prods
 
 
+def vigilados(prods):
+    """Los productos que se vigilan: fuera los que traen "apagado" (texto con motivo y fecha). Uno apagado no se pide a
+    ninguna tienda, ni al foro, ni a la busqueda de cupones, ni a promos, y no manda ningun aviso; sus claves quedan
+    dormidas en visto.json y sus renglones salen de precios.json (el historial no se toca). Para reencenderlo basta
+    borrar su linea "apagado" de productos.json. Lo usan main() y cobertura(); cargar_config() y las pruebas siguen
+    viendo el archivo completo. (26 nov 2026: Saul compro el Fold8 y ordeno apagar sus avisos; la PS5 sigue.)"""
+    return [p for p in prods if not p.get("apagado")]
+
+
 def variante(prod, titulo):
     """La variante del producto que casa con el titulo, o None si no interesa."""
     if not re.search(prod["patron"], titulo, re.I) or re.search(EXCLUIR, titulo, re.I):
@@ -2139,6 +2148,11 @@ def cobertura(prods=None):
     print("Nunca entran, en ningun producto: " + ", ".join(_legible(x) for x in _partes(glob)))
     for p in prods:
         print("")
+        if p.get("apagado"):
+            print("== %s == APAGADO: no se lee ninguna tienda ni se manda ningun aviso" % p["nombre"])
+            print("  motivo: %s" % p["apagado"])
+            print("  para reencenderlo: borrar su linea \"apagado\" de productos.json y publicar")
+            continue
         print("== %s ==" % p["nombre"])
         colores = {}
         for sku, (vid, color, _pag) in p["tiendas"].get("Samsung", {}).get("skus", {}).items():
@@ -2489,14 +2503,24 @@ def selftest():
     # reloj general: vencido solo pasado SEGUNDOS_CORRIDA
     assert not reloj_vencido(100.0, 100.0 + SEGUNDOS_CORRIDA) and reloj_vencido(100.0, 101.0 + SEGUNDOS_CORRIDA)
     # --cobertura: corre sin red y nombra cada variante, sus topes y las tiendas
+    # (con todos encendidos, aunque productos.json apague alguno: se prueba la descripcion de cada producto)
+    encendidos = [{k: w for k, w in x.items() if k != "apagado"} for x in prods]
     salida = io.StringIO()
     with contextlib.redirect_stdout(salida):
-        assert cobertura(prods) == 0
+        assert cobertura(encendidos) == 0
     texto = salida.getvalue()
-    for x in prods:
+    for x in encendidos:
         for v in x["variantes"]:
             assert v["nombre"] in texto and "{:,}".format(topes(x, v)[0]) in texto, v["nombre"]
     assert "Grafito" in texto and "foro" in texto and "Gameplanet" in texto, texto[:300]
+    # producto apagado (26 nov 2026): cobertura lo dice y no lista sus variantes; vigilados() lo saca
+    apagado = [dict(encendidos[0], apagado="prueba")] + encendidos[1:]
+    salida = io.StringIO()
+    with contextlib.redirect_stdout(salida):
+        assert cobertura(apagado) == 0
+    texto = salida.getvalue()
+    assert "APAGADO" in texto and "prueba" in texto and encendidos[0]["variantes"][0]["nombre"] + ":" not in texto, texto[:400]
+    assert [x["id"] for x in vigilados(apagado)] == [x["id"] for x in encendidos[1:]]
     # pruebas\casos_*.py con correr(v), en orden alfabetico; durante ellas la red y las pausas quedan prohibidas
     def sin_red(*a, **k):
         raise AssertionError("una prueba quiso usar la red o dormir")
@@ -2589,7 +2613,12 @@ def _main():
     arranque = reloj()   # reloj general de la corrida (SEGUNDOS_CORRIDA) y del tope duro (SEGUNDOS_DUROS)
     _ARRANQUE[0] = arranque
     LIVERPOOL_LEIDAS.clear()
-    prods = cargar_config(CONFIG)
+    todos = cargar_config(CONFIG)
+    prods = vigilados(todos)
+    apagados = {p["id"] for p in todos if p.get("apagado")}
+    for p in todos:
+        if p.get("apagado"):
+            print("producto apagado %s: no se lee ni se avisa (%s)" % (p["id"], str(p["apagado"])[:140]))
     por_id = {p["id"]: p for p in prods}
     try:
         with open(ESTADO, encoding="utf-8") as f:
@@ -2796,7 +2825,8 @@ def _main():
         previos = {}
     # lo que una tienda ya no ofrece (o ya no cumple los requisitos) sale de la tabla; si la tienda no se
     # pudo leer en esta corrida, se conserva su ultimo dato
-    actuales = {k: v for k, v in previos.items() if not leida(k, leidas)}
+    # un producto apagado sale de la tabla: su ultimo precio leido pareceria vigente (el historial lo conserva)
+    actuales = {k: v for k, v in previos.items() if not leida(k, leidas) and (k.split("|") + [""])[1] not in apagados}
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")
     cambios = []
     for clave, o in mejores.items():

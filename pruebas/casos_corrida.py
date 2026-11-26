@@ -179,7 +179,7 @@ class Servidor:
 
 # ------------------------------------------------------------------ banco de pruebas (una carpeta por escena)
 class Banco:
-    def __init__(self, v, visto=None):
+    def __init__(self, v, visto=None, apagar=()):
         self.v = v
         self.dir = tempfile.mkdtemp(prefix="vigia_corrida_")
         self.config = os.path.join(self.dir, "productos.json")
@@ -187,6 +187,12 @@ class Banco:
         with open(os.path.join(RAIZ, "productos.json"), encoding="utf-8") as f:
             cfg = json.load(f)
         self.quitadas = set()
+        for p in cfg["productos"]:
+            # las escenas prueban la mecanica con todos los productos encendidos aunque el archivo real apague alguno
+            # (26 nov 2026: Fold8 apagado); la escena 17 apaga a proposito los de `apagar`
+            p.pop("apagado", None)
+            if p["id"] in apagar:
+                p["apagado"] = "escena de prueba"
         for p in cfg["productos"]:   # solo tiendas con respuesta en el servidor falso y con lector cargado
             for t in list(p["tiendas"]):
                 if t not in SERVIDAS or t not in v.LECTORES:
@@ -986,6 +992,95 @@ def e16_cuelgue_y_vuelta_parcial(v):
         b.borrar()
 
 
+FOLD8_URL = r"(?i)galaxy|fold|samsung"   # toda peticion que solo sirve al Fold8 (busquedas, Samsung, foros de Samsung)
+
+
+def e17_producto_apagado(v):
+    """26 nov 2026, Fold8 comprado: con "apagado" en su bloque, el producto no se pide a ninguna tienda, ni al foro ni a
+    la busqueda de cupones ni a promos; no manda avisos de precio, de agotado, de tienda caida ni aparte, aunque sus
+    tiendas fallen y su precio sea de ganga; sale de precios.json y sus claves quedan dormidas en visto.json. La PS5 se
+    sigue leyendo igual. Al borrar la linea "apagado" vuelve a leerse sin avisos falsos. cobertura() lo dice."""
+    pr = getattr(v, "promos", None)
+    b0 = Banco(v)   # una corrida con todo encendido: estado y tabla con claves del Fold8
+    try:
+        b0.correr(mundo_base())
+        visto0, precios0 = b0.json(), b0.json(b0.precios)
+    finally:
+        b0.borrar()
+    afirma(any("|fold8|" in k for k in precios0) and any("|fold8|" in k for k in visto0.get("conocidos", {})),
+           ("17: la corrida encendida no dejo claves del Fold8", sorted(precios0)))
+    b = Banco(v, visto=visto0, apagar=("fold8",))
+    try:
+        b.escribe(b.precios, json.dumps(precios0))
+        # mundo trampa: el Fold8 de ganga en Costco y, a la vez, todas sus demas busquedas caidas; un hilo del foro
+        # del Fold8 con banco. Si se pidiera algo del Fold8 saldria aviso de precio, de agotado o de tienda caida.
+        trampa = costco_a(19000.0)
+        for patron in [r"searchapi\.samsung\.com/", r"www\.samsung\.com/mx/", r"shop\.samsung\.com",
+                       r"elektra\.mx/api/catalog_system/pub/products/search\?ft=galaxy", r"liverpool\.com\.mx/tienda\?s=galaxy",
+                       r"soriana\.com/buscar\?q=galaxy\+z\+fold8", r"cyberpuerta\.mx/index\.php\?cl=search&searchparam=galaxy"]:
+            trampa[patron] = (503, "<html>caida</html>")
+        trampa[r"promodescuentos\.com/rss/"] = (200, FORO_RSS.replace("</channel>", (
+            '<item><title>Samsung Galaxy Z Fold8 512GB a $19,999 con BBVA</title>'
+            '<link>https://www.promodescuentos.com/ofertas/fold8-1</link><guid>corrida-fold8</guid>'
+            '<pubDate>Fri, 27 Nov 2026 06:30:00 -0600</pubDate><description>Fold8 con 10% BBVA</description>'
+            '<pepper:merchant xmlns:pepper="x" name="Liverpool" price="$19,999"/></item></channel>')))
+        pedidas_fold, todos_avisos, ps5 = [], [], 0
+        n = v.AUSENCIAS_AGOTADO + 2
+        for i in range(n):
+            if i == n - 1 and pr is not None and hasattr(pr, "mejorar"):   # la ultima, con promos encendido
+                orig, orig_urlopen, directas = pr.mejorar, v.urllib.request.urlopen, []
+
+                def urlopen_falso(req, *a, **k):   # promos baja algunas paginas con urlopen directo (como en e14)
+                    directas.append(getattr(req, "full_url", req))
+                    raise urllib.error.URLError("sin red en la prueba (urlopen directo)")
+                pr.mejorar = lambda *a, **k: orig(*a, **dict(k, dormir=lambda s: None, reloj=lambda: b.mono))
+                v.urllib.request.urlopen = urlopen_falso
+                try:
+                    c, avs, srv, _ = b.correr(trampa, env={"SIN_PROMOS": None}, avanza=_dt.timedelta(hours=1))
+                finally:
+                    pr.mejorar, v.urllib.request.urlopen = orig, orig_urlopen
+                pedidas_fold += [u for u in directas if re.search(FOLD8_URL, str(u))]
+            else:
+                c, avs, srv, _ = b.correr(trampa, avanza=_dt.timedelta(hours=1))
+            afirma(c == 0, ("17: codigo de salida", i, c), b)
+            afirma("producto apagado fold8" in b.ultima, ("17: no se imprimio el producto apagado", i), b)
+            todos_avisos += asuntos(avs)
+            pedidas_fold += [u for u in srv.pedidas if re.search(FOLD8_URL, u)]
+            ps5 += srv.cuantas(r"(?i)playstation|ps5")
+        afirma(pedidas_fold == [], ("17: se pidio algo del Fold8 apagado", pedidas_fold[:8]), b)
+        afirma(todos_avisos == [], ("17: avisos con el Fold8 apagado", todos_avisos), b)
+        est, tabla = b.json(), b.json(b.precios)
+        afirma(not [k for k in tabla if "|fold8|" in k], ("17: el Fold8 sigue en precios.json", sorted(tabla)), b)
+        for k in ("Amazon|ps5|digital", "Liverpool|ps5|digital", "Gameplanet|ps5|digital"):
+            afirma(k in tabla, ("17: la PS5 dejo de leerse", k, sorted(tabla)), b)
+        afirma(ps5 >= n, ("17: peticiones de la PS5", ps5), b)
+        caidas = {k: x for k, x in est.get("fallos_fuente", {}).items() if x}
+        afirma(not caidas, ("17: fuentes con falla", caidas, est.get("ultimo_error")), b)
+        dormidas = [k for k in est.get("conocidos", {}) if "|fold8|" in k]
+        afirma(dormidas and not [k for k in est.get("agotados", {}) if "|fold8|" in k],
+               ("17: claves del Fold8 en el estado", dormidas, est.get("agotados")), b)
+        # cobertura: lo dice apagado y no lista sus topes
+        sal = io.StringIO()
+        with contextlib.redirect_stdout(sal):
+            v.cobertura(v.cargar_config(b.config))
+        txt = sal.getvalue()
+        afirma("APAGADO" in txt and "Fold8 Ultra 1 TB:" not in txt and "PS5 Digital" in txt, ("17: cobertura", txt[:600]), b)
+        # reencender: se borra la linea "apagado" y el Fold8 vuelve a leerse, sin avisos falsos
+        cfg = b.json(b.config)
+        for p in cfg["productos"]:
+            p.pop("apagado", None)
+        b.escribe(b.config, json.dumps(cfg, ensure_ascii=False))
+        c, avs, srv, _ = b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        tabla = b.json(b.precios)
+        afirma(c == 0 and asuntos(avs) == [] and any("|fold8|" in k for k in tabla) and srv.cuantas(FOLD8_URL) > 0,
+               ("17: reencendido", asuntos(avs), sorted(tabla)), b)
+        return ("%d corridas apagado (Fold8 de ganga y sus tiendas caidas; la ultima con promos): 0 peticiones y 0 avisos "
+                "del Fold8, %d peticiones de la PS5, Fold8 fuera de precios.json, %d claves dormidas; reencendido: se "
+                "lee de nuevo sin avisos" % (n, ps5, len(dormidas)))
+    finally:
+        b.borrar()
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
@@ -993,7 +1088,7 @@ ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_c
            ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
            ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento),
            ("14 promos encendido", e14_promos), ("15 producto caido", e15_producto_caido),
-           ("16 cuelgue y vuelta parcial", e16_cuelgue_y_vuelta_parcial)]
+           ("16 cuelgue y vuelta parcial", e16_cuelgue_y_vuelta_parcial), ("17 producto apagado", e17_producto_apagado)]
 
 
 def foto_repo():
