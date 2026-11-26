@@ -57,6 +57,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: espera
     timeout-minutes: 12
+    env:
+      # Sin compilados de Python en la carpeta: el paso "Guardar" sube todo lo que encuentre (git add -A).
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v5
       # Pruebas antes de revisar. Si una falla se apaga solo su parte y la revision de precios sigue:
