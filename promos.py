@@ -1188,14 +1188,20 @@ def _cifra_de_otra(pares, cod, f, ahora):
       articulo leido por primera vez tras vencer PP177 no hereda los $6,000.
     - Otro articulo con promocion viva de la misma cifra y otro codigo (PP177 y PP178 a la vez): no; son dos
       promociones reales (caso del revisor de la junta 3). Un par viejo de otro articulo sin fecha guardada tampoco."""
+    hoy = ahora.astimezone(MX).date()
+    ini_f = rango(f.get("vigencia"), ahora)[0]
     for art, par in (pares or {}).items():
         if not isinstance(par, list) or len(par) < 2 or par[1] != f.get("valor") or par[0] == f.get("codigo"):
             continue
         if art == cod:
             return par[0]
-        if len(par) >= 3 and par[2]:
+        # solo pares con fecha de fin escrita ("AAAA-MM-DD a AAAA-MM-DD"); sin fin no se sabe si vencio (revisor E, H3)
+        if len(par) >= 3 and re.search(r"\d{4}-\d{2}-\d{2} a \d{4}-\d{2}-\d{2}\s*$", par[2] or ""):
             _, fin = rango(par[2], ahora)
-            if fin is not None and fin < ahora.astimezone(MX).date():   # ya vencio (no: "aun no empieza")
+            # vencida Y sin haber convivido con la de `f` (la de `f` empezo cuando la otra ya acababa). Revisor E, 26
+            # nov: con solo "vencida", PP178 viva callaba en cuanto vencia PP177 de otro articulo.
+            # y vencida hace 14 dias o menos: despues ya no se le atribuye la cifra (revisor E, H2: PP300 real en enero)
+            if fin is not None and fin < hoy and (hoy - fin).days <= 14 and (ini_f is None or ini_f >= fin):
                 return par[0]
     return ""
 
@@ -2298,6 +2304,21 @@ def selftest():
                          reloj=_Reloj(), dormir=lambda s: None)
             assert sorted(a["clave"] for a in av) == ["Costco|fold8|normal-512|PayPal|PP177",
                                                       "Costco|fold8|ultra-512|PayPal|PP178"], (orden, corrida, av)
+    # revisor E (H1): PP177 (otro articulo) vence el 28 nov y PP178 sigue viva hasta el 5 dic; convivieron: el 29 nov
+    # el aviso de PP178 sale (de primera lectura y tambien con su par ya guardado)
+    pp177c = pp("PP177", "2026-11-23T13:00:00.000Z", "2026-11-29T05:59:59.000Z")
+    pp178l = pp("PP178", "2026-11-23T13:00:00.000Z", "2026-12-06T05:59:59.000Z")
+    d29 = dt.datetime(2026, 11, 29, 18, 0, tzinfo=dt.timezone.utc)
+    for previo_b in (False, True):
+        est_h = {}
+        primero = of_e() + (of_b() if previo_b else [])
+        pag = {"/648324?": (200, ficha_cc(["ahorrosPaypal6000"], [pp177c])), "/648330?": (200, ficha_b([pp178l]))}
+        mejorar(primero, est_h, pc_e, a29 - dt.timedelta(days=3), True, _pedir_falso(pag), abrir, reloj=_Reloj(),
+                dormir=lambda s: None)
+        of = of_b()
+        av = mejorar(of, est_h, pc_e, d29, True, _pedir_falso({"/648330?": (200, ficha_b([pp178l]))}), abrir,
+                     reloj=_Reloj(), dormir=lambda s: None)
+        assert [a["clave"] for a in av] == ["Costco|fold8|ultra-512|PayPal|PP178"], (previo_b, av, est_h["promos"])
     # par viejo de dos campos (estado publicado del 25 nov) de OTRO articulo: no anula; del mismo articulo: si
     est_l = {"promos": {"costco_pares": {"648324": ["PP177", 6000.0]}}}
     of = of_b()

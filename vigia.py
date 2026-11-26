@@ -1846,7 +1846,7 @@ def _issue_ya_creado(repo, token, titulo, desde):
             "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios"})
     try:
-        with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
+        with urllib.request.urlopen(req, timeout=tiempo_de_peticion(10)) as r:   # revisor E (H9): 10 s, no 30
             lista = json.loads(r.read())
     except Exception as ex:
         print("   no se pudo comprobar si el aviso quedo creado:", str(ex)[:120])
