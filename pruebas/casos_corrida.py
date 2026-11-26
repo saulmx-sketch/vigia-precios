@@ -1,0 +1,569 @@
+"""Corrida completa simulada: main() de punta a punta, muchas veces seguidas, sin red y con reloj falso.
+
+Cada escena es una secuencia de corridas de vigia.main() sobre el mismo estado, dentro de una carpeta temporal
+(tempfile, se borra al final). El servidor falso es un diccionario {regex de direccion: respuesta} armado con las
+respuestas grabadas de pruebas\\respuestas (y variantes alteradas en memoria); lo que no conoce responde 404 y cada
+peticion queda anotada. abrir_issue anota asunto y cuerpo; time.sleep no duerme; el "ahora" de main sale de un
+datetime falso que el arnes adelanta entre corridas (15 min, o lo que pida la escena).
+
+Lo que el arnes sustituye y restaura siempre (try/finally): vigia.pedir, vigia.abrir_issue, vigia.cargar_config (para
+leer la copia de productos.json: su valor por defecto quedo fijado al importar), vigia.ESTADO, vigia.PRECIOS,
+vigia.HISTORIAL, vigia.dt, time.sleep, urllib.request.build_opener (lo arma el carrito de Samsung; cuesta 30 ms por
+los certificados y aqui no se usa), sys.argv y las variables de entorno PRUEBA y SIN_AVISOS_PRECIO.
+
+Fallas del programa halladas: van en PENDIENTES (se imprimen; no tumban el selftest).
+Uso:  py -X utf8 pruebas\\casos_corrida.py   (o vigia.py --selftest, via correr(v))
+"""
+import contextlib
+import copy
+import datetime as _dt
+import io
+import json
+import os
+import re
+import shutil
+import sys
+import tempfile
+import time
+import types
+
+AQUI = os.path.dirname(os.path.abspath(__file__))
+RAIZ = os.path.dirname(AQUI)
+RESP = os.path.join(AQUI, "respuestas")
+INICIO = _dt.datetime(2026, 11, 27, 13, 5, tzinfo=_dt.timezone.utc)
+K_COS = "Costco|fold8|normal-512"
+K_ELE = "Elektra|ps5|digital"
+PENDIENTES = []   # fallas del programa: (escena, que se esperaba, que paso)
+
+
+def lee(n):
+    with open(os.path.join(RESP, n), encoding="utf-8") as f:
+        return f.read()
+
+
+# ------------------------------------------------------------------ respuestas (grabadas y alteradas en memoria)
+def costco_producto(base=44999.0, descuento=7000.0, nombre=None, externo=False, crudo_base=None):
+    p = json.loads(lee("cos_api_648324.json"))
+    p["basePrice"]["value"] = base if crudo_base is None else crudo_base
+    p["couponDiscount"]["discountValue"] = descuento
+    if nombre:
+        p["name"] = nombre
+    if externo:
+        p["isExternalVendorProduct"] = True
+    return p
+
+
+def costco_busqueda(*productos):
+    return 200, json.dumps({"products": list(productos)})
+
+
+def costco_ficha(**kw):
+    return 200, json.dumps(costco_producto(**kw))
+
+
+ELE_PS5_ID = "1302999999"
+
+
+def elektra_ps5(precio=7400.0, vendedor="Elektra"):
+    """Renglon de Elektra armado con la forma de ele_api_1302051913.json (no hay grabada una PS5 de Elektra)."""
+    d = json.loads(lee("ele_api_1302051913.json"))
+    p = d[0]
+    p["productId"] = ELE_PS5_ID
+    p["productName"] = p["items"][0]["name"] = p["items"][0]["nameComplete"] = "Consola PlayStation 5 Digital 825 GB"
+    p["link"] = "https://www.elektra.mx/consola-playstation-5-digital-%s/p" % ELE_PS5_ID
+    s = p["items"][0]["sellers"]
+    s[0]["sellerName"], s[0]["commertialOffer"]["Price"] = vendedor, precio
+    del s[1:]
+    return 200, json.dumps(d)
+
+
+GP_CATALOGO = ('<ul data-testid="products-list"><li><a data-testid="product-card" '
+               'href="/products/consola-playstation-5-digital-fortnite-flowering-playstation-5">'
+               '<h3>Consola PlayStation 5 Digital Fortnite Flowering</h3>'
+               '<span data-testid="product-price" data-value="10999.99"></span></a></li></ul>')
+FORO_RSS = ('<?xml version="1.0"?><rss><channel><item><title>Licuadora de 10 velocidades</title>'
+            '<link>https://www.promodescuentos.com/ofertas/licuadora-1</link><guid>corrida-g1</guid>'
+            '<pubDate>Fri, 27 Nov 2026 06:00:00 -0600</pubDate><description>nada que vigilar</description></item>'
+            '</channel></rss>')
+COSTCO_SEARCH_FOLD = r"costco\.com\.mx/rest/v2/mexico/products/search\?query=galaxy"
+COSTCO_FICHA = r"costco\.com\.mx/rest/v2/mexico/products/648324\?"
+ELEKTRA_PS5 = r"elektra\.mx/api/catalog_system/pub/products/search\?ft=consola"
+ELEKTRA_FICHA = r"elektra\.mx/api/catalog_system/pub/products/search\?fq=productId:" + ELE_PS5_ID
+
+
+def mundo_base():
+    """Un dia normal: todas las fuentes responden y nada baja de su tope (orden = prioridad de casamiento)."""
+    m = {}
+    m[r"promodescuentos\.com/rss/"] = (200, FORO_RSS)
+    m[r"promodescuentos\.com/search\?"] = (200, "<html>sin hilos</html>")
+    m[r"searchapi\.samsung\.com/"] = "sam_catalogo.json"          # catalogo; el carrito (shop.samsung.com) da 404
+    m[r"www\.samsung\.com/mx/"] = (200, "<html>sin cupones a la vista</html>")
+    m[r"amazon\.com\.mx/s\?k="] = "amz_busca_ps5.html"           # Fold8: la busqueda no trae ninguno (marca)
+    m[r"amazon\.com\.mx/dp/B0FTP523RH"] = "amz_ficha_B0FTP523RH.html"
+    m[COSTCO_SEARCH_FOLD] = costco_busqueda(costco_producto())   # $44,999 - $7,000 = $37,999
+    m[r"costco\.com\.mx/rest/v2/mexico/products/search\?query=playstation"] = costco_busqueda()
+    m[COSTCO_FICHA] = costco_ficha()
+    m[r"elektra\.mx/api/catalog_system/pub/products/search\?ft=galaxy"] = "ele_api_1302051913.json"  # Systore: fuera
+    m[ELEKTRA_PS5] = (200, "[]")
+    m[ELEKTRA_FICHA] = elektra_ps5()
+    m[r"liverpool\.com\.mx/tienda\?s=galaxy"] = "liv_busca_fold8.html"
+    m[r"liverpool\.com\.mx/tienda\?s=playstation"] = "liv_busca_ps5.html"
+    for pid, arch in (("1203150349", "liv_pdp_1203150349.html"), ("1156059630", "liv_pdp_1156059630_6999.html"),
+                      ("1207352230", "liv_pdp_1207352230_alterada.html"), ("1186785807", "liv_pdp_1186785807.html"),
+                      ("1186785793", "liv_pdp_1186785793.html")):
+        m[r"liverpool\.com\.mx/tienda/pdp/p/" + pid] = arch
+    m[r"gameplanet\.com/catalogo\?q="] = (200, GP_CATALOGO)
+    m[r"gameplanet\.com/products/"] = "gp_pdp_fortnite.html"
+    return m
+
+
+def con(base, **cambios):
+    m = dict(base)
+    for k, r in cambios.items():
+        m[{"cos": COSTCO_SEARCH_FOLD, "cos_ficha": COSTCO_FICHA, "ele": ELEKTRA_PS5, "ele_ficha": ELEKTRA_FICHA}[k]] = r
+    return m
+
+
+def costco_a(precio, **ficha):
+    """Mundo base con Costco (listado y ficha) al precio dado; ficha=... altera solo la ficha."""
+    base, desc = precio + 7000.0, 7000.0
+    m = con(mundo_base(), cos=costco_busqueda(costco_producto(base, desc)))
+    m[COSTCO_FICHA] = ficha["respuesta"] if "respuesta" in ficha else costco_ficha(base=base, descuento=desc, **ficha)
+    return m
+
+
+class Servidor:
+    """Diccionario direccion (regex) -> respuesta: (estado, texto), nombre de archivo grabado o funcion(url)."""
+
+    def __init__(self, mapa):
+        self.mapa, self.pedidas = mapa, []
+
+    def __call__(self, url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0, reintento=2.0):
+        self.pedidas.append(url)
+        for patron, r in self.mapa.items():
+            if re.search(patron, url):
+                if callable(r):
+                    r = r(url)
+                return r if isinstance(r, tuple) else (200, lee(r))
+        return 404, ""
+
+    def cuantas(self, patron):
+        return sum(1 for u in self.pedidas if re.search(patron, u))
+
+
+# ------------------------------------------------------------------ banco de pruebas (una carpeta por escena)
+class Banco:
+    def __init__(self, v, visto=None):
+        self.v = v
+        self.dir = tempfile.mkdtemp(prefix="vigia_corrida_")
+        self.config = os.path.join(self.dir, "productos.json")
+        shutil.copyfile(os.path.join(RAIZ, "productos.json"), self.config)
+        self.estado = os.path.join(self.dir, "visto.json")
+        self.precios = os.path.join(self.dir, "precios.json")
+        self.historial = os.path.join(self.dir, "historial_precios.csv")
+        self.escribe(self.estado, json.dumps(visto if visto is not None else {}))
+        self.escribe(self.precios, "{}")
+        self.escribe(self.historial, "fecha,tienda,producto,precio,vendedor,como,liga\n")
+        self.reloj = INICIO
+        self.issues, self.fallar = [], 0
+        self.ultima = None
+
+    @staticmethod
+    def escribe(ruta, texto):
+        with open(ruta, "w", encoding="utf-8", newline="") as f:
+            f.write(texto)
+
+    def borrar(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def json(self, ruta=None):
+        with open(ruta or self.estado, encoding="utf-8") as f:
+            return json.load(f)
+
+    def renglones(self):
+        with open(self.historial, encoding="utf-8") as f:
+            return f.read().splitlines()
+
+    def _abrir(self, asunto, cuerpo):
+        if self.fallar:
+            self.fallar -= 1
+            raise RuntimeError("GitHub no responde (simulado)")
+        self.issues.append((asunto, cuerpo))
+        return True
+
+    def correr(self, mapa, args=(), env=None, avanza=_dt.timedelta(minutes=15)):
+        """Una corrida de main(). Devuelve (codigo, avisos de esta corrida, servidor, salida impresa)."""
+        v, banco = self.v, self
+
+        class Ahora(_dt.datetime):
+            @classmethod
+            def now(cls, tz=None):
+                return banco.reloj.astimezone(tz) if tz else banco.reloj.replace(tzinfo=None)
+        dt_falso = types.ModuleType("dt_falso")
+        dt_falso.__dict__.update({k: getattr(_dt, k) for k in dir(_dt) if not k.startswith("__")})
+        dt_falso.datetime = Ahora
+
+        srv = Servidor(mapa)
+        env = dict({"PRUEBA": None, "SIN_AVISOS_PRECIO": None}, **(env or {}))
+        guardado = (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
+                    list(sys.argv), {k: os.environ.get(k) for k in env}, v.urllib.request.build_opener)
+        original_config = v.cargar_config
+        n0 = len(self.issues)
+        salida = io.StringIO()
+        try:
+            v.pedir, v.abrir_issue = srv, self._abrir
+            v.cargar_config = lambda ruta=None: original_config(self.config)
+            v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt = self.estado, self.precios, self.historial, dt_falso
+            time.sleep = lambda *a, **k: None
+            # el carrito de Samsung arma un abridor con cookies (carga los certificados de Windows: 30 ms cada vez);
+            # el servidor falso no lo usa, asi que basta un objeto vacio
+            v.urllib.request.build_opener = lambda *a, **k: types.SimpleNamespace(open=None)
+            sys.argv = ["vigia.py"] + list(args)
+            for k, x in env.items():
+                if x is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = x
+            with contextlib.redirect_stdout(salida):
+                codigo = v.main()
+        finally:
+            (v.pedir, v.abrir_issue, v.cargar_config, v.ESTADO, v.PRECIOS, v.HISTORIAL, v.dt, time.sleep,
+             sys.argv) = guardado[:9]
+            v.urllib.request.build_opener = guardado[10]
+            for k, x in guardado[9].items():
+                if x is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = x
+            self.reloj += avanza
+        self.ultima = salida.getvalue()
+        return codigo, self.issues[n0:], srv, self.ultima
+
+
+def asuntos(avs):
+    return [a for a, _ in avs]
+
+
+def afirma(cond, msg, banco=None):
+    if not cond:
+        raise AssertionError("%s\n--- salida de la ultima corrida (cola) ---\n%s" % (
+            msg, (banco.ultima or "")[-1500:] if banco else ""))
+
+
+def pendiente(escena, cond, esperado, paso):
+    """Falla del programa ya reportada: no tumba el selftest, se anota y se imprime."""
+    if not cond:
+        PENDIENTES.append((escena, esperado, paso))
+
+
+# ------------------------------------------------------------------ escenas
+def e1_dia_normal(v):
+    b = Banco(v)
+    try:
+        c, avs, srv, _ = b.correr(mundo_base())
+        afirma(c == 0 and avs == [], ("1a: avisos en un dia normal", asuntos(avs)), b)
+        est = b.json()
+        nombres = {"Foro", "Cupones", "Samsung", "Amazon", "Costco", "Elektra", "Liverpool", "Gameplanet"}
+        afirma(set(est["fallos_fuente"]) == nombres and not any(est["fallos_fuente"].values()),
+               ("1a: alguna fuente fallo (el mundo falso esta incompleto)", est["fallos_fuente"], est.get("ultimo_error")), b)
+        tabla = b.json(b.precios)
+        for k in ("Samsung|fold8|normal-512", "Amazon|ps5|digital", K_COS, "Liverpool|ps5|digital", "Gameplanet|ps5|digital"):
+            afirma(k in tabla, ("1a: falta en precios.json", k, sorted(tabla)), b)
+        afirma(tabla[K_COS]["precio"] == 37999.0, tabla[K_COS], b)
+        n = len(b.renglones())
+        afirma(n == 1 + len(tabla), ("1a: historial", n, len(tabla)), b)
+        c, avs, srv2, _ = b.correr(mundo_base())
+        afirma(c == 0 and avs == [] and len(b.renglones()) == n, ("1b: segunda corrida", asuntos(avs), len(b.renglones())), b)
+        return "2 corridas, 0 avisos, %d precios en la tabla, historial %d renglones sin crecer, %d peticiones por corrida" % (
+            len(tabla), n, len(srv2.pedidas))
+    finally:
+        b.borrar()
+
+
+def e2_baja_confirmada(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(len(avs) == 1, ("2b: se esperaba un aviso", asuntos(avs)), b)
+        a, cu = avs[0]
+        afirma(a == "GANGA $19,000 · Fold8 512 GB · Costco", a, b)
+        for x in ("Confirmado: se releyó la ficha", "https://www.costco.com.mx/Electronicos/", "/p/648324",
+                  "lo vende Costco (pide membresia)", "**$19,000**"):
+            afirma(x in cu, ("2b: falta en el cuerpo", x, cu[:600]), b)
+        afirma(srv.cuantas(COSTCO_FICHA) == 1, ("2b: fichas releidas", srv.cuantas(COSTCO_FICHA)), b)
+        est = b.json()
+        afirma(est["avisado"][K_COS] == 19000.0 and est["avisado_nivel"][K_COS] == ["GANGA", 19000.0], est["avisado"], b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("2c: repitio", asuntos(avs)), b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0 - v.BAJA_MINIMA - 100))
+        afirma(asuntos(avs) == ["GANGA $18,600 · Fold8 512 GB · Costco"], ("2d", asuntos(avs)), b)
+        afirma("Confirmado" in avs[0][1], avs[0][1][:400], b)
+        return "4 corridas: 0, 1 GANGA confirmado ($19,000), 0, 1 mas tras bajar $400 ($18,600)"
+    finally:
+        b.borrar()
+
+
+def e3_listado_miente(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        c, avs, srv, _ = b.correr(costco_a(19000.0, externo=True))
+        afirma(asuntos(avs) == ["SIN CONFIRMAR $19,000 · Fold8 512 GB · Costco · abre la ficha antes de creerlo"],
+               ("3b", asuntos(avs)), b)
+        afirma("lo vende vendedor externo en Costco, no la tienda ni la marca" in avs[0][1], avs[0][1][:500], b)
+        afirma(b.json()["avisado_nivel"][K_COS] == ["SIN CONFIRMAR", 19000.0], b.json()["avisado_nivel"], b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0, externo=True))
+        afirma(avs == [], ("3c: repitio el SIN CONFIRMAR", asuntos(avs)), b)
+        releida = srv.cuantas(COSTCO_FICHA)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco"] and "Confirmado" in avs[0][1], ("3d", asuntos(avs)), b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(avs == [], ("3e: repitio el confirmado", asuntos(avs)), b)
+        # 3f: la ficha dice otro articulo (banco nuevo)
+        b2 = Banco(v)
+        try:
+            c, avs, srv, _ = b2.correr(costco_a(19000.0, nombre="Samsung Galaxy Tab S10 Ultra 512GB Grafito"))
+            afirma(len(avs) == 1 and avs[0][0].startswith("SIN CONFIRMAR $19,000") and
+                   'es otro artículo: la ficha lo titula "Samsung Galaxy Tab S10' in avs[0][1], ("3f", avs), b2)
+        finally:
+            b2.borrar()
+        return ("5 corridas (tercero): SIN CONFIRMAR con la razon, 0 (la ficha se relee igual: %d peticion), "
+                "GANGA confirmado una vez, 0; y otro articulo: SIN CONFIRMAR con su razon" % releida)
+    finally:
+        b.borrar()
+
+
+def e4_ficha_caida(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        c, avs, srv, _ = b.correr(costco_a(19000.0, respuesta=(503, "Service Unavailable")))
+        afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco · ficha sin releer"], ("4b", asuntos(avs)), b)
+        afirma("No se pudo releer la ficha (la tienda no la entregó: Costco respondio 503 en la ficha 648324)" in avs[0][1],
+               avs[0][1][:700], b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        # Lo que hace el programa (afirmado tal cual): calla. La clave quedo avisada a $19,000 como GANGA; solo un
+        # SIN CONFIRMAR previo da derecho a un segundo correo "confirmado" al mismo precio. Ver "Dudas" de la salida.
+        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4c", asuntos(avs)), b)
+        # 4d (tal cual): si despues la ficha desmiente (un tercero), tambien calla: no se relee ni se corrige el aviso
+        c, avs, srv, _ = b.correr(costco_a(19000.0, externo=True))
+        afirma(avs == [] and srv.cuantas(COSTCO_FICHA) == 0, ("4d", asuntos(avs)), b)
+        return ("4 corridas: 1 GANGA 'ficha sin releer' con la razon; despues, con la ficha arriba, calla (0 avisos, "
+                "no la relee) tanto si coincide como si la desmiente")
+    finally:
+        b.borrar()
+
+
+def e5_tienda_caida(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        caida = con(mundo_base(), cos=(403, "<html>Access Denied</html>"))
+        todos = []
+        for i in range(4):
+            c, avs, srv, _ = b.correr(caida, avanza=_dt.timedelta(hours=1))
+            todos.append(asuntos(avs))
+            tabla = b.json(b.precios)
+            afirma(tabla.get(K_COS, {}).get("precio") == 37999.0, ("5: la tabla perdio a Costco", i, tabla.get(K_COS)), b)
+            afirma(not any(a.startswith("Agotado") for a in asuntos(avs)), ("5: agotado con la tienda caida", avs), b)
+        afirma(todos == [[], [], ["El vigia no puede leer Costco desde hace 2 horas"], []], ("5: avisos", todos), b)
+        est = b.json()
+        afirma(K_COS not in est.get("ausente", {}) and K_COS not in est.get("agotados", {}), est.get("ausente"), b)
+        c, avs, srv, _ = b.correr(mundo_base())
+        afirma(asuntos(avs) == ["El vigia volvio a leer Costco"], ("5f", asuntos(avs)), b)
+        return ("6 corridas, reloj +1 h por corrida: 403 cuatro veces sin 'Agotado' y con $37,999 en la tabla; "
+                "'no puede leer Costco' una vez (a las 2 h); al volver, 'volvio a leer'")
+    finally:
+        b.borrar()
+
+
+def e6_agotado_regreso(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        vacia = con(mundo_base(), cos=costco_busqueda())
+        vistos = []
+        for _ in range(v.AUSENCIAS_AGOTADO):
+            c, avs, srv, _ = b.correr(vacia)
+            vistos.append(asuntos(avs))
+        afirma(vistos == [[], [], [], ["Agotado: Fold8 512 GB ya no esta a la venta en Costco"]], ("6a", vistos), b)
+        c, avs, srv, _ = b.correr(vacia)
+        afirma(avs == [], ("6b: repitio el agotado", asuntos(avs)), b)
+        c, avs, srv, _ = b.correr(costco_a(21000.0))
+        a = asuntos(avs)
+        afirma(a == ["COMPRAR $21,000 · Fold8 512 GB · Costco",
+                     "Volvio a la venta: Fold8 512 GB en Costco a $21,000 · mira el aviso de precio de esta corrida"],
+               ("6c", a), b)
+        afirma("Confirmado" in avs[0][1] and not re.search(r"GANGA|COMPRAR|SIN CONFIRMAR", a[1]) and
+               "**$21,000**" in avs[1][1], ("6c: se contradicen", avs), b)
+        c, avs, srv, _ = b.correr(costco_a(21000.0))
+        afirma(avs == [], ("6d", asuntos(avs)), b)
+        return ("8 corridas: 'Agotado' solo a la 4a ausencia y una vez; regreso a $21,000: COMPRAR confirmado + "
+                "'Volvio a la venta ... mira el aviso de precio' (mismo precio, sin nivel propio); luego 0")
+    finally:
+        b.borrar()
+
+
+def e7_pruebas_fallidas(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        vacia = con(mundo_base(), cos=costco_busqueda())
+        for _ in range(v.AUSENCIAS_AGOTADO):
+            b.correr(vacia)
+        antes = b.json()
+        afirma(K_COS in antes["agotados"], antes.get("agotados"), b)
+        c, avs, srv, sal = b.correr(costco_a(19000.0), env={"SIN_AVISOS_PRECIO": "1"})
+        despues = b.json()
+        afirma(c == 0 and avs == [], ("7a: salieron avisos con SIN_AVISOS_PRECIO=1", asuntos(avs)), b)
+        afirma(K_COS not in despues["avisado"] and K_COS not in despues.get("avisado_nivel", {}), despues["avisado"], b)
+        for k in ("conocidos", "agotados", "ausente"):
+            afirma(despues.get(k) == antes.get(k), ("7a: se toco %s" % k, antes.get(k), despues.get(k)), b)
+        afirma("se habria avisado" in sal, "7a: no dijo lo que habria avisado", b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco",
+                                "Volvio a la venta: Fold8 512 GB en Costco a $19,000 · mira el aviso de precio de esta corrida"],
+               ("7b", asuntos(avs)), b)
+        return ("con SIN_AVISOS_PRECIO=1 y una baja a $19,000 de un agotado: 0 avisos, avisado y "
+                "conocidos/agotados/ausente intactos; sin la variable: GANGA + 'Volvio a la venta'")
+    finally:
+        b.borrar()
+
+
+def e8_aviso_que_falla(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        b.fallar = 1
+        c, avs, srv, sal = b.correr(costco_a(19000.0))
+        afirma(c == 0 and avs == [] and b.fallar == 0 and "no se pudo abrir el aviso" in sal, ("8a", avs), b)
+        est = b.json()
+        afirma(K_COS not in est["avisado"] and b.json(b.precios)[K_COS]["precio"] == 19000.0, est["avisado"], b)
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(asuntos(avs) == ["GANGA $19,000 · Fold8 512 GB · Costco"], ("8b", asuntos(avs)), b)
+        return "abrir_issue falla una vez: la corrida termina (codigo 0), guarda estado y precios; el aviso sale en la siguiente"
+    finally:
+        b.borrar()
+
+
+def e9_ficha_basura(v):
+    casos = [("JSON roto", {"respuesta": (200, '{"name": "Samsung Galaxy Z Fold 8 512GB", "price": {')}),
+             ("precio como texto raro", {"crudo_base": "veintiseis mil (aprox)"}),
+             ("HTML de mantenimiento con 200", {"respuesta": (200, "<html><h1>Sitio en mantenimiento</h1></html>")})]
+    hechos = []
+    for nombre, ficha in casos:
+        b = Banco(v)
+        try:
+            m = costco_a(19000.0, **ficha)
+            m[ELEKTRA_PS5] = elektra_ps5()
+            c, avs, srv, _ = b.correr(m)
+            a = sorted(asuntos(avs))
+            afirma(c == 0 and a == ["GANGA $19,000 · Fold8 512 GB · Costco · ficha sin releer",
+                                    "GANGA $7,400 · PS5 Digital (sin lector) · Elektra"], ("9 %s" % nombre, a), b)
+            afirma(any("Confirmado" in cu for x, cu in avs if "Elektra" in x), ("9 %s: Elektra sin confirmar" % nombre), b)
+            hechos.append(nombre)
+        finally:
+            b.borrar()
+    # y si la basura llega en el listado (no en la ficha): Costco cae como fuente, Elektra avisa igual
+    b = Banco(v)
+    try:
+        m = con(mundo_base(), cos=(200, "<html>Sitio en mantenimiento</html>"))
+        m[ELEKTRA_PS5] = elektra_ps5()
+        c, avs, srv, _ = b.correr(m)
+        afirma(c == 0 and asuntos(avs) == ["GANGA $7,400 · PS5 Digital (sin lector) · Elektra"], ("9 listado", asuntos(avs)), b)
+        afirma(b.json()["fallos_fuente"]["Costco"] == 1, b.json()["fallos_fuente"], b)
+    finally:
+        b.borrar()
+    return "ficha de Costco con %s: la corrida sigue, Costco sale 'ficha sin releer' y Elektra confirmado; listado basura: Costco cae, Elektra avisa" % (
+        ", ".join(hechos))
+
+
+def e10_estado_viejo(v):
+    with open(os.path.join(RAIZ, "visto.json"), encoding="utf-8") as f:
+        viejo = json.load(f)
+    b = Banco(v, visto=viejo)
+    try:
+        c, avs, srv, _ = b.correr(mundo_base())
+        agot = set(viejo.get("agotados", {}))
+        a = asuntos(avs)
+        afirma(c == 0, c, b)
+        afirma(all(x.startswith("Volvio a la venta") for x in a), ("10a: avisos que no son regreso", a), b)
+        claves = sorted(k for k in agot if k in b.json(b.precios))
+        afirma(len(a) == len(claves), ("10a: regresos", a, claves), b)
+        est = b.json()
+        afirma(all(isinstance(x, (int, float)) for x in est["avisado"].values()), est["avisado"], b)
+        c, avs, srv, _ = b.correr(mundo_base())
+        afirma(avs == [], ("10b: repitio", asuntos(avs)), b)
+        primera = a
+    finally:
+        b.borrar()
+    # 10c: la misma copia con un avisado escrito por la primera version de confirmar ({"precio", "nivel"})
+    viejo2 = copy.deepcopy(viejo)
+    viejo2["avisado"] = {K_COS: {"precio": 19000.0, "nivel": "GANGA"}}
+    b = Banco(v, visto=viejo2)
+    try:
+        c, avs, srv, _ = b.correr(costco_a(19000.0))
+        afirma(not any("Costco" in x and not x.startswith("Volvio") for x in asuntos(avs)), ("10c: reaviso", asuntos(avs)), b)
+        est = b.json()
+        afirma(est["avisado"] == {K_COS: 19000.0} and est["avisado_nivel"] == {K_COS: ["GANGA", 19000.0]},
+               (est["avisado"], est.get("avisado_nivel")), b)
+    finally:
+        b.borrar()
+    return ("visto.json real (copia): termina, solo %d aviso(s) de regreso legitimos (%s), 0 en la siguiente; "
+            "avisado en numeros; avisado viejo {precio, nivel}: no reavisa y queda 19000.0" % (len(primera), "; ".join(primera)))
+
+
+def e11_seco(v):
+    b = Banco(v)
+    try:
+        b.correr(mundo_base())
+        foto = {}
+        for n in sorted(os.listdir(b.dir)):
+            with open(os.path.join(b.dir, n), "rb") as f:
+                foto[n] = f.read()
+        c, avs, srv, sal = b.correr(costco_a(19000.0), args=["--seco"])
+        despues = {}
+        for n in sorted(os.listdir(b.dir)):
+            with open(os.path.join(b.dir, n), "rb") as f:
+                despues[n] = f.read()
+        afirma(c == 0 and avs == [] and despues == foto, ("11: --seco escribio o aviso", asuntos(avs),
+                                                           [n for n in despues if despues[n] != foto.get(n)]), b)
+        afirma(" * AVISO GANGA $19,000" in sal and len(srv.pedidas) > 20, "11: --seco no leyo o no imprimio el aviso", b)
+        return "con una GANGA a la vista: imprime el aviso, %d peticiones, 0 issues, ningun archivo cambia" % len(srv.pedidas)
+    finally:
+        b.borrar()
+
+
+ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
+           ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
+           ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
+           ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
+           ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco)]
+
+
+def foto_repo():
+    salida = {}
+    for n in ("visto.json", "precios.json", "historial_precios.csv", "historial.csv", "productos.json"):
+        r = os.path.join(RAIZ, n)
+        salida[n] = os.stat(r).st_mtime_ns if os.path.exists(r) else None
+    return salida
+
+
+def correr(v):
+    del PENDIENTES[:]
+    antes = foto_repo()
+    t0 = time.perf_counter()
+    for nombre, fn in ESCENAS:
+        detalle = fn(v)
+        print("casos_corrida escena %-24s OK: %s" % (nombre, detalle))
+    afirma(foto_repo() == antes, ("se escribio en la carpeta del repositorio", antes, foto_repo()))
+    for esc, esperado, paso in PENDIENTES:
+        print("casos_corrida PENDIENTE (falla del programa) escena %s: se esperaba %s; paso %s" % (esc, esperado, paso))
+    print("casos_corrida OK: %d escenas en %.2f s, %d pendientes" % (len(ESCENAS), time.perf_counter() - t0, len(PENDIENTES)))
+
+
+if __name__ == "__main__":
+    sys.path.insert(0, RAIZ)
+    import vigia
+    correr(vigia)
