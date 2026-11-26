@@ -712,6 +712,19 @@ def objetos_con(plano, clave, valor, intentos=400):
     return salida
 
 
+def consola_de_ficha(attrs):
+    """Lo que se anade al titulo de Liverpool segun los atributos de la ficha. Liverpool titula su PS5 Digital sin la
+    palabra "digital" ("Consola PS5 de 825 GB edicion bundle"); su ficha si lo dice. Medido el 25 nov 2026:
+    1186785807 Tipo de consola "Fija", Lector integrado "Sin lector" (Digital); 1186785793 "Fija", "CD" (con lector);
+    1156059630, el PlayStation Portal, "Fija/portátil", "Sin lector" (no se anade nada: no es la consola)."""
+    if (attrs.get("Tipo de consola") or "").strip() != "Fija":
+        return ""
+    lector = (attrs.get("Lector integrado") or "").strip()
+    if not lector:
+        return ""
+    return " Digital (sin lector de disco)" if lector.lower() == "sin lector" else " con lector de disco"
+
+
 def ficha_liverpool_texto(t, pid, sku=None):
     """Ficha de Liverpool desde su pagina. Medido el 25 nov 2026 (fichas 1156059630, 1203150349, 1186785807,
     1207352230, 999683571464): el articulo trae title, productAttributes, configurationFlags (isMarketPlace,
@@ -745,8 +758,7 @@ def ficha_liverpool_texto(t, pid, sku=None):
         color = a.get("Color") or {}
         extra = [(a.get("Size") or {}).get("name"), color.get("clothingBrandColor") or color.get("name")]
         titulo = " ".join([prin["title"]] + [x for x in extra if x and x.lower() not in prin["title"].lower()])
-        if attrs.get("Tipo de consola"):   # el PlayStation Portal dice "Fija/portátil"
-            titulo += " (consola %s)" % attrs["Tipo de consola"].lower()
+        titulo += consola_de_ficha(attrs)
         inv = s.get("inventoryStatus", prin.get("inventoryStatus"))
         opciones.append({"titulo": titulo, "precio": float(precio) if precio else None, "vendedor": vend,
                          "existencia": inv if isinstance(inv, bool) else None, "sku": s.get("skuId", ""),
@@ -771,8 +783,9 @@ def ficha_liverpool(url_o_id):
 
 
 def leer_liverpool(prod, cfg, estado):
-    """Busqueda (titulo y precio) y, para lo que pasa variante y piso, su ficha: titulo, precio de cada variante,
-    existencia y quien vende. Lo que no tiene ficha leida o no dice quien vende no se publica."""
+    """Busqueda (titulo y precio) y, para lo que es el producto y pasa el piso, su ficha: titulo (con lo que digan sus
+    atributos de consola), precio de cada variante, existencia y quien vende. Lo que no tiene ficha leida o no dice
+    quien vende no se publica."""
     e, t = pedir(LIVERPOOL + "?s=" + cfg["consulta"])
     if e != 200 or "-price" not in t:
         raise RuntimeError("Liverpool respondio %s (%d bytes)" % (e, len(t)))
@@ -783,7 +796,11 @@ def leer_liverpool(prod, cfg, estado):
         if not pr:
             continue
         titulo, pid, precio = html.unescape(m.group(1)), m.group(2), float(pr.group(1).replace(",", ""))
-        if variante(prod, titulo) and precio >= prod["piso"] and (pid not in cands or precio < cands[pid][1]):
+        # candidato a ficha: es el producto (patron), no es accesorio ni usado (EXCLUIR, excluir) y pasa el piso,
+        # aunque el titulo del listado no diga la variante: la ficha la dice (PS5 Digital sin "digital" en el titulo)
+        if re.search(prod["patron"], titulo, re.I) and not re.search(EXCLUIR, titulo, re.I) and \
+           not (prod.get("excluir") and re.search(prod["excluir"], titulo, re.I)) and precio >= prod["piso"] and \
+           (pid not in cands or precio < cands[pid][1]):
             cands[pid] = (titulo, precio)
     elegidos = sorted(cands.items(), key=lambda kv: kv[1][1])[:LIVERPOOL_FICHAS]
     salida, leidas = [], 0
@@ -803,6 +820,8 @@ def leer_liverpool(prod, cfg, estado):
             of = oferta(prod, "Liverpool", op["titulo"], op["precio"], op["url"], op["vendedor"], "", importado=op["importado"])
             if of:
                 salida.append(of)
+                print("   Liverpool: entra %s $%s (%s, lo vende %s)" % (of["titulo"][:90], "{:,.0f}".format(of["precio"]),
+                                                                       of["nombre"], of["vendedor"]))
             elif variante(prod, op["titulo"]) and not vendedor_oficial(prod, "Liverpool", op["vendedor"]):
                 print("   Liverpool: no se publica %s: lo vende %s (tercero de su marketplace)" % (op["url"], op["vendedor"]))
     if elegidos and not leidas:
@@ -905,8 +924,13 @@ def ficha_samsung(skus):
     return dict(next((o for o in opciones if o["existencia"]), opciones[0]), opciones=opciones)
 
 
-FICHAS = {"Amazon": ficha_amazon, "Liverpool": ficha_liverpool, "Costco": ficha_costco, "Elektra": ficha_elektra,
-          "Gameplanet": ficha_gameplanet, "Samsung": ficha_samsung}
+FICHAS_PROPIAS = {"Amazon": ficha_amazon, "Liverpool": ficha_liverpool, "Costco": ficha_costco, "Elektra": ficha_elektra,
+                  "Gameplanet": ficha_gameplanet, "Samsung": ficha_samsung}
+# Contrato para lectores que se dan de alta desde fuera (lectores_nuevos.py, registrar(v)): tienda -> funcion que recibe
+# la url de la oferta y devuelve {"titulo", "precio", "vendedor", "existencia" (True/False/None), "importado"} o lanza
+# RuntimeError. confirmar() la usa para toda tienda sin trato propio, con las mismas tres salidas.
+FICHAS = {}
+CAMPOS_FICHA = ("titulo", "precio", "vendedor", "existencia", "importado")
 TOPE_CONFIRMAR = 6                                   # fichas releidas por corrida (las de menor precio primero)
 NIVELES_CONFIRMAR = ("GANGA", "COMPRAR", "SIN CONFIRMAR")
 
@@ -930,7 +954,7 @@ def confirmar(o, prod, estado):
     - "no_coincide": la ficha se leyo y no la sostiene; razon lo dice con cifras.
     - "sin_releer": no se pudo leer (rechazo, tope de tiempo, tienda sin ficha); la oferta queda como estaba.
     Las tres salidas avisan: releer nunca se traga un aviso. Cuenta las relecturas de la corrida en estado["_confirmaciones"]."""
-    lector = FICHAS.get(o.get("tienda"))
+    lector = FICHAS_PROPIAS.get(o.get("tienda")) or FICHAS.get(o.get("tienda"))
     if o.get("foro") or not lector:
         return "sin_releer", o, "esta tienda no deja releer la ficha"
     if estado.get("_confirmaciones", 0) >= TOPE_CONFIRMAR:
@@ -943,6 +967,8 @@ def confirmar(o, prod, estado):
         fi = lector(ref)
     except Exception as ex:
         return "sin_releer", o, "la tienda no la entregó: %s" % str(ex)[:120]
+    if not isinstance(fi, dict) or any(k not in fi for k in CAMPOS_FICHA):
+        return "sin_releer", o, "la ficha llegó incompleta"
     var = var_por_id(prod, o["var"])
     buenas, motivos = [], []
     for op in fi.get("opciones") or [fi]:
@@ -1003,24 +1029,59 @@ def pasos_compra(o):
         m = re.search(r"con cupones ([^;]+)", o.get("nota") or "")
         codigos = [c.strip() for c in m.group(1).split("+")] if m else []
     pasos = ["Abre la liga de abajo."] + ["Teclea el cupón %s." % c for c in codigos if c]
-    resto = [x.strip() for x in (o.get("nota") or "").split(";")
-             if x.strip() and not re.match(r"con cupones|promocion vigente hasta", x.strip())]
-    if resto and not cup:
-        pasos.append("Ojo: " + "; ".join(resto) + ".")
     pasos.append("Revisa que el total sea {} antes de pagar.".format(pesos(o["precio"])))
     return pasos
 
 
-def linea_razon(o, prod, var):
-    """Renglon de la linea A (funcion global razon, si existe); nunca tumba el aviso."""
+def notas_compra(o):
+    """Lo que dice la nota y no es un paso: renglones que van debajo de los pasos ("Sin cupones cuesta $N.", "Ojo: ...")."""
+    salida, otras = [], []
+    for x in (o.get("nota") or "").split(";"):
+        x = x.strip()
+        if not x or re.match(r"con cupones|promocion vigente hasta", x):
+            continue
+        m = re.match(r"sin cup[oó]n\s+(\$[\d,]+)", x)
+        if m:
+            salida.append("Sin cupones cuesta %s." % m.group(1))
+        else:
+            otras.append(x)
+    if otras:
+        salida.append("Ojo: " + "; ".join(otras) + ".")
+    return salida
+
+
+def fecha_lego(txt):
+    """'2026-12-01' (o con hora) -> '1 dic'; lo que no sea fecha de ese tipo se deja como viene ('29 nov 23:59')."""
+    m = re.match(r"(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d:\d\d))?", txt or "")
+    if not m:
+        return txt
+    return "%d %s%s" % (int(m.group(3)), MESES[int(m.group(2)) - 1], " " + m.group(4) if m.group(4) else "")
+
+
+def vigencia_de(o):
+    """Renglon de vigencia en lego: la de la oferta, o la que diga la nota, o 'no se sabe'."""
+    if o.get("vigencia"):
+        v = fecha_lego(str(o["vigencia"]))
+        return v if v.startswith("hasta") else "hasta el " + v
+    m = re.search(r"vigente hasta ([\w:-]+)", o.get("nota") or "")
+    return "hasta el %s (lo dice la tienda)" % fecha_lego(m.group(1)) if m else "no se sabe"
+
+
+def razon_a(o, prod, var):
+    """Texto de la linea A (funcion global razon, si existe) o ''; nunca tumba el aviso."""
     fn = globals().get("razon")
     if not callable(fn):
         return ""
     try:
         r = fn(o["precio"], prod, var)
-        return ("- Por qué: " + str(r)) if r else ""
+        return str(r) if r else ""
     except Exception:
         return ""
+
+
+def linea_razon(o, prod, var):
+    r = razon_a(o, prod, var)
+    return ("- Por qué: " + r) if r else ""
 
 
 def texto_aviso(o, prod, var, niv, resultado, razon_ficha, mejores, hora, niv_listado=None):
@@ -1040,21 +1101,25 @@ def texto_aviso(o, prod, var, niv, resultado, razon_ficha, mejores, hora, niv_li
         elif niv_listado and niv_listado != niv:
             conf += " (El listado lo ponía como %s; con el precio de la ficha es %s.)" % (niv_listado, niv)
     elif resultado == "no_coincide":
-        conf = "No coincide: se releyó la ficha a las %s; %s. Ábrela antes de creerlo." % (hora, razon_ficha)
+        conf = "Se releyó la ficha a las %s y no coincide con el listado: ábrela antes de creerlo." % hora
     elif resultado == "sin_releer":
         conf = "No se pudo releer la ficha (%s): ábrela antes de comprar." % razon_ficha
     else:
         conf = "Aviso de %s: no se releyó la ficha (solo se relee para ganga y comprar)." % niv
     g, c, t = topes(prod, var)
-    lineas = ["**%s**" % o["titulo"], "Variante vigilada: %s" % var["nombre"], "",
-              "- Dónde: %s; lo vende %s" % (o["tienda"], o["vendedor"] or "(sin dato)"),
-              "- Pagas: **%s**" % p, "- Cómo se llega:"]
+    lineas = []
+    if niv == "SIN CONFIRMAR":   # la advertencia va antes de todo
+        if resultado == "no_coincide":
+            lineas += ["Sin confirmar: %s." % razon_ficha, ""]
+        else:
+            ra = razon_a(o, prod, var)
+            lineas += ["Sin confirmar: el precio está muy por debajo de lo que suele costar%s." % ((": " + ra) if ra else ""), ""]
+    lineas += ["**%s**" % o["titulo"], "Variante vigilada: %s" % var["nombre"], "",
+               "- Dónde: %s; lo vende %s" % (o["tienda"], o["vendedor"] or "(sin dato)"),
+               ("- Precio que se vio: **%s**" if niv == "SIN CONFIRMAR" else "- Pagas: **%s**") % p, "- Cómo se llega:"]
     lineas += ["    %d. %s" % (i + 1, x) for i, x in enumerate(pasos_compra(o))]
-    vig = o.get("vigencia")
-    if not vig:   # mientras la oferta no traiga vigencia, la que diga la nota (Samsung: "promocion vigente hasta ...")
-        m = re.search(r"vigente hasta ([\w-]+)", o.get("nota") or "")
-        vig = "hasta %s (lo dice la tienda)" % m.group(1) if m else "no se sabe"
-    lineas += ["- Vigencia: %s" % vig, "", o["url"], "", conf, "",
+    lineas += ["- " + x for x in notas_compra(o)]
+    lineas += ["- Vigencia: %s" % vigencia_de(o), "", o["url"], "", conf, "",
                "- Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(var["nombre"], g, c, t)]
     pq = linea_razon(o, prod, var)
     if pq:
@@ -1065,16 +1130,39 @@ def texto_aviso(o, prod, var, niv, resultado, razon_ficha, mejores, hora, niv_li
 
 
 def avisado_de(v):
-    """(precio, nivel) de lo ya avisado. Acepta lo viejo de visto.json (solo el precio) y lo nuevo {"precio", "nivel"}."""
+    """(precio, nivel) de un valor de avisado: un numero (el formato de siempre) o {"precio", "nivel"} (escrito por la
+    primera version de confirmar, si quedo en algun estado)."""
     if isinstance(v, dict):
         return v.get("precio"), v.get("nivel")
     return v, None
 
 
+def normalizar_avisado(estado):
+    """Deja estado["avisado"] como {clave: precio} (numeros, lo que lee cualquier version anterior del vigia, para poder
+    volver atras sin que truene) y el nivel con que se aviso en estado["avisado_nivel"] {clave: nivel}."""
+    avisado = estado.setdefault("avisado", {})
+    niveles = estado.setdefault("avisado_nivel", {})
+    for c, v in list(avisado.items()):
+        if isinstance(v, dict):
+            precio, niv = avisado_de(v)
+            if precio is None:
+                avisado.pop(c)
+                niveles.pop(c, None)
+                continue
+            avisado[c] = precio
+            if niv:
+                niveles[c] = niv
+    for c in [c for c in niveles if c not in avisado]:
+        niveles.pop(c)
+    return avisado, niveles
+
+
 def avisos_de_precio(mejores, por_id, avisado, estado, ahora):
     """Avisos de precio de esta corrida. Lo que tocaria avisar (regla de avisado y BAJA_MINIMA) y es GANGA, COMPRAR o
     SIN CONFIRMAR relee su ficha (confirmar), del mas barato al mas caro. Devuelve [dict(clave, asunto, cuerpo, precio,
-    nivel, resultado, razon)] y deja en mejores el precio y vendedor de la ficha cuando se confirmo. No abre nada."""
+    nivel, resultado, razon)] y deja en mejores el precio y vendedor de la ficha cuando se confirmo. No abre nada.
+    El nivel con que se aviso cada clave se lee de estado["avisado_nivel"]."""
+    niveles = estado.setdefault("avisado_nivel", {})
     pend = []
     for clave, o in mejores.items():
         prod = por_id[o["prod"]]
@@ -1082,8 +1170,10 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora):
         niv = nivel(o["precio"], prod, var)
         if not niv:
             avisado.pop(clave, None)   # subio del tope: la proxima baja vuelve a avisar
+            niveles.pop(clave, None)
             continue
         ant, niv_ant = avisado_de(avisado[clave]) if clave in avisado else (None, None)
+        niv_ant = niv_ant or niveles.get(clave)
         if ant is not None and o["precio"] > ant - BAJA_MINIMA and niv_ant != "SIN CONFIRMAR":
             continue
         pend.append((clave, o, prod, var, niv, ant, niv_ant))
@@ -1119,8 +1209,9 @@ def avisos_de_precio(mejores, por_id, avisado, estado, ahora):
     return hechos
 
 
-def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None):
-    """Abre el aviso y lo marca como avisado (precio y nivel). En seco o con SIN_AVISOS_PRECIO=1 no abre ni marca."""
+def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
+    """Abre el aviso y lo marca: avisado[clave] = precio (numero, como siempre) y niveles[clave] = nivel
+    (estado["avisado_nivel"]). En seco o con SIN_AVISOS_PRECIO=1 no abre ni marca."""
     if seco:
         return False
     if sin_avisos:
@@ -1128,7 +1219,9 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None):
         return False
     try:
         (abrir or abrir_issue)(av["asunto"], av["cuerpo"])
-        avisado[av["clave"]] = {"precio": av["precio"], "nivel": av["nivel"]}
+        avisado[av["clave"]] = av["precio"]
+        if niveles is not None:
+            niveles[av["clave"]] = av["nivel"]
         return True
     except Exception as ex:
         print("   no se pudo abrir el aviso:", ex)
@@ -1206,10 +1299,11 @@ def aviso_foro(prods, it):
         asunto = "[foro] SIN CONFIRMAR {} · {} · {} · abre la ficha antes de creerlo".format(ptxt, var["nombre"], tienda)
     else:
         asunto = "[foro] {} {} · {} · {} · ficha sin releer".format(niv, ptxt, var["nombre"], tienda)
-    cuerpo = "\n".join([
+    raro = niv == "SIN CONFIRMAR"
+    cuerpo = "\n".join((["Sin confirmar: el precio publicado está muy por debajo de lo que suele costar.", ""] if raro else []) + [
         "**{}**".format(it["titulo"]), "Variante vigilada: {}".format(var["nombre"]), "",
         "- Dónde: {}; quién vende: no se sabe (lo publicó un usuario del foro de ofertas)".format(tienda),
-        "- Pagas: **{}** (precio publicado en el foro, no leído en la tienda)".format(ptxt),
+        "- {}: **{}** (precio publicado en el foro, no leído en la tienda)".format("Precio que se vio" if raro else "Pagas", ptxt),
         "- Cómo se llega:",
         "    1. Abre la publicación del foro (liga de abajo) y de ahí la tienda.",
         "    2. Banco: {}.".format(nota),
@@ -1286,7 +1380,7 @@ def sembrar_conocidos(estado, prods, mejores, leidas, ruta=None):
 
 
 def disponibilidad(estado, prods, mejores, leidas, hoy):
-    """Devuelve avisos [(asunto, cuerpo)] de modelos agotados o de vuelta, y actualiza el estado."""
+    """Devuelve avisos [(asunto, cuerpo, clave)] de modelos agotados o de vuelta, y actualiza el estado."""
     por_id = {p["id"]: p for p in prods}
     conocidos = estado.setdefault("conocidos", {})
     agotados = estado.setdefault("agotados", {})
@@ -1298,6 +1392,7 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
             if c not in mejores:
                 conocidos.pop(c, None); ausente.pop(c, None); agotados.pop(c, None)
                 estado.get("avisado", {}).pop(c, None)   # y sin aviso de precio pendiente de esa clave
+                estado.get("avisado_nivel", {}).pop(c, None)
     for c, o in mejores.items():
         conocidos[c] = {"producto": o["nombre"], "precio": o["precio"], "url": o["url"], "visto": hoy}
         ausente.pop(c, None)
@@ -1319,7 +1414,7 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
                     "- Veredicto: **{}**{}. Tus topes de {}: ganga ${:,}; comprar ${:,}; mirar ${:,}".format(
                         niv, " (ábrela antes de creerlo)" if raro else "", var["nombre"], g, cc, t), "",
                     o["url"], "",
-                    "Lo mejor de cada tienda ahora:", "", tabla(mejores)])))
+                    "Lo mejor de cada tienda ahora:", "", tabla(mejores)]), c))
             agotados.pop(c)
     for c, info in conocidos.items():
         if c in mejores or c.split("|")[0] not in leidas or c in agotados:
@@ -1334,7 +1429,7 @@ def disponibilidad(estado, prods, mejores, leidas, hoy):
                     "si se leyo.".format(info["producto"], tienda, ausente[c]), "",
                     "- Ultima vez a la venta: {} a ${:,.0f}".format(info["visto"], info["precio"]),
                     "- Liga: {}".format(info["url"]), "",
-                    "Te aviso en cuanto vuelva a estar a la venta, con su precio."])))
+                    "Te aviso en cuanto vuelva a estar a la venta, con su precio."]), c))
             agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
             ausente.pop(c)
     return avisos
@@ -1364,21 +1459,21 @@ def recortar_vistos(vistos, tope=400):
     return dict(sorted(vistos.items(), key=lambda kv: cuando(kv[1]), reverse=True)[:tope])
 
 
-def avisar_disponibilidad(estado, prods, mejores, leidas, hoy, abrir=None):
+def avisar_disponibilidad(estado, prods, mejores, leidas, hoy, abrir=None, callar=False):
     """Corre disponibilidad() y abre un aviso por cada resultado (abrir=None: solo imprime, para --seco).
     Si un aviso no se pudo abrir, se deshace lo que disponibilidad() marco para esa clave, para que la proxima
-    corrida lo vuelva a intentar: un "agotado" vuelve a quedar a una ausencia de avisar; un "volvio" sigue agotado."""
+    corrida lo vuelva a intentar: un "agotado" vuelve a quedar a una ausencia de avisar; un "volvio" sigue agotado.
+    callar=True (SIN_AVISOS_PRECIO=1): se calcula sobre una copia, se imprime lo que se habria avisado y el estado de
+    disponibilidad no se toca, para que la siguiente corrida con pruebas en verde lo mande."""
+    if callar:
+        avisos = disponibilidad(json.loads(json.dumps(estado)), prods, mejores, leidas, hoy)
+        for asunto, _, _ in avisos:
+            print(" * DISPONIBILIDAD (SIN_AVISOS_PRECIO=1: se habria avisado; no se abre ni se marca)", asunto)
+        return avisos
     antes_ag = dict(estado.get("agotados", {}))
     avisos = disponibilidad(estado, prods, mejores, leidas, hoy)
-    ag, conocidos = estado.get("agotados", {}), estado.get("conocidos", {})
-    claves = {}   # comienzo del asunto que arma disponibilidad() -> clave
-    for c in ag:
-        if c not in antes_ag and c in conocidos:
-            claves["Agotado: {} ya no esta a la venta en {}".format(conocidos[c]["producto"], c.split("|")[0])] = c
-    for c in antes_ag:
-        if c not in ag and c in mejores:
-            claves["Volvio a la venta: {} en {} a ".format(mejores[c]["nombre"], c.split("|")[0])] = c
-    for asunto, cuerpo in avisos:
+    ag = estado.get("agotados", {})
+    for asunto, cuerpo, c in avisos:
         print(" * DISPONIBILIDAD", asunto)
         if abrir is None:
             continue
@@ -1386,10 +1481,7 @@ def avisar_disponibilidad(estado, prods, mejores, leidas, hoy, abrir=None):
             abrir(asunto, cuerpo)
         except Exception as ex:
             print("   no se pudo abrir el aviso:", ex)
-            c = next((k for pref, k in claves.items() if asunto.startswith(pref)), None)
-            if c is None:
-                print("   (no halle su clave: el aviso no se reintentara)")
-            elif c in antes_ag:
+            if c in antes_ag:
                 ag[c] = antes_ag[c]
             else:
                 ag.pop(c, None)
@@ -1742,7 +1834,8 @@ def main():
     except Exception:
         estado = {}
     antes = json.dumps(estado, sort_keys=True)
-    fallos, avisado = estado.setdefault("fallos_fuente", {}), estado.setdefault("avisado", {})
+    fallos = estado.setdefault("fallos_fuente", {})
+    avisado, avisado_nivel = normalizar_avisado(estado)   # avisado: solo numeros (vuelta atras segura)
     vistos = estado.setdefault("vistos", {})
 
     caidas, avisadas = estado.setdefault("caida_desde", {}), estado.setdefault("caida_avisada", [])
@@ -1815,14 +1908,14 @@ def main():
     sin_avisos = os.environ.get("SIN_AVISOS_PRECIO", "").lower() in ("1", "true", "yes")
     for av in avisos_de_precio(mejores, por_id, avisado, estado, ahora):
         print(" * AVISO", av["asunto"], "|", av["resultado"] or "sin releer (mirar)", av["razon"])
-        publicar_aviso(av, avisado, seco, sin_avisos)
+        publicar_aviso(av, avisado, seco, sin_avisos, niveles=avisado_nivel)
 
     # --- avisos de modelo agotado o de vuelta a la venta (solo cuenta tiendas leidas en esta corrida)
     if "conocidos" not in estado:
         sembrar_conocidos(estado, prods, mejores, leidas)
         print("   disponibilidad sembrada; agotados de arranque:", ", ".join(estado["agotados"]) or "ninguno")
     avisar_disponibilidad(estado, prods, mejores, leidas, ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
-                          None if seco else abrir_issue)
+                          None if seco else abrir_issue, callar=sin_avisos)
 
     # --- avisos del foro (tiendas que no se dejan leer, y recetas con banco)
     sembrar = not estado.get("sembrado")
