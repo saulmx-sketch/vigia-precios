@@ -64,7 +64,7 @@ TIENDAS_FORO = (r"samsung|walmart|bodega|sam'?s|amazon|mercado\s*libre|liverpool
                 r"lenovo|apple|xiaomi|motorola|sony|lg\b|hp\b|dell")
 BANCOS_PROPIOS = {"BBVA": r"bbva|bancomer", "Revolut": r"revolut", "PayPal": r"paypal"}
 BANCOS_AJENOS = {"Banorte": r"banorte", "Santander": r"santander", "Banamex": r"banamex|citibanamex",
-                 "HSBC": r"hsbc", "Scotiabank": r"scotiabank", "Amex": r"amex|american\s*express",
+                 "HSBC": r"hsbc", "Scotiabank": r"scotiabank", "Amex": r"\bamex\b|american\s+express",
                  "Inbursa": r"inbursa", "Afirme": r"afirme", "BanCoppel": r"bancoppel",
                  "Mercado Pago": r"mercado\s*pago", "Nu": r"\bnu\b", "Hey Banco": r"hey\s*banco"}
 SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v2/mx"
@@ -82,7 +82,11 @@ PAGINAS_CUPON_SAMSUNG = ["https://www.samsung.com/mx/offer/", "https://www.samsu
 BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cupones_foro" de cada producto
 DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
 HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
-TOPE_CUPONES = 40        # codigos probados por corrida y producto (los recien hallados primero)
+HORAS_REPROBADO_CUPONERA = 12   # el que solo publica una cuponera y no bajo nada descansa mas: son muchos (41 el 25 nov
+#                                 2026) y casi todos de otros productos; probarlos cada 3 h duplicaba el tiempo del carrito
+TOPE_CUPONES = 30        # codigos probados por corrida y producto (los recien hallados primero). Era 40; con 40 la
+#                          corrida de ensayo del 25 nov 2026 tardo 243 s (101 s con 24). Lo que no cabe entra en la corrida
+#                          siguiente, porque lo ya probado sin exito descansa.
 SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
 # Codigos de tienda cerrada (empleados o estudiantes: llevan "EPP"). En el carrito normal se rechazaron 24 de 24 el
 # 25 nov 2026 (8 codigos x 3 modelos). Se siguen cosechando (quedan en visto.json), pero no se prueban en el carrito.
@@ -237,6 +241,13 @@ def cupones_en_texto(plano):
         for c in codigos_de(m.group(1)):
             if c not in salida:
                 salida.append(c)
+    # /offer/cyber/ los escribe de otra forma: "Cupon 20%: PRO-20", "10% con HS26_ECO" (medido el 25 nov 2026);
+    # la segunda exige guion o guion bajo para no tomar "10% con BBVA"
+    for m in re.finditer(r"(?i:cup[oó]n)\s*\d{1,2}\s*%\s*:\s*([A-Z0-9][A-Z0-9_\-]{3,21})\b|"
+                         r"\d{1,2}\s*%\s+con\s+([A-Z][A-Z0-9]*[_\-][A-Z0-9_\-]{1,18})\b", plano):
+        for c in codigos_de(m.group(1) or m.group(2)):
+            if c not in salida:
+                salida.append(c)
     return salida
 
 
@@ -289,6 +300,17 @@ def cosechar_cupones(prods, estado, ahora):
                 pass
             for c in codigos_de(crudo):
                 hallados.setdefault(c, "foro")
+    if promos:
+        try:   # cuponeras medidas el 25 nov 2026 (promos.FUENTES_EXTRA); si fallan enteras, la cosecha queda como antes
+            extra = promos.cosechar_extra(pedir)
+            for crudo in extra.get("Samsung") or {}:
+                for c in codigos_de(crudo):
+                    hallados.setdefault(c, "cuponera")
+            leidas += promos.ULTIMA_COSECHA.get("leidas", 0)
+            promos.guardar_codigos(estado, extra, ahora)   # Amazon, Liverpool, Costco: solo como dato
+            print("   cuponeras: %s" % promos.ULTIMA_COSECHA.get("resumen", ""))
+        except Exception as ex:
+            print("   cuponeras sin leer (%s)" % str(ex)[:100])
     if not leidas:
         raise RuntimeError("ninguna fuente de cupones respondio")
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d")
@@ -302,7 +324,8 @@ def cosechar_cupones(prods, estado, ahora):
 
 
 def cupones_candidatos(prod, estado):
-    """Primero lo recien hallado (lo mas fresco), luego la lista fija; fuera los reprobados de las ultimas horas."""
+    """Primero lo recien hallado en Samsung y en el foro (lo mas fresco), luego la lista fija y al final lo que solo
+    publica una cuponera; fuera los reprobados de las ultimas horas. Asi el tope nunca deja fuera a la lista fija."""
     lista = []
     try:
         with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
@@ -313,9 +336,15 @@ def cupones_candidatos(prod, estado):
     if not isinstance(cosecha, dict):
         cosecha = {c: "" for c in cosecha}
     reprobados = estado.get("cupones_reprobados", {})
+    origen = (estado.get("cupones_ultima_busqueda") or {}).get("hallados") or {}
+    if not isinstance(origen, dict):
+        origen = {}
+    frescos = sorted(cosecha, key=lambda k: cosecha[k], reverse=True)
+    de_cuponera = [c for c in frescos if origen.get(c) == "cuponera" and c not in lista]
     salida = []
-    for c in sorted(cosecha, key=lambda k: cosecha[k], reverse=True) + lista:
-        if c in salida or MARCA_TIENDA_CERRADA in c.upper() or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < HORAS_REPROBADO * 3600:
+    for c in [c for c in frescos if c not in de_cuponera] + lista + de_cuponera:
+        horas = HORAS_REPROBADO_CUPONERA if c in de_cuponera else HORAS_REPROBADO
+        if c in salida or MARCA_TIENDA_CERRADA in c.upper() or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < horas * 3600:
             continue
         salida.append(c)
     return salida[:TOPE_CUPONES]
@@ -377,6 +406,8 @@ def samsung_carrito(sku, cupones):
     # Pasada 2: se parte del mejor y se le suman los demas solo si bajan el total.
     mejor_total, mejor, fin_d = base, [], d
     for cup in sorted(solos, key=solos.get):
+        if time.time() - inicio > SEGUNDOS_CARRITO * 2:
+            break
         prueba = mejor + [cup]
         t2, puestos, d2 = dejar_solo(prueba)
         if all(c in puestos for c in prueba) and t2 < mejor_total - 1:
