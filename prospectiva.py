@@ -1534,7 +1534,10 @@ def _eventos_validos(d, hoy):
     return sorted(salida)
 
 
-PROHIBIDAS = re.compile(r"\bpiso|años\s+parecidos|an[aá]logo|\bnivel|\bcentral|proporci[oó]n|\bficha", re.I)
+PROHIBIDAS = re.compile(r"\bpiso|años\s+parecidos|an[aá]logo|\bnivel|\bcentral|proporci[oó]n|\bficha|años\s+comparables|"
+                        r"llevado\s+al\s+precio", re.I)
+OFERTA = re.compile(r"cup[oó]n|bonific|descuento|reembolso|cashback", re.I)   # el minimo citado salio con cupon o banco
+CON_OFERTA = "con cupón o bonificación de banco"
 HERMANA_TXT = "calculado a partir del de 512 GB"
 ENCABEZADO = {"sin confirmar": "Sin confirmar:", "ganga": "Ganga", "comprar": "Buen precio para comprar", "mirar": "Conviene esperar:",
               None: "Conviene esperar:"}
@@ -1588,7 +1591,15 @@ def _minimo_citado(d, hoy):
     tienda = usar.get("tienda").strip() if isinstance(usar.get("tienda"), str) else ""
     donde = " ".join(x for x in ("el " + fecha if fecha else "", "en " + tienda if tienda else "") if x)
     segun = {"foro": "según el foro de ofertas", "prensa": "según la prensa"}.get(str(usar.get("fuente") or "").strip().lower(), "")
+    cond = usar.get("condicion")
+    if not isinstance(cond, str):   # minimo_ciclo no trae la condicion: la del mismo renglon en minimo o minimo_30d
+        for k in ("minimo", "minimo_30d"):
+            o = d.get(k) if isinstance(d.get(k), dict) else {}
+            if usar.get("rastro") and o.get("rastro") == usar.get("rastro") and isinstance(o.get("condicion"), str):
+                cond = o["condicion"]
+                break
     return {"precio": _numero(usar["precio"]), "donde": donde, "segun": segun, "tipo": tipo,
+            "oferta": bool(isinstance(cond, str) and OFERTA.search(cond)),
             "nombre": "lo más barato visto" if tipo == "salio" else "lo más barato de los últimos cuatro meses"}
 
 
@@ -1600,25 +1611,57 @@ def _detalle(m, coma):
     return _dinero(m["precio"]) + (", " + m["segun"] if m["segun"] else "")
 
 
-def _contra_minimo(p, m, corto):
+def _contra_minimo(p, m, corto, oferta=False):
+    """El precio contra el minimo citado. oferta=True: el minimo se nombra como lo visto con cupon o banco."""
     det = _dinero(m["precio"]) if corto else None
+    nombre = ("lo que ya se vio " + CON_OFERTA if m["oferta"] else "lo que ya se vio en oferta") if oferta else m["nombre"]
     if abs(p - m["precio"]) < IGUAL_MARGEN:
-        return "iguala %s (%s)" % (m["nombre"], det or _detalle(m, True))
+        return "iguala %s (%s)" % (nombre, det or _detalle(m, True))
     if p < m["precio"]:
         record = ("%s es lo más barato visto en México desde que salió" if m["tipo"] == "salio"
                   else "%s es lo más barato de los últimos cuatro meses") % _dinero(p)
         return "%s (antes, %s)" % (record, det or _detalle(m, False))
-    return "está %s arriba de %s (%s)" % (_dinero(p - m["precio"]), m["nombre"], det or _detalle(m, True))
+    if p - m["precio"] < 0.05 * p:
+        return "solo %s más que %s (%s)" % (_dinero(p - m["precio"]), nombre, det or _detalle(m, True))
+    return "está %s arriba de %s (%s)" % (_dinero(p - m["precio"]), nombre, det or _detalle(m, True))
 
 
-def _contra_esperado(p, e, corto):
+def _ya_visto(m, corto, p=None):
+    """'con cupon o bonificacion de banco ya se vio a $X (el D en T, segun ...)'; sin cupon conocido, 'ya se vio a $X ...'.
+    Si p queda debajo del minimo: '..., lo mas barato visto habia sido $X (...)'."""
+    det = ", ".join(x for x in (m["donde"], m["segun"]) if x)
+    if p is not None and p < m["precio"] - IGUAL_MARGEN:
+        txt = "%s%s había sido %s" % (CON_OFERTA + ", " if m["oferta"] else "", m["nombre"], _dinero(m["precio"]))
+    else:
+        txt = "%sya se vio a %s" % (CON_OFERTA + " " if m["oferta"] else "", _dinero(m["precio"]))
+    return txt + (" (%s)" % det if det and not corto else "")
+
+
+def _contra_esperado(p, e, corto, normal=False):
     aqui = "" if (corto or not e["hasta"]) else " de aquí al %s" % e["hasta"]
     nota = ", " + HERMANA_TXT if e["hermana"] else ""
+    espera = "se espera en precio normal" if normal else "se espera"
     if p < e["central"]:
-        return "queda debajo de lo más bajo que se espera%s (unos %s%s)" % (aqui, _dinero(e["central"]), nota)
+        return "queda debajo de lo más bajo que %s%s (unos %s%s)" % (espera, aqui, _dinero(e["central"]), nota)
     if p <= e["central"] * 1.02:
-        return "está en lo más bajo que se espera%s (unos %s%s)" % (aqui, _dinero(e["central"]), nota)
-    return "lo más bajo que se espera%s ronda %s%s" % (aqui, _dinero(e["central"]), " (%s)" % HERMANA_TXT if e["hermana"] else "")
+        return "está en lo más bajo que %s%s (unos %s%s)" % (espera, aqui, _dinero(e["central"]), nota)
+    return "lo más bajo que %s%s ronda %s%s" % (espera, aqui, _dinero(e["central"]), " (%s)" % HERMANA_TXT if e["hermana"] else "")
+
+
+def _podria_txt(p, e, normal):
+    """Comprar con el precio arriba de lo esperado: cuanto podria bajar, y que es aproximado (versiones larga y corta)."""
+    mins = e["mins"]
+    bajaron = [x for x in mins if x < p * 0.98]
+    if mins and not bajaron:
+        return ["El año pasado no bajó más en estas fechas." if len(mins) == 1 else "Los años anteriores no bajó más en estas fechas."]
+    base = "Podría bajar a unos %s%s%s" % (_dinero(e["central"]), " en precio normal" if normal else "",
+                                          " antes del %s" % e["hasta"] if e["hasta"] else "")
+    cola = ", pero ese cálculo es aproximado: esperar es apostar."
+    if not bajaron:
+        return [base + cola]
+    par = (" (el año pasado bajó hasta %s)" % _dinero(min(bajaron)) if len(mins) == 1
+           else " (%d de cada %d años bajó hasta %s)" % (len(bajaron), len(mins), _dinero(min(bajaron))))
+    return [base + par + cola, base + cola]
 
 
 def _esperado(d, hoy):
@@ -1639,17 +1682,17 @@ def _esperado(d, hoy):
 
 
 def _baja_mas_txt(p, e):
-    """Si en los anios comparables el precio bajo mas que p (2 % o mas) de aqui al fin del pronostico."""
+    """Si en los anios anteriores el precio bajo mas que p (2 % o mas) de aqui al fin del pronostico."""
     mins = e["mins"]
     bajaron = [x for x in mins if x < p * 0.98]
     if not mins:
         return None
     if len(mins) == 1:
         return ("Puede bajar más (el año pasado bajó hasta unos %s), pero no es seguro." % _dinero(min(bajaron)) if bajaron
-                else "El año pasado no bajó más.")
+                else "El año pasado no bajó más en estas fechas.")
     if bajaron:
         return "Puede bajar más (pasó %d de cada %d años, hasta unos %s), pero no es seguro." % (len(bajaron), len(mins), _dinero(min(bajaron)))
-    return "En los años comparables no bajó más."
+    return "Los años anteriores no bajó más en estas fechas."
 
 
 def _versiones(cabeza, clausulas, cola=""):
@@ -1696,33 +1739,68 @@ def _razon(precio, datos, hoy):
     elif etiqueta in ("ganga", "comprar"):
         cabeza = "Ganga:" if etiqueta == "ganga" else "Buen precio para comprar:"
         cola = "Compra si quien vende da garantía en México." if etiqueta == "ganga" else ""
-        cl = [(_contra_minimo(p, m, False), _contra_minimo(p, m, True)) if m else None,
-              (_contra_esperado(p, e, False), _contra_esperado(p, e, True)) if e else None]
-        piezas.append(_versiones(cabeza, cl, cola))
-        if etiqueta == "comprar" and e and _baja_mas_txt(p, e):
-            piezas.append([_baja_mas_txt(p, e), None])
+        aparte = bool(m and e and m["precio"] < e["central"])   # minimo (con oferta) debajo de lo esperado: no se juntan
+        if etiqueta == "comprar" and e and p > e["central"] * 1.02:   # arriba de lo esperado: cuanto podria bajar
+            if m:
+                piezas.append(_versiones(cabeza, [(_contra_minimo(p, m, False, aparte), _contra_minimo(p, m, True, aparte))]))
+                piezas.append(_podria_txt(p, e, aparte))
+            else:   # sin minimo: "Buen precio para comprar: podria bajar ..."
+                piezas.append([cabeza + " " + v[0].lower() + v[1:] for v in _podria_txt(p, e, aparte)])
+        elif aparte:
+            piezas.append(_versiones(cabeza, [(_contra_esperado(p, e, False, True), _contra_esperado(p, e, True, True))]))
+            largo_m, corto_m = _ya_visto(m, False, p), _ya_visto(m, True, p)
+            piezas.append([largo_m[0].upper() + largo_m[1:] + ".", corto_m[0].upper() + corto_m[1:] + "."])
+            if cola:
+                piezas.append([cola])
+            if etiqueta == "comprar" and _baja_mas_txt(p, e):
+                piezas.append([_baja_mas_txt(p, e), None])
+        else:
+            cl = [(_contra_minimo(p, m, False), _contra_minimo(p, m, True)) if m else None,
+                  (_contra_esperado(p, e, False), _contra_esperado(p, e, True)) if e else None]
+            piezas.append(_versiones(cabeza, cl, cola))
+            if etiqueta == "comprar" and e and _baja_mas_txt(p, e):
+                piezas.append([_baja_mas_txt(p, e), None])
     else:
+        cita_m = bool(m)   # el minimo va en su propia frase, salvo que ya vaya pegado a lo esperado
         if e and etiqueta in ("mirar", None):
             quien = "la misma consola" if d.get("analogo") == "misma_consola" else "el modelo anterior"
-            nota = "; " + HERMANA_TXT if e["hermana"] else ""
-            vienen = [x for x in _eventos_validos(d, hoy) if x[2] < p]
+            nota = " y a partir del de 512 GB" if e["hermana"] else ""
+            vienen =[x for x in _eventos_validos(d, hoy) if x[2] < p]
             tp = d.get("topes")
             comprar = _numero(tp[1]) if isinstance(tp, list) and len(tp) == 3 else None
             if vienen:
                 ini, nom, val, fin = vienen[0]   # evento ya empezado: "de aqui al <fin>", no "hacia" (C10)
                 cuando = ("de aquí al %s (%s)" % (_fecha_aviso(fin, hoy), nom) if ini <= hoy.isoformat() else "hacia %s" % nom)
-                piezas.append(["Conviene esperar: %s se espera alrededor de %s (así bajó %s en estas fechas, llevado al precio "
-                               "de hoy%s)." % (cuando, _dinero(val), quien, nota),
-                               "Conviene esperar: %s se espera alrededor de %s%s." % (
-                                   cuando, _dinero(val), " (%s)" % HERMANA_TXT if e["hermana"] else "")])
+                ap = bool(m and m["precio"] < val)
+                normal = " en precio normal" if ap else ""
+                larga = "Conviene esperar: %s se espera alrededor de %s%s (calculado con lo que bajó %s en estas fechas%s)" % (
+                    cuando, _dinero(val), normal, quien, nota)
+                corta = "Conviene esperar: %s se espera alrededor de %s%s%s" % (
+                    cuando, _dinero(val), normal, " (%s)" % HERMANA_TXT if e["hermana"] else "")
+                if ap:
+                    cita_m = False
+                    piezas.append([larga + "; " + _ya_visto(m, False) + ".", corta + "; " + _ya_visto(m, False) + ".",
+                                   corta + "; " + _ya_visto(m, True) + "."])
+                else:
+                    piezas.append([larga + ".", corta + "."])
             elif p <= e["central"] * 1.02 and comprar is not None:   # ya debajo de lo esperado: sin cifra esperada (C10)
                 piezas.append(["Conviene esperar: todavía no llega a tu precio de compra (%s)." % _dinero(comprar)])
+            elif m and m["precio"] < e["central"]:
+                cita_m = False
+                piezas.append(["Conviene esperar: %s; %s." % (_contra_esperado(p, e, False, True), _ya_visto(m, False)),
+                               "Conviene esperar: %s; %s." % (_contra_esperado(p, e, True, True), _ya_visto(m, True))])
             else:
                 piezas.append(["Conviene esperar: %s." % _contra_esperado(p, e, False),
                                "Conviene esperar: %s." % _contra_esperado(p, e, True)])
         elif e:   # sin topes: no se sabe la etiqueta del correo; solo lo esperado
-            piezas.append([(lambda t: t[0].upper() + t[1:] + ".")(_contra_esperado(p, e, False)), None])
-        if m:
+            if m and m["precio"] < e["central"]:
+                cita_m = False
+                sube = lambda t: t[0].upper() + t[1:]
+                piezas.append([sube(_contra_esperado(p, e, False, True)) + "; " + _ya_visto(m, False) + ".",
+                               sube(_contra_esperado(p, e, True, True)) + "; " + _ya_visto(m, True) + ".", None])
+            else:
+                piezas.append([(lambda t: t[0].upper() + t[1:] + ".")(_contra_esperado(p, e, False)), None])
+        if cita_m:
             piezas.append(["%s: %s." % (m["nombre"][0].upper() + m["nombre"][1:], _detalle(m, True)),
                            "%s: %s." % (m["nombre"][0].upper() + m["nombre"][1:], _dinero(m["precio"])), None])
     if e and e["n"] == 1:
@@ -2164,31 +2242,55 @@ def selftest():
           "pisos_esperados": [{"evento": "Black Friday y Cyber Monday 2026", "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 30461},
                               {"evento": "Navidad 2026", "inicio": "2026-12-16", "fin": "2027-01-06", "piso": 27620},
                               {"evento": "Cuesta de enero 2027", "inicio": "2027-01-07", "fin": "2027-01-31", "piso": 31181}]}
-    # ganga: contra el minimo y contra lo esperado; "queda debajo" porque 21,500 < 24,059
+    # df: el minimo citado (23,464) queda DEBAJO de lo esperado (24,059): van en frases separadas, "en precio normal"
     r = razon(21500, df, hoy)
-    assert r == ("Ganga: $21,500 es lo más barato visto en México desde que salió (antes, $23,464 el 13 oct en Samsung, "
-                 "según el foro de ofertas) y queda debajo de lo más bajo que se espera de aquí al 31 ene (unos $24,059). "
-                 "Compra si quien vende da garantía en México. En el último mes costaba unos $35,000."), r
-    # comprar: "pasó k de cada n años"
+    assert r == ("Ganga: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene (unos $24,059). Lo más "
+                 "barato visto había sido $23,464 (el 13 oct en Samsung, según el foro de ofertas). Compra si quien vende da "
+                 "garantía en México. En el último mes costaba unos $35,000."), r
     r = razon(23999, df, hoy)
-    assert r.startswith("Buen precio para comprar: está $535 arriba de lo más barato visto ($23,464, el 13 oct en Samsung, "
-                        "según el foro de ofertas) y queda debajo de lo más bajo que se espera de aquí al 31 ene (unos $24,059). "
-                        "Puede bajar más (pasó 1 de cada 2 años, hasta unos $19,680), pero no es seguro."), r
+    assert r.startswith("Buen precio para comprar: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene "
+                        "(unos $24,059). Ya se vio a $23,464 (el 13 oct en Samsung, según el foro de ofertas). Puede bajar más "
+                        "(pasó 1 de cada 2 años, hasta unos $19,680), pero no es seguro."), r
     r = razon(24100, dict(df, topes=[22000, 24500, 29000]), hoy)   # 24,100: arriba de 24,059 pero dentro de 2 %
-    assert "y está en lo más bajo que se espera de aquí al 31 ene (unos $24,059)." in r, r
-    r = razon(25500, dict(df, topes=[22000, 26000, 29000]), hoy)   # arriba de 24,059 x 1.02
-    assert "y lo más bajo que se espera de aquí al 31 ene ronda $24,059." in r, r
+    assert r.startswith("Buen precio para comprar: está en lo más bajo que se espera en precio normal de aquí al 31 ene (unos $24,059)."), r
     r = razon(23999, dict(df, analogos=[{"usado": True, "minimos": {"horizonte": 26000}},
                                         {"usado": True, "minimos": {"horizonte": 27600}}]), hoy)
-    assert "En los años comparables no bajó más." in r, r
+    assert "Los años anteriores no bajó más en estas fechas." in r, r
+    # C10 retoque 2: minimo con cupon (o con la condicion de su mismo renglon en minimo_30d) debajo de lo esperado
+    dc = dict(df, minimo=dict(df["minimo"], condicion="cupón PROMODESC_FOLD8U"))
+    r = razon(23999, dc, hoy)
+    assert r.startswith("Buen precio para comprar: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene "
+                        "(unos $24,059). Con cupón o bonificación de banco ya se vio a $23,464 (el 13 oct en Samsung, según el "
+                        "foro de ofertas)."), r
+    r = razon(25500, dict(dc, topes=[22000, 26000, 29000]), hoy)   # comprar arriba de lo esperado y minimo con cupon
+    assert r.startswith("Buen precio para comprar: está $2,036 arriba de lo que ya se vio con cupón o bonificación de banco "
+                        "($23,464, el 13 oct en Samsung, según el foro de ofertas). Podría bajar a unos $24,059 en precio normal "
+                        "antes del 31 ene (1 de cada 2 años bajó hasta $19,680), pero ese cálculo es aproximado: esperar es apostar."), r
+    r = razon(28999, dict(dc, pisos_esperados=[]), hoy)
+    assert r.startswith("Conviene esperar: lo más bajo que se espera en precio normal de aquí al 31 ene ronda $24,059; con cupón o "
+                        "bonificación de banco ya se vio a $23,464 (el 13 oct en Samsung, según el foro de ofertas)."), r
+    # C10 retoque 1: dz = minimo (23,464) ARRIBA de lo esperado (22,799), como el Fold8 Ultra 512 real
+    dz = dict(df, piso=dict(df["piso"], precio=22799))
+    r = razon(23999, dz, hoy)
+    assert r == ("Buen precio para comprar: solo $535 más que lo más barato visto ($23,464, el 13 oct en Samsung, según el foro "
+                 "de ofertas). Podría bajar a unos $22,799 antes del 31 ene (1 de cada 2 años bajó hasta $19,680), pero ese "
+                 "cálculo es aproximado: esperar es apostar. En el último mes costaba unos $35,000."), r
+    r = razon(25500, dict(dz, topes=[22000, 26000, 29000]), hoy)   # 2,036 es mas de 5 % de 25,500: "esta $N arriba"
+    assert r.startswith("Buen precio para comprar: está $2,036 arriba de lo más barato visto ($23,464"), r
+    r = razon(25500, dict(dz, topes=[22000, 26000, 29000], analogos=[{"usado": True, "minimos": {"horizonte": 26000}},
+                                                                    {"usado": True, "minimos": {"horizonte": 27600}}]), hoy)
+    assert "Los años anteriores no bajó más en estas fechas." in r and "Podría" not in r, r
+    # C10 retoque 3: jerga fuera
+    assert PROHIBIDAS.search("En los años comparables no bajó más.") and PROHIBIDAS.search("llevado al precio de hoy")
     # mirar y sin etiqueta: conviene esperar
     r = razon(28999, df, hoy)
-    assert r.startswith("Conviene esperar: hacia Navidad 2026 se espera alrededor de $27,620 (así bajó el modelo anterior en "
-                        "estas fechas, llevado al precio de hoy). Lo más barato visto: $23,464, el 13 oct en Samsung, según el "
-                        "foro de ofertas."), r
+    assert r.startswith("Conviene esperar: hacia Navidad 2026 se espera alrededor de $27,620 en precio normal (calculado con lo "
+                        "que bajó el modelo anterior en estas fechas); ya se vio a $23,464 (el 13 oct en Samsung, según el foro "
+                        "de ofertas)."), r
     assert razon(34199, df, hoy).startswith("Conviene esperar: hacia Black Friday y Cyber Monday 2026 se espera alrededor de $30,461")
-    r = razon(28999, dict(df, pisos_esperados=[]), hoy)
-    assert r.startswith("Conviene esperar: lo más bajo que se espera de aquí al 31 ene ronda $24,059."), r
+    r = razon(28999, dict(dz, pisos_esperados=[]), hoy)   # minimo arriba de lo esperado: sin "en precio normal", minimo aparte
+    assert r.startswith("Conviene esperar: lo más bajo que se espera de aquí al 31 ene ronda $22,799. Lo más barato visto: "
+                        "$23,464, el 13 oct en Samsung, según el foro de ofertas."), r
     r = razon(23000, dict(df, topes=[19900, 21800, 28100]), hoy)   # mirar, pero ya debajo de lo esperado
     # C10: "conviene esperar" nunca va junto a una cifra esperada mayor que el precio
     assert r.startswith("Conviene esperar: todavía no llega a tu precio de compra ($21,800). Lo más barato visto:") \
@@ -2203,8 +2305,8 @@ def selftest():
     # variante calculada a partir de otra: un solo parentesis, pegado a la cifra esperada
     dh = dict(df, piso=dict(df["piso"], tipo="proporcion"), minimo=None, minimo_ciclo=None, tipico=None)
     r = razon(28500, dh, hoy)
-    assert r == ("Conviene esperar: hacia Navidad 2026 se espera alrededor de $27,620 (así bajó el modelo anterior en estas "
-                 "fechas, llevado al precio de hoy; calculado a partir del de 512 GB)."), r
+    assert r == ("Conviene esperar: hacia Navidad 2026 se espera alrededor de $27,620 (calculado con lo que bajó el modelo "
+                 "anterior en estas fechas y a partir del de 512 GB)."), r
     assert "(unos $24,059, calculado a partir del de 512 GB)" in razon(21500, dh, hoy)
     # PS5: minimo de toda la historia de hace mas de 180 dias -> el de los ultimos cuatro meses; "la misma consola"
     dp = {"topes": [7500, 9000, 10800], "sin_confirmar_bajo": 6100, "analogo": "misma_consola",
@@ -2215,15 +2317,26 @@ def selftest():
           "analogos": [{"usado": True, "minimos": {"horizonte": 10434}}, {"usado": False, "motivo": "x"}],
           "pisos_esperados": [{"evento": "Black Friday y Cyber Monday 2026", "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 10434}]}
     r = razon(7400, dp, hoy)
-    assert r.startswith("Ganga: $7,400 es lo más barato de los últimos cuatro meses (antes, $7,717 el 13 nov en Walmart, según "
-                        "el foro de ofertas) y queda debajo de lo más bajo que se espera de aquí al 31 ene (unos $10,434). "
-                        "Compra si quien vende da garantía en México.") and "6,675" not in r, r
+    assert r.startswith("Ganga: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene (unos $10,434). "
+                        "Lo más barato de los últimos cuatro meses había sido $7,717 (el 13 nov en Walmart, según el foro de "
+                        "ofertas). Compra si quien vende da garantía en México.") and "6,675" not in r, r
     assert "Es orientación: solo hay un año para comparar." in r, r
     r = razon(8999, dp, hoy)
-    assert r.startswith("Buen precio para comprar: está $1,282 arriba de lo más barato de los últimos cuatro meses ($7,717") \
-        and "El año pasado no bajó más." in r, r
+    assert r.startswith("Buen precio para comprar: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene "
+                        "(unos $10,434). Ya se vio a $7,717 (el 13 nov en Walmart") and "El año pasado no bajó más en estas fechas." in r, r
     assert razon(10740, dp, hoy).startswith("Conviene esperar: hacia Black Friday y Cyber Monday 2026 se espera alrededor de "
-                                            "$10,434 (así bajó la misma consola en estas fechas, llevado al precio de hoy).")
+                                            "$10,434 en precio normal (calculado con lo que bajó la misma consola en estas "
+                                            "fechas); ya se vio a $7,717")
+    # C10 retoque 2, como el prospectiva.json real: minimo_ciclo sin condicion, la toma de minimo_30d (mismo rastro)
+    dpb = dict(dp, minimo_ciclo=dict(dp["minimo_ciclo"], rastro="r1"),
+               minimo_30d={"rastro": "r1", "condicion": "cupón WMBF13; 25% de bonificación de BBVA"})
+    r = razon(8999, dpb, hoy)
+    assert r.startswith("Buen precio para comprar: queda debajo de lo más bajo que se espera en precio normal de aquí al 31 ene "
+                        "(unos $10,434). Con cupón o bonificación de banco ya se vio a $7,717 (el 13 nov en Walmart, según el "
+                        "foro de ofertas)."), r
+    r = razon(10740, dpb, hoy)
+    assert ("se espera alrededor de $10,434 en precio normal" in r
+            and "; con cupón o bonificación de banco ya se vio a $7,717 (el 13 nov en Walmart" in r and len(r) <= MAX_RAZON), r
     # C10: Black Friday ya empezado (28 nov): "de aqui al 30 nov", no "hacia"
     r = razon(10740, dp, dt.date(2026, 11, 28))
     assert r.startswith("Conviene esperar: de aquí al 30 nov (Black Friday y Cyber Monday 2026) se espera alrededor de $10,434"), r
@@ -2246,7 +2359,7 @@ def selftest():
     r = razon(10740, dict(dp, minimo_ciclo=None), hoy)   # minimo viejo y sin el de cuatro meses: se omite
     assert "6,675" not in r and "Lo más barato" not in r, r
     # iguala; fuente propia con garantia: no se dice de donde sale; prensa
-    r = razon(23500, dict(df, topes=[24000, 25000, 29000]), hoy)
+    r = razon(23500, dict(dz, topes=[24000, 25000, 29000]), hoy)
     assert r.startswith("Ganga: iguala lo más barato visto ($23,464, el 13 oct en Samsung, según el foro de ofertas)"), r
     propio = dict(df, minimo={"precio": 23464, "fecha": "2026-10-13", "tienda": "Amazon", "fuente": "keepa", "garantia": "si"})
     assert "según" not in razon(28999, propio, hoy)
@@ -2255,7 +2368,8 @@ def selftest():
     largo = dict(df, minimo=dict(df["minimo"], tienda="T" * 200), sin_confirmar_bajo=99999,
                  pisos_esperados=[{"evento": "E" * 300, "inicio": "2026-11-27", "fin": "2026-11-30", "piso": 2}])
     fijos = dict(df, topes=[14000, 15000, 16000], sin_confirmar_bajo=12600)
-    for dd in (df, dh, dp, dps, largo, fijos, dict(df, minimo=dict(df["minimo"], tienda="T" * 120))):
+    for dd in (df, dh, dp, dps, largo, fijos, dict(df, minimo=dict(df["minimo"], tienda="T" * 120)), dc, dz, dpb,
+               dict(dc, minimo=dict(dc["minimo"], tienda="T" * 120))):
         tiene_pron = bool(_esperado(dd, hoy))
         for prc in range(5000, 40001, 125):
             r = razon(prc, dd, hoy)
