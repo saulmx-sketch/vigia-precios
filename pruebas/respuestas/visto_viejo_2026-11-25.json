@@ -1,0 +1,376 @@
+{
+ "agotados": {
+  "Amazon|fold8|ultra-512": {
+   "desde": "desde 2026-11-25 09:43",
+   "precio": 34394.83
+  },
+  "Liverpool|fold8|ultra": {
+   "desde": "desde 2026-11-19 18:57",
+   "precio": 55999.0
+  },
+  "Liverpool|ps5|digital": {
+   "desde": "desde 2026-11-25 07:10",
+   "precio": 24999.0
+  }
+ },
+ "ausente": {},
+ "avisado": {},
+ "caida_avisada": [],
+ "caida_desde": {},
+ "ciego_avisado": false,
+ "conocidos": {
+  "Amazon|fold8|normal-512": {
+   "precio": 34394.83,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
+   "visto": "2026-11-25 18:58"
+  },
+  "Amazon|fold8|ultra-512": {
+   "precio": 34394.83,
+   "producto": "Fold8 Ultra 512 GB",
+   "url": "https://www.amazon.com.mx/dp/B0H773PLWP?th=1&psc=1",
+   "visto": "2026-11-25 09:43"
+  },
+  "Amazon|ps5|digital": {
+   "precio": 12499.0,
+   "producto": "PS5 Digital (sin lector)",
+   "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
+   "visto": "2026-11-25 18:58"
+  },
+  "Costco|fold8|normal-512": {
+   "precio": 37999.0,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
+   "visto": "2026-11-25 18:58"
+  },
+  "Costco|fold8|ultra-512": {
+   "precio": 41999.0,
+   "producto": "Fold8 Ultra 512 GB",
+   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
+   "visto": "2026-11-25 18:58"
+  },
+  "Gameplanet|ps5|digital": {
+   "precio": 10999.99,
+   "producto": "PS5 Digital (sin lector)",
+   "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
+   "visto": "2026-11-25 18:58"
+  },
+  "Liverpool|fold8|normal": {
+   "precio": 44999.0,
+   "producto": "Fold8 (capacidad sin dato)",
+   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
+   "visto": "2026-11-25 18:58"
+  },
+  "Liverpool|fold8|ultra": {
+   "precio": 55999.0,
+   "producto": "Fold8 Ultra (capacidad sin dato)",
+   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150314",
+   "visto": "2026-11-19 18:57"
+  },
+  "Liverpool|ps5|digital": {
+   "precio": 24999.0,
+   "producto": "PS5 Digital (sin lector)",
+   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1180626294",
+   "visto": "2026-11-25 07:10"
+  },
+  "Samsung|fold8|normal-512": {
+   "precio": 31639.2,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
+   "visto": "2026-11-25 18:58"
+  },
+  "Samsung|fold8|ultra-1tb": {
+   "precio": 56149.1,
+   "producto": "Fold8 Ultra 1 TB",
+   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
+   "visto": "2026-11-25 18:58"
+  },
+  "Samsung|fold8|ultra-512": {
+   "precio": 34199.2,
+   "producto": "Fold8 Ultra 512 GB",
+   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
+   "visto": "2026-11-25 18:58"
+  }
+ },
+ "cupones_cosechados": {
+  "AFIHOME": "2026-11-25",
+  "BF1000": "2026-11-25",
+  "BF26_5": "2026-11-25",
+  "BFLIVESEM": "2026-11-25",
+  "CARRITO5": "2026-11-25",
+  "CART5_EPP": "2026-11-25",
+  "CBHOME": "2026-11-25",
+  "CENEVAL26": "2026-11-25",
+  "CRP26TV": "2026-11-25",
+  "ECO_20": "2026-11-25",
+  "ECO_25": "2026-11-25",
+  "ECO_30": "2026-11-25",
+  "EPP10_NOV": "2026-11-25",
+  "EPP1O_NOV": "2026-11-25",
+  "EPPLIVESEM": "2026-11-25",
+  "EPPMX_QUINCENA": "2026-11-25",
+  "FLASHBP25": "2026-11-25",
+  "FOLD8_20CLUB": "2026-11-25",
+  "MEMBER_NOV15": "2026-11-25",
+  "MEMHOME": "2026-11-25",
+  "PRO-15": "2026-11-25",
+  "PRO-20": "2026-11-25",
+  "S26CLUB_NOV": "2026-11-25",
+  "WINDC_600": "2026-11-25"
+ },
+ "cupones_reprobados": {
+  "fold8|AFIHOME": 1795651895,
+  "fold8|BF26_10": 1795651895,
+  "fold8|BF26_5": 1795651895,
+  "fold8|CARRITO5": 1795651895,
+  "fold8|CART5_EPP": 1795651895,
+  "fold8|CBHOME": 1795651895,
+  "fold8|CENEVAL26": 1795651895,
+  "fold8|CLUB_FOLD30": 1795651895,
+  "fold8|CRP26TV": 1795651895,
+  "fold8|ECO_20": 1795651895,
+  "fold8|ECO_25": 1795651895,
+  "fold8|ECO_30": 1795651895,
+  "fold8|ECO_CLUB25": 1795651895,
+  "fold8|ECO_CLUB30": 1795651895,
+  "fold8|EPP10_NOV": 1795651895,
+  "fold8|EPP1O_NOV": 1795651895,
+  "fold8|EPPLIVESEM": 1795651895,
+  "fold8|EPPMX_QUINCENA": 1795651895,
+  "fold8|FLASHBP25": 1795651895,
+  "fold8|FOLD8MEMBER_20": 1795651895,
+  "fold8|FOLD8U_20CLUB": 1795651895,
+  "fold8|FOLD8U_35CLUB": 1795651895,
+  "fold8|LIVESEM": 1795651895,
+  "fold8|MEMBER_NOV15": 1795651895,
+  "fold8|MEMHOME": 1795651895,
+  "fold8|PRO-15": 1795651895,
+  "fold8|PRO-20": 1795651895,
+  "fold8|PROMODESC_FOLD8U": 1795651895,
+  "fold8|S26CLUB_NOV": 1795651895,
+  "fold8|S26CRP_NOV": 1795651895,
+  "fold8|WINDC_600": 1795651895
+ },
+ "cupones_ultima_busqueda": {
+  "cuando": "2026-11-25 18:58",
+  "fuentes_leidas": 12,
+  "hallados": {
+   "AFIHOME": "foro",
+   "BF1000": "Samsung",
+   "BF26_5": "foro",
+   "BFLIVESEM": "foro",
+   "CARRITO5": "foro",
+   "CART5_EPP": "foro",
+   "CBHOME": "foro",
+   "CENEVAL26": "foro",
+   "CRP26TV": "foro",
+   "ECO_20": "Samsung",
+   "ECO_25": "Samsung",
+   "ECO_30": "Samsung",
+   "EPP10_NOV": "foro",
+   "EPPLIVESEM": "foro",
+   "EPPMX_QUINCENA": "foro",
+   "FLASHBP25": "foro",
+   "FOLD8_20CLUB": "foro",
+   "MEMHOME": "foro",
+   "PRO-15": "Samsung",
+   "PRO-20": "foro",
+   "S26CLUB_NOV": "foro"
+  }
+ },
+ "diag_amazon": [
+  "11-25 02:47 busqueda ok; busqueda ok",
+  "11-25 02:47 busqueda ok",
+  "11-25 03:02 busqueda ok; busqueda ok",
+  "11-25 03:02 busqueda ok",
+  "11-25 03:18 busqueda ok; busqueda ok",
+  "11-25 03:18 busqueda ok",
+  "11-25 03:34 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-25 03:35 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 03:51 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 03:52 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 04:08 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 04:09 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 04:25 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 04:26 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 04:42 busqueda 200 de 2322 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 04:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 04:59 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 04:59 busqueda ok",
+  "11-25 05:15 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 05:17 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 05:32 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-25 05:32 busqueda ok",
+  "11-25 05:48 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 05:48 busqueda ok",
+  "11-25 06:04 busqueda 200 de 2322 bytes, reintento 200 de 2322 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 06:05 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 06:22 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 06:22 busqueda 503 de 1669 bytes, reintento ok",
+  "11-25 06:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 06:39 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 06:55 busqueda 200 de 2319 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 06:57 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 07:13 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 07:14 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 07:30 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 07:31 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 07:47 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 07:48 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 08:04 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 08:05 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 08:21 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 08:22 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 08:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 08:39 busqueda 503 de 1669 bytes, reintento ok",
+  "11-25 08:55 busqueda 200 de 2314 bytes, reintento ok; busqueda ok",
+  "11-25 08:55 busqueda ok",
+  "11-25 09:11 busqueda ok; busqueda 503 de 1669 bytes, reintento ok",
+  "11-25 09:12 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 09:28 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 09:29 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 09:45 busqueda ok; busqueda ok",
+  "11-25 09:45 busqueda ok",
+  "11-25 18:12 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 18:13 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 18:29 busqueda 200 de 2321 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 18:30 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 18:45 busqueda 200 de 2322 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 18:45 busqueda ok",
+  "11-25 19:00 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 19:01 busqueda 200 de 2280 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok"
+ ],
+ "fallos": 0,
+ "fallos_fuente": {
+  "Amazon": 0,
+  "Costco": 0,
+  "Cupones": 0,
+  "Elektra": 0,
+  "Foro": 0,
+  "Gameplanet": 0,
+  "Liverpool": 0,
+  "Samsung": 0
+ },
+ "sembrado": true,
+ "ultimo_error": {},
+ "vendedor_amazon": {
+  "B09SYJ9NNX": [
+   7499.0,
+   "Koval Olena",
+   false,
+   "ps5"
+  ],
+  "B0D9WTKV1B": [
+   16681.77,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0F6968Y5G": [
+   18750.0,
+   "Tekno Electronicos (FACTURAMOS TODAS LAS COMPRAS)",
+   false,
+   "ps5"
+  ],
+  "B0FTNL3B9F": [
+   14599.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0FTP523RH": [
+   12499.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G4NPJB3K": [
+   15419.11,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G756CBJ1": [
+   27098.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G75WQKTT": [
+   12948.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G76569Q9": [
+   13319.11,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G76PM4FZ": [
+   15238.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G76R6X1Z": [
+   15476.78,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G76YF472": [
+   14498.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0G86XR6F3": [
+   15490.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0GH2GJD6J": [
+   16798.0,
+   "Amazon México",
+   false,
+   "ps5"
+  ],
+  "B0H76XJTG2": [
+   34394.83,
+   "Amazon México",
+   false,
+   "fold8"
+  ],
+  "B0H773GGWG": [
+   38171.64,
+   "Amazon México",
+   false,
+   "fold8"
+  ],
+  "B0H773PLWP": [
+   34394.83,
+   "Amazon México",
+   false,
+   "fold8"
+  ],
+  "B0H779SQRZ": [
+   34394.83,
+   "Amazon México",
+   false,
+   "fold8"
+  ],
+  "B0H92G9GNW": [
+   37999.05,
+   "Amazon Remates de Almacén",
+   false,
+   "fold8"
+  ]
+ },
+ "vistos": {
+  "https://www.promodescuentos.com/ofertas/samsung-estudiantes-galaxy-z-fold8-galaxy-watch-9-con-banorte-1211089": "Tue, 17 Nov 2026 11:20:43 -0600",
+  "https://www.promodescuentos.com/ofertas/z-fold-8-ultra-vendido-por-samsung-pagando-con-bbva-o-banamex-1211402": "Wed, 18 Nov 2026 00:57:00 -0600"
+ }
+}
