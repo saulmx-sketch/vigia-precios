@@ -333,6 +333,15 @@ def _correr(v):
     assert af[0].startswith("[foro] SOLO CON OTRO BANCO $7,717 ·") and "tope al mes" not in af[1], af
     af = v.aviso_foro(prods, dict(bbva, descripcion="Pagando con BBVA. Bonificación en monedero de la tienda."))
     assert "con devolución" not in af[0], af[0]   # la bonificacion no es del banco: no se explica como devolucion
+    af = v.aviso_foro(prods, bbva)
+    assert "que tras la devolución quede en $7,717" in af[1] and "que el total sea" not in af[1], af[1]   # revisor D, H4
+    for desc in ("Bonificación de 30% Banamex pagando con PayPal.",            # revisor D, H1: otro banco en la frase
+                 "Pagando con BBVA a 12 MSI. La bonificación de BBVA no aplica en consolas.",   # H3: negacion
+                 "Pagando con BBVA.\nBonificación en Monedero Walmart de $500."):           # H2/H3: monedero
+        af = v.aviso_foro(prods, dict(bbva, descripcion=desc))
+        assert "con devolución" not in af[0] and "tope al mes" not in af[1], (desc, af)
+    af = v.aviso_foro(prods, dict(bbva, descripcion="Con 10% de cashback pagando con PayPal."))
+    assert "con devolución PayPal" in af[0] and "13 nov" not in af[1], af       # H5: el 13 nov solo con BBVA
     v.nivel = lambda precio, prod, var: "SIN CONFIRMAR"
     est = {"conocidos": {clave: {"producto": "Fold8 512 GB", "precio": 44999, "url": "u", "visto": "h"}},
            "agotados": {clave: {"desde": "desde h", "precio": 44999}}}
