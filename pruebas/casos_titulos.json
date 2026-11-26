@@ -3779,5 +3779,32 @@
   "vendedor": "Soriana",
   "espera": "digital",
   "origen": "encargo 09 de la linea C (25-nov-2026): caso de 'regla sin piso'; precio subido a proposito a 7,000 para que el piso ($6,500) no ayude y decida solo la regla de titulos; tienda y vendedor supuestos. Debe entrar: Saul, 'el paquete Digital + unidad de disco cuenta como Digital'"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 de 825 GB edición bundle Blanco Digital (sin lector de disco)",
+  "precio": 12499,
+  "vendedor": "Liverpool",
+  "espera": "digital",
+  "origen": "ficha de Liverpool 1186785807 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785807.html): titulo armado por ficha_liverpool con Tipo de consola 'Fija' y Lector integrado 'Sin lector'"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 Blanco",
+  "precio": 6999,
+  "vendedor": "Liverpool",
+  "espera": null,
+  "origen": "ficha de Liverpool 1156059630 (PlayStation Portal) del 25-nov-2026, Tipo de consola 'Fija/portátil': titulo armado por ficha_liverpool; precio ALTERADO de $5,999 a $6,999 (arriba del piso)"
+ },
+ {
+  "tienda": "Liverpool",
+  "producto": "ps5",
+  "titulo": "Consola PS5 de 1 TB edición estándar Blanco con lector de disco",
+  "precio": 14699,
+  "vendedor": "Liverpool",
+  "espera": null,
+  "origen": "ficha de Liverpool 1186785793 del 25-nov-2026 (pruebas/respuestas/liv_pdp_1186785793.html): Tipo de consola 'Fija', Lector integrado 'CD'"
  }
 ]
