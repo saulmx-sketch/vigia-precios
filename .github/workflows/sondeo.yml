@@ -53,6 +53,28 @@ jobs:
         run: |
           bash .github/scripts/relevo.sh; c=$?
           echo "codigo=$c"; exit $c
+      - name: relevo_planB_con_corrida
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: '45739994911'
+        run: |
+          echo "=== plan B, TERMINO_ID=45739994911 (corrida real terminada de la cadena) ==="
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
+      - name: relevo_planB_sin_corrida
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: ''
+        run: |
+          echo "=== plan B, TERMINO_ID vacio (disparo a mano) ==="
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
       - name: seco
         continue-on-error: true
         timeout-minutes: 7
