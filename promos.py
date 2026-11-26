@@ -525,9 +525,15 @@ def precio_con_fila(precio, fila):
             baja = min(baja, float(fila["tope"]))
         if baja <= 0 or baja > precio * 0.5:   # E6/A2: una rebaja de mas de la mitad es lectura equivocada
             return None
+        if fila.get("tope_relativo") and baja > precio * float(fila["tope_relativo"]):
+            return None   # P5' (26 nov): cifra de categoria de Costco que pasa de su tope relativo: solo nota
         return round(precio - baja, 2)
     except (TypeError, ValueError):
         return None
+
+
+TOPE_CATEGORIA_COSTCO = 0.25   # P5' (26 nov): la cifra de la categoria ahorrosPaypalNNNN es de la tienda, no del articulo
+#                                (medida en un Fold8 de $44,999: 13 %); en un articulo barato daria rebajas de casi la mitad
 
 
 # ------------------------------------------------------------------------------- Samsung: tiendas cerradas
@@ -618,6 +624,7 @@ def costco_promos(texto_ficha, ahora=None, url=""):
         if cod == con_cifra:
             f = _fila(banco, "%s (codigo %s, solo pagando con %s)" % (monto[1], cod, banco), "descuento", url,
                       valor=monto[0], unidad="$", vigencia=vig)
+            f["tope_relativo"] = TOPE_CATEGORIA_COSTCO
         else:
             f = _fila(banco, "promocion de pago %s sin cifra publica" % cod, "descuento", url, vigencia=vig)
         f["codigo"] = cod
@@ -722,6 +729,12 @@ FUENTES_EXTRA = [   # (nombre, url, tienda); intercaladas por sitio para que la 
     ("cupondescuento_liverpool", "https://www.cupondescuento.com.mx/liverpool.com.mx", "Liverpool"),
     ("eluniversal_cs_liverpool", CS % 122, "Liverpool"),
     ("cupondescuento_costco", "https://www.cupondescuento.com.mx/costco.com.mx", "Costco"),
+    # Pendiente 9 (26 nov): fuentes medidas el 25 nov por la linea B (medicion\fuentes2a, 2b y 3a), al final para que
+    # el tope de tiempo les toque a ellas y no a las de antes. Cada una con su lector propio (EXTRACTORES).
+    ("telegram_multitienda_samsung", "https://t.me/s/ofertasdemexicomultitienda?q=samsung", "Samsung"),
+    ("cuponesmexico_costco", "https://www.cuponesmexico.com.mx/tienda/costco-mexico/", "Costco"),
+    ("cupondescuento_elektra", "https://www.cupondescuento.com.mx/elektra.mx", "Elektra"),
+    ("cyberpuerta_cupones", "https://www.cyberpuerta.mx/api/v0.1/vouchers/cms", "Cyberpuerta"),
 ]
 NO_ES_EXTRA = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|CUPON|CODIGO|"
                          r"DESCUENTO|GRATIS|ENVIO|SHEIN|AMAZON|LIVERPOOL|COSTCO|HERRAMIENTAS|"
@@ -752,6 +765,80 @@ def codigos_en(texto):
                 and not NO_ES_EXTRA.match(c) and c.upper() not in [s.upper() for s in salida]):
             salida.append(c)
     return salida
+
+
+_TG_MSG = re.compile(r'<div class="tgme_widget_message_wrap(.*?)(?=<div class="tgme_widget_message_wrap|\Z)', re.S)
+_TG_TXT = re.compile(r'tgme_widget_message_text[^>]*>(.*?)</div>', re.S)
+_TG_FEC = re.compile(r'datetime="(\d{4}-\d{2}-\d{2})')
+_TG_COD = re.compile(r'\U0001F39F\ufe0f?\s*(?:Cup[oó]n:\s*)?([A-Z0-9][A-Z0-9_\-]{3,24})\b')   # el canal marca cada codigo con 🎟
+DIAS_TELEGRAM = 14   # un mensaje mas viejo que esto no da codigos
+
+
+def codigos_telegram(texto, hoy=None):
+    """Codigos de la vista web publica de un canal de Telegram (t.me/s/<canal>?q=...): los que el mensaje marca con el
+    boleto 🎟, de mensajes de los ultimos DIAS_TELEGRAM dias; fuera los de mensajes que dicen "Tienda Estudiantes"
+    (esa tienda pide sesion: el carrito normal los rechaza siempre). Formato medido el 25 nov 2026."""
+    hoy = hoy or dt.date.today()
+    salida = []
+    for m in _TG_MSG.finditer(texto or ""):
+        t = _TG_TXT.search(m.group(1))
+        if not t:
+            continue
+        txt = html.unescape(re.sub(r"<[^>]+>", "", re.sub(r"<br\s*/?>", " / ", t.group(1))))
+        f = _TG_FEC.search(m.group(1))
+        try:
+            if f and (hoy - dt.date.fromisoformat(f.group(1))).days > DIAS_TELEGRAM:
+                continue
+        except ValueError:
+            pass
+        if re.search(r"Tienda Estudiantes", txt, re.I):
+            continue
+        for c in _TG_COD.findall(txt):
+            if re.search(r"[A-Z]", c) and not NO_ES_EXTRA.match(c) and c not in salida:
+                salida.append(c)
+    return salida
+
+
+def codigos_vivos_cuponera(texto, hoy=None):
+    """Solo lo vigente de cuponesmexico (fecha "Vencido el dd/mm/aaaa" de cada tarjeta) y de cupondescuento (lo que va
+    antes del rotulo "recientemente expirados"). Medido el 25 nov 2026 (medicion\fuentes2b)."""
+    hoy = hoy or dt.date.today()
+    vivos = []
+    if "data-code=" in (texto or ""):   # cuponesmexico
+        for m in DATA_CODE.finditer(texto):
+            antes = texto[max(0, m.start() - 900): m.start()]
+            f = re.findall(r'coupon-expiry">([^<]+)<', antes)
+            marca = f[-1].strip() if f else ""
+            d = re.search(r"(\d{2})/(\d{2})/(\d{4})", marca)
+            try:
+                vencido = "Vencido" in marca or bool(d and dt.date(int(d[3]), int(d[2]), int(d[1])) < hoy)
+            except ValueError:
+                vencido = True
+            if not vencido and m.group(1) not in vivos:
+                vivos.append(m.group(1))
+        return vivos
+    plano = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", re.sub(r"<script.*?</script>", " ", texto or "",
+                                                                                flags=re.S))))
+    corte = plano.find("recientemente expirados")
+    for m in re.finditer(r"(" + _COD + r") \1 Copiar el c[oó]digo", plano[:corte] if corte > 0 else plano):
+        if not NO_ES_EXTRA.match(m.group(1)) and m.group(1) not in vivos:
+            vivos.append(m.group(1))
+    return vivos
+
+
+def codigos_cyberpuerta(texto):
+    """Codigos del JSON publico de cupones de Cyberpuerta (/api/v0.1/vouchers/cms, medido el 25 nov 2026)."""
+    try:
+        d = json.loads(texto)
+    except ValueError:
+        return []
+    return [a["coupon_code"] for a in ((v or {}).get("attributes") or {} for v in (d.get("data") or []))
+            if a.get("coupon_code")]
+
+
+EXTRACTORES = {"telegram_multitienda_samsung": codigos_telegram, "cuponesmexico_costco": codigos_vivos_cuponera,
+               "cupondescuento_elektra": codigos_vivos_cuponera, "cyberpuerta_cupones": codigos_cyberpuerta}
+MINIMO_POR_FUENTE = {"cyberpuerta_cupones": 50}   # su JSON es chico (1 KB el 25 nov); las demas, MINIMO_CUPONERA
 
 
 def cosechar_extra(pedir, tope_s=TOPE_CUPONERAS, dormir=time.sleep, hay_tiempo=None, reloj=time.monotonic):
@@ -789,9 +876,9 @@ def cosechar_extra(pedir, tope_s=TOPE_CUPONERAS, dormir=time.sleep, hay_tiempo=N
         try:
             e, t = pedir(url)
             ultimo[sitio] = reloj()
-            if e != 200 or len(t or "") < MINIMO_CUPONERA:
+            if e != 200 or len(t or "") < MINIMO_POR_FUENTE.get(nombre, MINIMO_CUPONERA):
                 raise RuntimeError("%s de %d bytes" % (e, len(t or "")))
-            cods = codigos_en(t)
+            cods = EXTRACTORES.get(nombre, codigos_en)(t)
             for c in cods:
                 salida.setdefault(tienda, {}).setdefault(c, url)
             fuentes[nombre] = len(cods)
@@ -1038,6 +1125,44 @@ LECTORES_BANCOS["Liverpool"] = lector_bancos_liverpool
 LECTORES_BANCOS["BBVA"] = lector_bancos_bbva
 
 
+def fuera_de_buen_fin(ahora):
+    """True fuera de la ventana en que cae el Buen Fin (del 8 al 22 de noviembre, hora de Mexico; sus fechas cambian
+    cada anio pero siempre caen ahi)."""
+    hoy = ahora.astimezone(MX).date()
+    return not (hoy.month == 11 and 8 <= hoy.day <= 22)
+
+
+def recorte_banco(lit, banco, antes=40, despues=110):
+    """N1 de la linea B (26 nov): el literal de un banco se recortaba a sus primeros 90 caracteres y se comia la
+    condicion ("solo en laptops y tablets"). Ahora: de 40 caracteres antes del nombre del banco a 110 despues; sin
+    nombre a la vista, los primeros 150."""
+    lit = re.sub(r"\s+", " ", lit or "").strip()
+    m = re.search(re.escape(banco or ""), lit, re.I) if banco else None
+    ini = max(0, m.start() - antes) if m else 0
+    fin = (m.end() + despues) if m else antes + despues
+    corte = lit[ini:fin].strip()
+    return ("…" if ini > 0 else "") + corte + ("…" if fin < len(lit) else "")
+
+
+def _que(o):
+    """Como se nombra el articulo en los pasos de un aviso (pendiente 8: decia "el teléfono" tambien para la consola)."""
+    return (o or {}).get("nombre") or "el artículo"
+
+
+def _repartir(skus, n):
+    """Hasta n SKU de {sku: [prod, variante]}, turnando productos (pendiente 8: con list(skus)[:3], un tercer producto
+    de Samsung nunca se leia en la tienda de estudiantes). Con un solo producto da lo mismo que list(skus)[:n]."""
+    por_prod = {}
+    for sku, info in skus.items():
+        por_prod.setdefault(info[0], []).append(sku)
+    salida, filas = [], list(por_prod.values())
+    while len(salida) < n and any(filas):
+        for fila in filas:
+            if fila and len(salida) < n:
+                salida.append(fila.pop(0))
+    return salida
+
+
 def _skus_cerradas(prods):
     """Un SKU por producto y variante de Samsung: {sku: [prod, variante]}."""
     out, vistos = {}, set()
@@ -1237,7 +1362,7 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
     previo = caja.get("cerradas") if isinstance(caja.get("cerradas"), dict) else {}
     if skus and _vencido(previo.get("leido"), ahora, MINUTOS_CERRADAS):
         try:
-            precios, errores, _ = samsung_cerradas(pedir, list(skus)[:3], hay_tiempo, dormir)
+            precios, errores, _ = samsung_cerradas(pedir, _repartir(skus, 3), hay_tiempo, dormir)
             bueno = bool(precios or not errores)
             if not precios and previo.get("precios"):   # E11: 200 sin precio (reto) no borra los precios buenos
                 bueno = False
@@ -1336,6 +1461,10 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             if vig is not True:
                 continue
             nuevo = precio_con_fila(precio, f)
+            if nuevo is None and f.get("tope_relativo") and f.get("valor"):
+                _anade(extras, o, "%s anuncia ahorro de ${:,.0f} al pagar con %s (%s); no se resta: pasa de la cuarta "
+                                  "parte del precio y puede no valer para este artículo".format(float(f["valor"]))
+                       % (tienda, f.get("banco"), f.get("codigo") or "?"))
             llave = (f.get("banco"), f.get("codigo") or "")
             if nuevo is not None and nuevo < precio - MARGEN and (llave not in por_banco or nuevo < por_banco[llave][0]):
                 por_banco[llave] = (nuevo, f)
@@ -1343,7 +1472,11 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
         dichos = []
         for f in anuncios:
             lit = re.sub(r"\s+", " ", f.get("beneficio") or "").strip()
-            lit = lit if len(lit) <= 90 else lit[:89].rstrip() + "…"
+            if re.search(CATEGORIA_AJENA, lit, re.I):
+                continue   # N2 de la linea B (26 nov): "12 % ... en Moda y Hogar" no es de este articulo
+            if re.search(r"buen\s*fin", lit, re.I) and fuera_de_buen_fin(ahora):
+                continue   # N3: "Buen Fin: 15 % con Santander" heredaba la fecha de la pagina; fuera de su ventana, vencida
+            lit = recorte_banco(lit, f.get("banco"))
             texto = '%s anuncia promoción con %s: "%s" (sin probar; revísala en la página)' % (tienda, f["banco"], lit)
             if texto not in dichos and len(dichos) < 2:
                 dichos.append(texto)
@@ -1370,8 +1503,8 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                     requisito = "PayPal"
                     pide = "elegir PayPal como forma de pago; la promoción (%s la llama %s) se aplica sola, no se teclea" % (
                         tienda, codigo)
-                    pasos = "pon el teléfono en el carrito, elige PayPal y revisa que el total baje a ${:,.0f} antes de " \
-                            "confirmar.".format(nuevo)
+                    pasos = ("agrega al carrito %s, elige PayPal y revisa que el total baje a ${:,.0f} antes de "
+                             "confirmar.".format(nuevo) % _que(o))
                     if tienda == "Costco":
                         pide += "; y ser socio de Costco (membresía Dorada ${:,.0f} al año)".format(COSTCO_MEMBRESIA)
                         pasos = ("entra con tu cuenta de Costco, " + pasos +
@@ -1382,17 +1515,17 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                     requisito = "tarjeta %s (código %s)" % (banco, codigo)
                     pide = "pagar con una tarjeta %s y teclear el código %s al pagar%s" % (banco, codigo,
                                                                                            ("; " + cond) if cond else "")
-                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s, teclea el código %s y mira el total en "
+                    pasos = ("agrega al carrito %s, elige la tarjeta %s, teclea el código %s y mira el total en "
                              "la última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
-                             % (banco, codigo))
+                             % (_que(o), banco, codigo))
                 else:
                     _anade(extras, o, "pagando con {} quedaría en ${:,.0f}, hasta {} (no probado: se ve al pagar)".format(
                         banco, nuevo, hasta or "?"))
                     requisito = "tarjeta %s" % banco
                     pide = "pagar con una tarjeta %s%s" % (banco, ("; " + cond) if cond else "")
-                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s como forma de pago y mira el total en la "
+                    pasos = ("agrega al carrito %s, elige la tarjeta %s como forma de pago y mira el total en la "
                              "última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
-                             % banco)
+                             % (_que(o), banco))
                 if precio - nuevo >= AHORRO_PROPIO:
                     _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, lit,
                            f.get("url", ""), cierre=cierre, hasta=hasta, pasos=pasos)
@@ -1713,6 +1846,28 @@ def _pedir_falso(paginas, reloj=None, paso=0.0, llamadas=None):
 
 
 def selftest():
+    # pendiente 8 (26 nov): un tercer producto de Samsung entra a la tienda de estudiantes aunque el primero tenga 3
+    # variantes; con un solo producto, el mismo orden de siempre; los pasos del aviso nombran el articulo
+    tres = [{"id": "a", "tiendas": {"Samsung": {"skus": {"A1": ["v1"], "A2": ["v2"], "A3": ["v3"]}}}},
+            {"id": "b", "tiendas": {"Samsung": {"skus": {"B1": ["w1"]}}}},
+            {"id": "c", "tiendas": {"Amazon": {}}},
+            {"id": "d", "tiendas": {"Samsung": {"skus": {"D1": ["x1"], "D2": ["x2"]}}}}]
+    assert _repartir(_skus_cerradas(tres), 3) == ["A1", "B1", "D1"], _repartir(_skus_cerradas(tres), 3)
+    assert _repartir(_skus_cerradas(tres[:1]), 3) == ["A1", "A2", "A3"]
+    assert _repartir(_skus_cerradas(tres), 9) == ["A1", "B1", "D1", "A2", "D2", "A3"]
+    assert _que({"nombre": "Producto X"}) == "Producto X" and _que({}) == "el artículo"
+    # N1 (26 nov): el recorte guarda la condicion que sigue al banco
+    largo = "Ofertas de la semana en tecnologia y mas: " * 3 + "15% de descuento con Banorte solo en laptops y tablets."
+    r_b = recorte_banco(largo, "Banorte")
+    assert "solo en laptops y tablets" in r_b and r_b.startswith("…") and len(r_b) <= 155, r_b
+    assert recorte_banco("corto con BBVA", "BBVA") == "corto con BBVA"
+    # N3 (26 nov): fuera del 8 al 22 de noviembre, un literal del Buen Fin no se cita
+    assert fuera_de_buen_fin(dt.datetime(2026, 11, 27, 18, tzinfo=dt.timezone.utc))
+    assert not fuera_de_buen_fin(dt.datetime(2026, 11, 15, 18, tzinfo=dt.timezone.utc))
+    # P5' (26 nov): la cifra de la categoria de Costco no pasa de la cuarta parte del precio del articulo
+    cat = {"tipo": "descuento", "valor": 6000, "unidad": "$", "tope_relativo": TOPE_CATEGORIA_COSTCO}
+    assert precio_con_fila(44999, cat) == 38999 and precio_con_fila(12499, cat) is None
+    assert precio_con_fila(12499, dict(cat, tope_relativo=None)) == 6499   # sin tope relativo, como antes
     reglas = {"FOLD8_20CLUB": ("pct", 20, "club"), "BFLIVESEM": ("pct", 10, "club"), "BF1000": ("fijo", 1000, ""),
               "LIVESEM": ("sube", 4000, ""), "CENTAVO": ("fijo", 0.5, "")}
     codigos = ["LIVESEM", "MUERTO", "BFLIVESEM", "BF1000", "FOLD8_20CLUB", "CENTAVO"]
@@ -1901,7 +2056,7 @@ def selftest():
     llamadas, esperas = [], []
     ex = cosechar_extra(_pedir_falso(pag_cup, llamadas=llamadas), dormir=esperas.append, reloj=quieto)
     assert {"FOLD8_25CLUB", "ECO_20", "BFPLUS45", "GALAXYMP"} <= set(ex["Samsung"]), ex
-    assert list(ex["Amazon"]) == ["PRIMERA1126"] and "Liverpool" not in ex and len(llamadas) == 9, (ex, llamadas)
+    assert list(ex["Amazon"]) == ["PRIMERA1126"] and "Liverpool" not in ex and len(llamadas) == 13, (ex, llamadas)   # 9 + 4 fuentes del 26 nov (aqui 404)
     assert "auth=0123456789abcdef0123456789abcdef" in llamadas[2] and llamadas[1] == EU_PAGINA, llamadas   # llave leida
     assert ULTIMA_COSECHA["leidas"] == 4 and "falla" in str(ULTIMA_COSECHA["fuentes"]["eluniversal_cs_amazon"])
     assert esperas and all(0 < s <= PAUSA for s in esperas)                   # 1 s entre peticiones a un mismo sitio
@@ -1915,12 +2070,30 @@ def selftest():
     est_k, llamadas = {}, []
     cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora, dormir=lambda s: None, reloj=quieto)
     n1 = len(llamadas)
-    assert est_k["promos"]["cuponeras_leido"] == "2026-11-27 12:00" and n1 == 9, (est_k, n1)
+    assert est_k["promos"]["cuponeras_leido"] == "2026-11-27 12:00" and n1 == 13, (est_k, n1)
     assert cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora + dt.timedelta(hours=1)) == {}
     assert len(llamadas) == n1 and ULTIMA_COSECHA["leidas"] == 0
     cosechar_extra_si_toca(_pedir_falso(pag_cup, llamadas=llamadas), est_k, ahora + dt.timedelta(hours=2),
                            dormir=lambda s: None, reloj=quieto)
     assert len(llamadas) == 2 * n1
+    # pendiente 9 (26 nov): lectores de las cuatro fuentes nuevas, con el formato medido el 25 nov
+    boleto = '<i class="emoji"><b>\U0001F39F️</b></i> <code>%s</code><br/>'
+    tg = "".join('<div class="tgme_widget_message_wrap"><div class="tgme_widget_message_text js-message_text">%s</div>'
+                 '<time datetime="%sT10:00:00+00:00"></time></div>' % (txt, f) for txt, f in (
+                     ("Galaxy Z Flip8 $20,932<br/>2.- Aplica estos cupones<br/>" + boleto % "MEMBER_NOV15" + boleto % "BF1000",
+                      "2026-11-24"),
+                     ("En Tienda Estudiantes<br/>" + boleto % "EPPLIVESEM", "2026-11-24"),     # pide sesion: fuera
+                     ("Fold viejo<br/>" + boleto % "VIEJO_SEP", "2026-09-01")))                  # mas de 14 dias: fuera
+    assert codigos_telegram(tg, dt.date(2026, 11, 26)) == ["MEMBER_NOV15", "BF1000"], codigos_telegram(tg, dt.date(2026, 11, 26))
+    cm = ('<span class="coupon-expiry">Vencido el 22/11/2026</span><a data-code="MSF1A"></a>'
+          '<span class="coupon-expiry">Vence el 30/11/2026</span><a data-code="PP177"></a>'
+          '<span class="coupon-expiry">Vence el 20/11/2026</span><a data-code="VIEJO1"></a>')
+    assert codigos_vivos_cuponera(cm, dt.date(2026, 11, 26)) == ["PP177"], codigos_vivos_cuponera(cm, dt.date(2026, 11, 26))
+    cd = ("<p>Añadido hace 2 días</p><b>HKPRO500</b> <b>HKPRO500</b> <span>Copiar el código</span>"
+          "<h2>Cupones recientemente expirados</h2><b>LB10</b> <b>LB10</b> <span>Copiar el código</span>")
+    assert codigos_vivos_cuponera(cd) == ["HKPRO500"], codigos_vivos_cuponera(cd)
+    assert codigos_cyberpuerta('{"data": [{"attributes": {"coupon_code": "CyberpowerOFER", "discount": 150}}, {}]}') == \
+        ["CyberpowerOFER"] and codigos_cyberpuerta("no es json") == []
     # palabras comunes tras "cupon/codigo" no son codigos (E6/M5)
     assert codigos_en("<h3>CUPÓN EXCLUSIVO</h3><p>Código VERIFICADO</p><span>Cupones NUEVOS</span><b>Código ACTIVO</b>"
                       "<i>cupón HONOR</i> data-code=\"REDMAGIC\"") == [], codigos_en("CUPÓN EXCLUSIVO")

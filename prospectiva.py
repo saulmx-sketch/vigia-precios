@@ -1372,10 +1372,22 @@ def generar(base=AQUI, ahora=None, ruta=None):
     return doc, detalle, info
 
 
-def recalcular(base=AQUI, ahora=None, ruta=None):
+def recalcular(base=AQUI, ahora=None, ruta=None, si_viejo=None):
     """Como generar, pero solo reemplaza el archivo si el resultado valida y ningun tope salta mas de 15 %.
-    Ante cualquier problema deja el archivo anterior intacto y lo dice por stderr. Devuelve 0 siempre."""
+    Ante cualquier problema deja el archivo anterior intacto y lo dice por stderr. Devuelve 0 siempre.
+    si_viejo=H: no hace nada si el archivo se genero hace menos de H horas (vigia.yml lo corre en cada corrida con
+    20: en la practica, una vez al dia; asi prospectiva.json no caduca solo a los 30 dias)."""
     ruta = ruta or os.path.join(base, SALIDA)
+    if si_viejo is not None and os.path.exists(ruta):
+        try:
+            with open(ruta, encoding="utf-8") as f:
+                gen = dt.datetime.fromisoformat(str(json.load(f).get("generado", "")))
+            edad = ((ahora or dt.datetime.now(MX)) - gen).total_seconds() / 3600
+            if 0 <= edad < si_viejo:
+                print("prospectiva.json tiene %.1f h (menos de %s): no se recalcula" % (edad, si_viejo))
+                return 0
+        except Exception as e:   # fecha ilegible o sin zona: se recalcula, que es lo que se pidio
+            _aviso("recalcular: no se leyo la edad del archivo (%s); se recalcula" % e)
     try:
         doc, _, info = construir(base, ahora)
         prods = {p["id"]: p for p in info["ctx"].prods}
@@ -2135,6 +2147,13 @@ def selftest():
         assert recalcular(tmp, dt.datetime(2026, 11, 25, 15, 0, tzinfo=MX)) == 0
         with open(ruta, encoding="utf-8") as fb:
             assert json.load(fb)["generado"] == "2026-11-25T15:00:00-06:00", "topes anteriores como texto"
+        # pendiente 1 del 26 nov: --si-viejo 20 no recalcula un archivo de menos de 20 h; si pasa de 20 h, si
+        assert recalcular(tmp, dt.datetime(2026, 11, 26, 10, 59, tzinfo=MX), si_viejo=20) == 0
+        with open(ruta, encoding="utf-8") as fb:
+            assert json.load(fb)["generado"] == "2026-11-25T15:00:00-06:00", "--si-viejo: 19.98 h no recalcula"
+        assert recalcular(tmp, dt.datetime(2026, 11, 26, 11, 1, tzinfo=MX), si_viejo=20) == 0
+        with open(ruta, encoding="utf-8") as fb:
+            assert json.load(fb)["generado"] == "2026-11-26T11:01:00-06:00", "--si-viejo: 20.02 h si recalcula"
         # retroprueba: si la escritura falla, no queda el temporal en historia/
         original_md = g["_retro_md"]
         g["_retro_md"] = lambda *a: None   # f.write(None) lanza TypeError
@@ -2456,7 +2475,8 @@ def main(argv):
         print("tiempo: %.2f s" % (time.perf_counter() - t0))
         return 0
     if orden == "--recalcular":
-        return recalcular(AQUI)
+        horas = float(argv[argv.index("--si-viejo") + 1]) if "--si-viejo" in argv[:-1] else None
+        return recalcular(AQUI, si_viejo=horas)
     if orden == "--retroprueba":
         ruta_csv = argv[argv.index("--csv") + 1] if "--csv" in argv[:-1] else None
         resultados, s, sesgo, md = retroprueba(AQUI, ruta_csv)

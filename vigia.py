@@ -135,6 +135,7 @@ NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BB
 # que siempre alcance a guardar visto.json y precios.json antes de los 12 min del trabajo de GitHub (una tienda o el
 # foro colgados la hacian morir sin guardar). Fuera de main() (_ARRANQUE sin fijar) nada cambia.
 SEGUNDOS_DUROS = 600
+SEGUNDOS_UN_INTENTO = 210   # pasado esto desde el arranque, pedir() abre una sola vez (mitad de SEGUNDOS_CORRIDA)
 _ARRANQUE = [None]
 
 
@@ -174,6 +175,8 @@ def pedir(url, datos=None, metodo=None, abridor=None, json_api=False, pausa=0.0,
         tiempo_de_peticion()   # pasado el tope duro no se espera la pausa: se lanza ya
         time.sleep(pausa)
     ultimo = 1 if intentos == 1 else 2   # linea B: intentos=1 abre una sola vez (C4: un cuelgue costaba 60 s, no 30)
+    if _ARRANQUE[0] is not None and reloj() - _ARRANQUE[0] > SEGUNDOS_UN_INTENTO:
+        ultimo = 1   # pendiente 6 (26 nov): pasada la mitad de la corrida, sin segundo intento (todo colgado: 493 s)
     for intento in range(1, ultimo + 1):
         espera = tiempo_de_peticion(30)   # pasado el tope duro: no se empieza (ni el reintento)
         try:
@@ -268,7 +271,12 @@ def var_por_id(prod, vid):
 def cargar_prospectiva():
     """Topes y cifras de referencia que prospectiva.py calcula con el historial de precios (prospectiva.json).
     Devuelve {} si el modulo o el archivo faltan, el archivo vencio o no pasa su validacion: entonces topes()
-    usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia."""
+    usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia.
+    SIN_PROSPECTIVA=1 (vigia.yml lo pone si fallan las pruebas de prospectiva): {} sin importar nada (pendiente de A,
+    26 nov: la variable existia en vigia.yml y ningun .py la leia, asi que el aviso "esa parte queda apagada" mentia)."""
+    if os.environ.get("SIN_PROSPECTIVA", "").lower() in ("1", "true", "yes"):
+        print("   prospectiva apagada (SIN_PROSPECTIVA): topes por fracciones", file=sys.stderr)
+        return {}
     try:
         sys.dont_write_bytecode = True   # sin __pycache__: el paso que guarda el estado en la nube hace "git add -A"
         import prospectiva
@@ -308,6 +316,8 @@ def nivel(precio, prod, var):
 def razon(precio, prod, var, hoy=None):
     """Una o dos frases en lego de por que ese precio es bueno o no (minimo visto con garantia, lo normal del
     mes, lo que se espera en la siguiente temporada). Cadena vacia si no hay datos; nunca lanza excepcion."""
+    if os.environ.get("SIN_PROSPECTIVA", "").lower() in ("1", "true", "yes"):   # sus pruebas fallaron: apagada
+        return ""
     try:
         import prospectiva
         return prospectiva.razon(precio, prospectiva_de(prod, var), hoy) or ""
@@ -483,9 +493,11 @@ def cupones_candidatos(prod, estado):
     cuponera (origen duradero en estado['cupones_origen']; la ultima busqueda, de respaldo); fuera los reprobados de las
     ultimas horas. Asi el tope nunca deja fuera a la lista fija."""
     lista = []
-    try:
-        with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
-            lista = [l.split("#")[0].strip() for l in f if l.split("#")[0].strip()]
+    archivo = prod["tiendas"]["Samsung"].get("cupones")   # pendiente 8: sin campo "cupones", sin lista fija (antes
+    try:                                                 # heredaba la de otro producto)
+        if archivo:
+            with open(os.path.join(AQUI, archivo), encoding="utf-8") as f:
+                lista = [l.split("#")[0].strip() for l in f if l.split("#")[0].strip()]
     except Exception:
         pass
     cosecha = estado.get("cupones_cosechados") or {}
@@ -602,10 +614,15 @@ def leer_samsung(prod, cfg, estado):
             base, final, buenos, fin, prob, solos = samsung_carrito(sku, cupones)
             probados.update(prob)
             sirven.update(solos)
+            # P5 de la linea B (26 nov): si el tope de tiempo corto la prueba, quedaron codigos sin probar y el precio
+            # puede estar arriba del real; la nota lo dice con "cupones sin probar", y asi promos no lo compara contra
+            # la tienda de estudiantes (daba "bajaria $4,000" cuando la rebaja real era 0)
+            cortada = len(prob) < len(cupones)
             nota = "; ".join(x for x in [
                 ("con cupones " + " + ".join(buenos)) if buenos else
                 "ninguno de %d cupones probados baja el precio" % len(prob),
                 "sin cupon ${:,.0f}".format(base) if buenos else "",
+                ("prueba cortada por tiempo: %d cupones sin probar" % (len(cupones) - len(prob))) if cortada else "",
                 ("promocion vigente hasta " + fin) if fin else "", nota] if x)
             precio = final
         except Exception as ex:
@@ -1070,9 +1087,13 @@ def leer_liverpool(prod, cfg, estado):
     if e != 200 or "-price" not in t:
         raise RuntimeError("Liverpool respondio %s (%d bytes)" % (e, len(t)))
     cands = {}
-    for m in re.finditer(r'<h3[^>]*>([^<]*)</h3><div[^>]*data-testid="(\d+)-price">(.{0,700}?)</div>', t, re.S):
-        pr = re.search(r'data-testid="discounted".{0,200}?\$(?:<!-- -->)?([\d,]+)', m.group(3), re.S) or \
-             re.search(r"\$(?:<!-- -->)?([\d,]+)", m.group(3))
+    # El bloque de precio no se corta en su primer </div>: con rango de precios ("$44,999 - $55,999" y los de lista
+    # tachados) pasa de 700 caracteres y el articulo no salia (26 nov 2026: el Fold8 Ultra nunca se abria). Se corta
+    # en el siguiente articulo y en 900 caracteres (leidos por adelantado: no se comen el articulo de al lado).
+    for m in re.finditer(r'<h3[^>]*>([^<]*)</h3><div[^>]*data-testid="(\d+)-price">(?=(.{0,900}))', t, re.S):
+        bloque = re.split(r'<h3|card-card-link', m.group(3))[0]
+        pr = re.search(r'data-testid="discounted".{0,200}?\$(?:<!-- -->)?([\d,]+)', bloque, re.S) or \
+             re.search(r"\$(?:<!-- -->)?([\d,]+)", bloque)
         if not pr:
             continue
         titulo, pid, precio = html.unescape(m.group(1)), m.group(2), float(pr.group(1).replace(",", ""))
@@ -1813,7 +1834,17 @@ def abrir_issue(titulo, texto):
     req = urllib.request.Request("https://api.github.com/repos/%s/issues" % repo, data=datos, method="POST", headers={
         "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "vigia-precios", "Content-Type": "application/json"})
-    desde = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    ahora_utc = dt.datetime.now(dt.timezone.utc)
+    desde = (ahora_utc - dt.timedelta(minutes=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # P2 de la linea B (26 nov): si la corrida anterior abrio este mismo aviso y no alcanzo a guardar su memoria (fallo
+    # el paso "Guardar" o el programa tronó despues), sin esto se repetia cada 15 min. Mismo titulo exacto creado en las
+    # ultimas HORAS_SIN_REPETIR horas = ya avisado (quien llama lo marca). Si la consulta falla, se abre como siempre:
+    # mejor un correo repetido que uno callado.
+    previo = _issue_ya_creado(repo, token, titulo[:250],
+                              (ahora_utc - dt.timedelta(hours=HORAS_SIN_REPETIR)).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    if previo:
+        print("   aviso ya abierto en las ultimas %d h (no se repite):" % HORAS_SIN_REPETIR, previo)
+        return True
     # mismo tope duro que pedir(): un aviso que no sale por tiempo no se marca y sale en la corrida siguiente
     try:
         with urllib.request.urlopen(req, timeout=tiempo_de_peticion(30)) as r:
@@ -1837,6 +1868,7 @@ def abrir_issue(titulo, texto):
 
 CORTE_AMBIGUO = (TimeoutError, ConnectionResetError, ConnectionAbortedError, http.client.RemoteDisconnected,
                  http.client.IncompleteRead)
+HORAS_SIN_REPETIR = 6   # abrir_issue no repite un aviso de titulo identico creado en estas horas
 
 
 def _issue_ya_creado(repo, token, titulo, desde):
@@ -1898,8 +1930,19 @@ def sembrar_conocidos(estado, prods, mejores, leidas, ruta=None):
             conocidos[c] = {"producto": fila["producto"], "precio": float(fila["precio"]), "url": fila["liga"],
                             "visto": fila["fecha"]}
     for c, info in conocidos.items():
-        if c not in mejores and c.split("|")[0] in leidas:
+        if c not in mejores and leida(c, leidas):
             agotados[c] = {"desde": "desde " + info["visto"], "precio": info["precio"]}
+
+
+def _relanzar(ex):
+    raise ex
+
+
+def leida(c, leidas):
+    """La clave tienda|producto|variante se leyo en esta corrida: leidas trae la tienda entera o el par tienda|producto
+    (desde el 26 nov cada producto se lee aparte: una busqueda caida de uno no vuelve "agotados" a los demas)."""
+    partes = c.split("|")
+    return partes[0] in leidas or "|".join(partes[:2]) in leidas
 
 
 def nivel_regreso(c, o, prod, var, fichas):
@@ -1966,7 +2009,7 @@ def disponibilidad(estado, prods, mejores, leidas, hoy, fichas=None):
             except Exception as ex:
                 print("   aviso de regreso de %s no se pudo armar: %s" % (c, str(ex)[:120]))
     for c, info in conocidos.items():
-        if c in mejores or c.split("|")[0] not in leidas or c in agotados:
+        if c in mejores or not leida(c, leidas) or c in agotados:
             continue
         ausente[c] = ausente.get(c, 0) + 1
         if ausente[c] >= AUSENCIAS_AGOTADO:
@@ -2187,10 +2230,23 @@ def _prueba_corte_ambiguo():
                 assert ex is corte or isinstance(lista, Exception) or lista is not None, ex
             assert r == espera, (corte, lista, r)
             if lista is None:
-                assert pedidas == ["POST"], pedidas          # GitHub dijo que no o no se conecto: ni se busca
+                # GitHub dijo que no o no se conecto: tras el POST ni se busca (el GET es la consulta previa, P2)
+                assert pedidas == ["GET", "POST"], pedidas
         # 2xx con cuerpo cortado: ya se creo
-        urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"')
+        urllib.request.urlopen = lambda req, timeout=None: Resp(b'{"html_url": "u/2"' if req.get_method() == "POST" else b"[]")
         assert abrir_issue(titulo, "cuerpo") is True
+        # P2 (26 nov): el mismo titulo creado hace 2 h (la corrida anterior no guardo su memoria): no se repite, sin POST;
+        # creado hace 7 h, o con otro titulo, si se abre
+        for creado, otro, sale_post in ((2, False, False), (7, False, True), (2, True, True)):
+            pedidas = []
+            hace = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=creado)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            lista = [{"title": titulo + (" (otro)" if otro else ""), "created_at": hace, "html_url": "u/9"}]
+
+            def falso2(req, timeout=None, lista=lista, pedidas=pedidas):
+                pedidas.append(req.get_method())
+                return Resp(b'{"html_url": "u/3"}' if req.get_method() == "POST" else json.dumps(lista).encode("utf-8"))
+            urllib.request.urlopen = falso2
+            assert abrir_issue(titulo, "cuerpo") is True and (pedidas == ["GET", "POST"]) == sale_post, (creado, otro, pedidas)
     finally:
         urllib.request.urlopen = guardados[0]
         for k, v in guardados[1].items():
@@ -2378,6 +2434,23 @@ def selftest():
         raise AssertionError("pedir con intentos=1 no lanzo")
     except RuntimeError:
         assert a.veces == 1, a.veces
+    # pendiente 6 (26 nov): pasada la mitad de la corrida, pedir abre una sola vez aunque no se le pida; antes, dos
+    guardado = _ARRANQUE[0]
+    try:
+        _ARRANQUE[0] = reloj() - SEGUNDOS_UN_INTENTO - 1
+        a = Abridor(1, TimeoutError("tope"))
+        try:
+            pedir("https://x.example/a", abridor=a, reintento=0)
+            raise AssertionError("pedir tarde no lanzo al primer corte")
+        except RuntimeError:
+            assert a.veces == 1, a.veces
+        _ARRANQUE[0] = reloj()
+        a = Abridor(1, TimeoutError("tope"))
+        assert pedir("https://x.example/a", abridor=a, reintento=0) == (404, "nada") and a.veces == 2, a.veces
+    finally:
+        _ARRANQUE[0] = guardado
+    # pendiente 4 (26 nov): una clave cuenta como leida si se leyo su tienda entera o su par tienda|producto
+    assert leida("T|p|v", {"T"}) and leida("T|p|v", {"T|p"}) and not leida("T|p|v", {"T|q"}) and not leida("T|p|v", set())
     # avisos de disponibilidad: si el aviso no se abre, la proxima corrida lo vuelve a intentar
     def falla(asunto, cuerpo):
         raise RuntimeError("GitHub no responde")
@@ -2538,7 +2611,7 @@ def _main():
             desde = caidas.setdefault(nombre, ahora.isoformat(timespec="minutes"))
             horas = (ahora - dt.datetime.fromisoformat(desde)).total_seconds() / 3600
             print("fuente FALLA %-10s (%d seguidas, %.1f h sin leer) %s" % (nombre, fallos[nombre], horas, str(ex)[:150]))
-            limite = HORAS_SIN_LEER.get(nombre, HORAS_SIN_LEER_DEFECTO)
+            limite = HORAS_SIN_LEER.get(nombre.split(" (")[0], HORAS_SIN_LEER_DEFECTO)
             if horas >= limite and nombre not in avisadas and not seco:
                 try:
                     abrir_issue("El vigia no puede leer %s desde hace %d horas" % (nombre, int(horas)),
@@ -2563,15 +2636,35 @@ def _main():
                   % (tienda, SEGUNDOS_CORRIDA))
             continue
 
-        def todas(lector=lector, usan=usan, tienda=tienda):
+        # Cada producto se lee aparte (pendiente 4 del 26 nov): si falla la busqueda de uno, los demas de esa tienda
+        # se leen igual. La tienda cuenta como fuente caida solo si fallan todos; si falla uno solo, cae la fuente
+        # "tienda (producto)", con su propio aviso a las horas. leidas guarda "tienda|producto" de lo que si se leyo.
+        hechos, fallas = [], []
+
+        def todas(lector=lector, usan=usan, tienda=tienda, hechos=hechos, fallas=fallas):
             r = []
             for p in usan:
-                r += lector(p, p["tiendas"][tienda], estado)
+                if hechos and reloj_vencido(arranque):
+                    print("producto saltado %s en %s: se acabo el tiempo de la corrida" % (p["id"], tienda))
+                    continue
+                try:
+                    r += lector(p, p["tiendas"][tienda], estado)
+                    hechos.append(p["id"])
+                except Exception as ex:
+                    fallas.append((p["id"], ex))
+            if fallas and not hechos:
+                raise fallas[0][1]
             return r
         res = fuente(tienda, todas)
         if res is not None:
-            leidas.add(tienda)
+            leidas.update("%s|%s" % (tienda, pid) for pid in hechos)
             ofertas += res
+            for pid, ex in fallas:   # la tienda respondio, pero no para este producto
+                fuente("%s (%s)" % (tienda, pid), lambda ex=ex: _relanzar(ex))
+            for pid in hechos:       # producto que ya se lee: se limpia su caida aparte, si la hubo
+                nombre = "%s (%s)" % (tienda, pid)
+                if nombre in fallos or nombre in caidas or nombre in avisadas:
+                    fuente(nombre, lambda: [])
     for tienda in tiendas_sin_lector(prods):   # configurada y sin lector: falla visible, con su aviso a las horas
 
         def sin_lector(tienda=tienda):
@@ -2670,7 +2763,7 @@ def _main():
         previos = {}
     # lo que una tienda ya no ofrece (o ya no cumple los requisitos) sale de la tabla; si la tienda no se
     # pudo leer en esta corrida, se conserva su ultimo dato
-    actuales = {k: v for k, v in previos.items() if k.split("|")[0] not in leidas}
+    actuales = {k: v for k, v in previos.items() if not leida(k, leidas)}
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M")
     cambios = []
     for clave, o in mejores.items():

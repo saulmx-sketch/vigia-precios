@@ -104,6 +104,19 @@ grep -Fq -- "select(.databaseId != 0)" "$TMP/20_corrida_no_numerica/log" && ! gr
   && echo "OK    20_corrida_no_numerica cuenta con 0 y sin run view" || { echo "FALLA 20_corrida_no_numerica"; fallos=$((fallos+1)); }
 # H6: un estado que no es active ni disabled_manually sigue como activo y lo imprime.
 caso 21_estado_inesperado "$(printf 'estado=disabled_inactivity\ncuentas=0 0\nlanza=ok\n%s' "$ULT")" 0 1 1 "estado inesperado del flujo vigia (\"disabled_inactivity\")"
+# Pendiente 5 (26 nov): el horario salvavidas usa este mismo relevo.sh (vigia.yml, trabajo "salvavidas"), sin
+# TERMINO_ID y con TERMINO_CONCLUSION=success. (a) Cae justo entre dos corridas: primera cuenta 0, segunda 1 -> no
+# lanza ni avisa (antes contaba una vez, lanzaba una de mas y mandaba un "relanzada" falso).
+caso 22_salvavidas_entre_corridas "cuentas=0 1" 0 0 0 "la cadena lanzo tarde" \
+  "QUIEN_RELANZA=el horario salvavidas" TERMINO_CONCLUSION=success
+# (b) Cadena de verdad detenida: lanza y el aviso dice quien la relanzo.
+caso 23_salvavidas_detenida "$(printf 'cuentas=0 0\nlanza=ok\n%s' "$ULT")" 0 1 1 "Quién la relanzó: el horario salvavidas" \
+  "QUIEN_RELANZA=el horario salvavidas" TERMINO_CONCLUSION=success
+# (c) No se puede contar: no lanza a ciegas (como el salvavidas de antes).
+caso 24_salvavidas_sin_cuenta "cuentas=x x x x x" 0 0 0 "se asume cadena viva" \
+  "QUIEN_RELANZA=el horario salvavidas" TERMINO_CONCLUSION=success
+grep -Fq -- "bash .github/scripts/relevo.sh" "$RAIZ/.github/workflows/vigia.yml" && echo "OK    vigia.yml: el salvavidas llama a relevo.sh" \
+  || { echo "FALLA vigia.yml: el salvavidas no llama a relevo.sh"; fallos=$((fallos+1)); }
 n=$(grep -c "^gh workflow run" "$TMP/13_lanzo_pese_al_500/log")
 [ "$n" = 1 ] && echo "OK    13_lanzo_pese_al_500 lanzo $n vez" || { echo "FALLA 13_lanzo_pese_al_500 lanzo $n veces (esperada 1)"; fallos=$((fallos+1)); }
 

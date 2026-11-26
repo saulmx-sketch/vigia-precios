@@ -121,6 +121,12 @@ def _correr(v):
     assert all("skuId=" in o["url"] and not o["nota"] for o in out), out
     assert any("Lavanda" in o["titulo"] for o in out), out
     lavanda = next(o for o in out if "Lavanda" in o["titulo"])
+    # 2b (26 nov): un articulo con rango de precios ("$44,999 - $55,999" y los de lista tachados) pasa de 700
+    # caracteres y no se abria su ficha (el Fold8 Ultra de Liverpool nunca se leyo); el de al lado no se pierde
+    v.pedir = Red([(r"tienda\?s=galaxy", "liv_busca_rango.html"), (r"pdp/p/1203150349", "liv_pdp_1203150349.html")])
+    out = v.leer_liverpool(fold, fold["tiendas"]["Liverpool"], {})
+    assert any("pdp/p/1203150314" in u for u in v.pedir.pedidas), v.pedir.pedidas   # la del rango se abrio
+    assert len(out) == 3 and all(o["var"] == "normal-512" for o in out), out           # y la de al lado entro
 
     # --- 3. confirmar: las tres salidas
     v.pedir = Red(LIV_OK)
@@ -392,6 +398,20 @@ def _correr(v):
     finally:
         v.FICHAS.pop("TiendaX", None)
         v.VENDEDOR_OFICIAL.pop("TiendaX", None)
+
+    # --- 12. (26 nov, P5 de B) carrito de Samsung cortado por tiempo: la nota dice "cupones sin probar" (promos no
+    # lo compara con la tienda de estudiantes); completo, no lo dice
+    carrito0 = v.samsung_carrito
+    try:
+        for probados, debe in ((["A"], True), (None, False)):   # None: probo todos los que recibio
+            v.samsung_carrito = lambda sku, cupones, p=probados: (43999.0, 43999.0, [], "", list(cupones if p is None else p), [])
+            v.pedir = Red([(r"searchapi\.samsung\.com/", "sam_catalogo.json")])
+            est = {"cupones_cosechados": {"A": "", "B": "", "C": ""}}
+            ofs = v.leer_samsung(fold, fold["tiendas"]["Samsung"], est)
+            assert ofs, "sin ofertas de Samsung"
+            assert all(("cupones sin probar" in o["nota"]) == debe for o in ofs), [(o["nota"], debe) for o in ofs]
+    finally:
+        v.samsung_carrito = carrito0
 
 
 if __name__ == "__main__":

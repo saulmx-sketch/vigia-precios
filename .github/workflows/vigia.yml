@@ -22,36 +22,20 @@ jobs:
   salvavidas:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
+      # Pendiente 5 (26 nov): el mismo relevo.sh que usa relevo.yml. Antes el horario contaba una sola vez: si caia
+      # justo entre una corrida que terminaba y la siguiente que esta lanzaba, veia cero, lanzaba una de mas y mandaba
+      # un aviso falso de "relanzada". relevo.sh vuelve a contar tras 45 s y mira antes de cada reintento.
+      # TERMINO_CONCLUSION=success: si no se puede contar, no se lanza a ciegas (como antes: el horario no sabe nada
+      # de la corrida anterior, y si la cadena de verdad murio, el siguiente horario la relanza).
       - name: Relanzar la cadena solo si esta detenida
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           QUIEN_RELANZA: el horario salvavidas
-        run: |
-          # Reintentos: el 25-nov GitHub respondio HTTP 500 a una sola peticion y la cadena se corto 8 horas.
-          for intento in 1 2 3 4 5; do
-            vivas=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --limit 30 --json databaseId,status,event \
-              --jq "[.[] | select(.databaseId != $GITHUB_RUN_ID) | select(.event != \"schedule\") | select(.status != \"completed\")] | length") && break
-            sleep $((intento * 15))
-          done
-          echo "corridas de la cadena vivas: $vivas"
-          if [ "$vivas" != "0" ]; then
-            echo "la cadena sigue viva (o no se pudo saber): nada que hacer"
-            exit 0
-          fi
-          for intento in 1 2 3 4 5; do
-            if gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main; then
-              echo "la cadena estaba detenida: relanzada (intento $intento)"
-              bash .github/scripts/aviso.sh relanzada || true
-              exit 0
-            fi
-            sleep $((intento * 15))
-          done
-          echo "no se pudo relanzar la cadena tras 5 intentos"
-          bash .github/scripts/aviso.sh detenida || true
-          exit 1
+          TERMINO_CONCLUSION: success
+        run: bash .github/scripts/relevo.sh
   revisar:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
@@ -91,6 +75,14 @@ jobs:
         continue-on-error: true
         timeout-minutes: 1
         run: python3 promos.py --selftest
+      # Pendiente 1 (26 nov): el pronostico (prospectiva.json) caduca a los 30 dias. Se recalcula si tiene 20 h o mas
+      # (una vez al dia) y solo si sus pruebas pasaron; recalcular no reemplaza si un tope salta mas de 15 %. El paso
+      # "Guardar" sube el archivo nuevo junto con el estado.
+      - name: Recalcular el pronostico una vez al dia
+        if: steps.pruebas_a.outcome == 'success'
+        continue-on-error: true
+        timeout-minutes: 1
+        run: python3 prospectiva.py --recalcular --si-viejo 20
       # "cancelled" (la prueba llego a su tope) cuenta como falla, igual que "failure".
       - name: Aviso de pruebas fallidas
         if: >-
