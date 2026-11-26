@@ -4,6 +4,7 @@ import gzip
 import json
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -41,17 +42,63 @@ URLS = {
     "sanborns_ps5": "https://www.sanborns.com.mx/resultados/q=playstation%205/pagina=1",
     "sanborns_fold8": "https://www.sanborns.com.mx/resultados/q=galaxy%20z%20fold8/pagina=1",
     "promodescuentos_rss":"https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
+    # --- 25 nov: tiendas nuevas (encargo 05 de la linea C) ---
+    "ml_listado_ps5": "https://listado.mercadolibre.com.mx/consola-playstation-5-digital",
+    "ml_tienda_samsung": "https://www.mercadolibre.com.mx/tienda/samsung",
+    "ml_api_busca_ps5": "https://api.mercadolibre.com/sites/MLM/search?q=playstation%205%20digital&limit=10",
+    "walmart_ps5": "https://www.walmart.com.mx/search?q=consola+playstation+5+digital",
+    "sams_ps5": "https://www.sams.com.mx/search?q=consola+playstation+5",
+    "bodega_ps5": "https://www.bodegaaurrera.com.mx/search?q=consola+playstation+5",
+    "coppel_ps5": "https://www.coppel.com/search?q=consola%20playstation%205",
+    "coppel_vtex": "https://www.coppel.com/api/catalog_system/pub/products/search?ft=playstation%205",
+    "palacio_ps5": "https://www.elpalaciodehierro.com/buscar?q=consola+playstation+5",
+    "sears_ps5": "https://www.sears.com.mx/resultados/q=consola%20playstation%205/pagina=1",
+    "claroshop_fold8": "https://www.claroshop.com/resultados/q=galaxy%20z%20fold8/pagina=1",
+    "claroshop_ps5": "https://www.claroshop.com/resultados/q=consola%20playstation%205/pagina=1",
+    "suburbia_ps5": "https://www.suburbia.com.mx/tienda?s=consola+playstation+5",
+    "liverpool_ps5": "https://www.liverpool.com.mx/tienda?s=consola+playstation+5",
+    "liverpool_pdp": "https://www.liverpool.com.mx/tienda/pdp/p/1156059630",
+    "elektra_ps5": "https://www.elektra.mx/api/catalog_system/pub/products/search?ft=consola%20playstation%205",
+    "costco_ps5": "https://www.costco.com.mx/rest/v2/mexico/products/search?query=playstation%205&fields=FULL&lang=es_MX&curr=MXN",
+    "att_inicio": "https://www.att.com.mx/",
+    "movistar_inicio": "https://tienda.movistar.com.mx/",
+    "sony_vtex": "https://store.sony.com.mx/api/catalog_system/pub/products/search?ft=playstation%205",
+    "sony_inicio": "https://store.sony.com.mx/",
+    "officedepot_ps5": "https://www.officedepot.com.mx/officedepot/en/search/?text=consola+playstation+5",
+    "officemax_vtex": "https://www.officemax.com.mx/api/catalog_system/pub/products/search?ft=playstation%205",
+    "radioshack_ps5": "https://www.radioshack.com.mx/store/radioshack/en/search/?text=consola+playstation+5",
+    "cyberpuerta_ps5": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=consola+playstation+5",
+    "ddtech_ps5": "https://ddtech.mx/buscar/consola%20playstation%205",
+    "soriana_ps5": "https://www.soriana.com/buscar?q=consola+playstation+5",
+    "chedraui_vtex": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205",
+    "heb_vtex": "https://www.heb.com.mx/api/catalog_system/pub/products/search?ft=playstation%205",
+    "doto_shopify": "https://doto.com.mx/search/suggest.json?q=playstation&resources%5Btype%5D=product",
+    "linio_inicio": "https://www.linio.com.mx/",
+    "mixup_vtex": "https://www.mixup.com/api/catalog_system/pub/products/search?ft=playstation%205",
+    "pcel_ps5": "https://pcel.com/index.php?route=product/search&search=playstation%205",
+    "intercompras_inicio": "https://intercompras.com/",
+    "zegucom_inicio": "https://www.zegucom.com.mx/",
 }
 
+FOLD = re.compile(r"fold\s?-?8", re.I)
+PS5 = re.compile(r"play\s*station\s*®?\s*5|\bps5\b", re.I)
+NUM = re.compile(r"(?<![\d.,])(\d{1,2}[,.]?\d{3})(?:\.\d{1,2})?(?![\d])")
+BLOQ = re.compile(r"captcha|verifica tu identidad|access denied|acceso denegado|robot|px-captcha|blocked", re.I)
+VEND = re.compile(r"(sellerName|\"seller\"|vendido por|vendedor|soldBy|sold_by|seller_name)[\"':\s>]{0,6}(.{0,60})", re.I)
+PLAT = {"vtex": r"vtex", "shopify": r"shopify", "magento": r"magento|mage-", "sfcc": r"demandware|sfcc",
+        "hybris": r"hybris|/_ui/", "next": r"__NEXT_DATA__", "ldjson": r"application/ld\+json"}
+CABS = ("server", "x-powered-by", "x-vtex-cache-status", "powered-by", "x-shopid", "x-magento-cache-debug",
+        "x-akamai-transformed", "x-cache", "cf-ray", "content-type")
 
-def pedir(url):
+
+def pedir(url, tiempo=30):
     req = urllib.request.Request(url, headers=CAB)
     try:
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(req, timeout=tiempo) as r:
             crudo = r.read()
             if r.headers.get("Content-Encoding") == "gzip":
                 crudo = gzip.decompress(crudo)
-            return r.status, r.geturl(), crudo.decode("utf-8", "replace")
+            return r.status, r.geturl(), crudo.decode("utf-8", "replace"), dict(r.headers)
     except urllib.error.HTTPError as e:
         cuerpo = b""
         try:
@@ -60,22 +107,45 @@ def pedir(url):
                 cuerpo = gzip.decompress(cuerpo)
         except Exception:
             pass
-        return e.code, url, cuerpo.decode("utf-8", "replace")
+        return e.code, url, cuerpo.decode("utf-8", "replace"), dict(e.headers or {})
     except Exception as e:
-        return 0, url, "ERROR " + repr(e)[:200]
+        return 0, url, "ERROR " + repr(e)[:200], {}
+
+
+def rango(texto, a, b):
+    vistos = set()
+    for p in NUM.findall(texto):
+        n = int(p.replace(",", "").replace(".", ""))
+        if a <= n <= b:
+            vistos.add(n)
+    return sorted(vistos)[:12]
+
+
+def analizar(estado, final, texto, cab):
+    cabl = {k.lower(): v for k, v in cab.items()}
+    return {"estado": estado, "bytes": len(texto),
+            "fold8": len(FOLD.findall(texto)), "ps5": len(PS5.findall(texto)),
+            "precios_vistos": rango(texto, 20000, 69999), "precios_ps5": rango(texto, 6000, 16000),
+            "bloqueo": bool(BLOQ.search(texto[:20000])) or estado in (403, 412, 429),
+            "final": final[:160],
+            "vendedor_pistas": sorted({(m[0] + ": " + re.sub(r"\s+", " ", m[1])) for m in VEND.findall(texto[:400000])})[:6],
+            "plataforma": [k for k, rx in PLAT.items() if re.search(rx, texto[:300000], re.I)],
+            "cabeceras": {k: str(cabl[k])[:80] for k in CABS if k in cabl},
+            "inicio": re.sub(r"\s+", " ", texto[:300])}
 
 
 def main():
     salida = {}
+    t0 = time.time()
     for nombre, url in URLS.items():
-        estado, final, texto = pedir(url)
-        folds = len(re.findall(r"fold\s?-?8", texto, re.I))
-        precios = re.findall(r"(?<![\d.])([2-6]\d[,.]?\d{3})(?:\.\d{2})?(?![\d])", texto)
-        tops = sorted({p.replace(",", "").replace(".", "") for p in precios})[:12]
-        bloqueo = bool(re.search(r"captcha|verifica tu identidad|access denied|robot|px-captcha|blocked", texto[:20000], re.I))
-        salida[nombre] = {"estado": estado, "bytes": len(texto), "fold8": folds, "precios_vistos": tops,
-                          "bloqueo": bloqueo, "final": final[:120], "inicio": re.sub(r"\s+", " ", texto[:160])}
-        print("%-22s %3s %8d fold8=%-3d bloqueo=%-5s %s" % (nombre, estado, len(texto), folds, bloqueo, tops[:6]))
+        if time.time() - t0 > 500:
+            salida[nombre] = {"estado": None, "nota": "sin tiempo en esta corrida"}
+            continue
+        estado, final, texto, cab = pedir(url, 12)
+        salida[nombre] = analizar(estado, final, texto, cab)
+        d = salida[nombre]
+        print("%-22s %3s %8d fold8=%-3d ps5=%-3d bloqueo=%-5s %s %s" % (
+            nombre, estado, len(texto), d["fold8"], d["ps5"], d["bloqueo"], d["precios_vistos"][:4], d["precios_ps5"][:4]))
     with open("sondeo.json", "w", encoding="utf-8") as f:
         json.dump(salida, f, ensure_ascii=False, indent=1)
 
