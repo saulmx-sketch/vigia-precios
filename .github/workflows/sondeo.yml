@@ -1,18 +1,88 @@
 name: sondeo
+# TEMPORAL Y DESECHABLE (rama linea-C-nube, encargo 06 de la linea C): prueba la rama juntada en un
+# corredor real, en seco. No hace commit ni push; esta rama nunca se junta con nada.
 on:
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+  actions: read
+  issues: read
 jobs:
   sondear:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash {0}
     steps:
       - uses: actions/checkout@v4
-      - run: python3 sondeo.py
-      - run: |
-          git config user.name "vigia"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "sondeo" || true
-          git push
+      - name: python
+        continue-on-error: true
+        run: python3 --version; echo "codigo=$?"
+      - name: selftest
+        continue-on-error: true
+        env:
+          SELFTEST_SOLO_NUCLEO: '1'
+        run: |
+          python3 vigia.py --selftest > "$RUNNER_TEMP/selftest.txt" 2>&1; c=$?
+          tail -5 "$RUNNER_TEMP/selftest.txt"; echo "codigo=$c"; exit $c
+      - name: casos_titulos
+        continue-on-error: true
+        run: |
+          python3 pruebas/casos_titulos.py > "$RUNNER_TEMP/titulos.txt" 2>&1; c=$?
+          tail -5 "$RUNNER_TEMP/titulos.txt"; echo "codigo=$c"; exit $c
+      - name: cobertura
+        continue-on-error: true
+        run: |
+          python3 vigia.py --cobertura > "$RUNNER_TEMP/cobertura.txt" 2>&1; c=$?
+          head -20 "$RUNNER_TEMP/cobertura.txt"; echo "codigo=$c"; exit $c
+      - name: simular_relevo
+        continue-on-error: true
+        run: |
+          mkdir -p "$RUNNER_TEMP/sim"
+          TMPDIR_SIM="$RUNNER_TEMP/sim" bash pruebas/simular_relevo.sh 2>&1 | grep -v '^      |'; c=${PIPESTATUS[0]}
+          echo "codigo=$c"; exit $c
+      - name: relevo_en_seco
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: '1'
+          TERMINO_CONCLUSION: failure
+        run: |
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
+      - name: relevo_planB_con_corrida
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: '45739994911'
+        run: |
+          echo "=== plan B, TERMINO_ID=45739994911 (corrida real terminada de la cadena) ==="
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
+      - name: relevo_planB_sin_corrida
+        continue-on-error: true
+        timeout-minutes: 12
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEVO_SECO: '1'
+          TERMINO_ID: ''
+        run: |
+          echo "=== plan B, TERMINO_ID vacio (disparo a mano) ==="
+          bash .github/scripts/relevo.sh; c=$?
+          echo "codigo=$c"; exit $c
+      - name: seco
+        continue-on-error: true
+        timeout-minutes: 7
+        run: |
+          unset GITHUB_TOKEN GH_TOKEN
+          { time python3 vigia.py --seco ; } > "$RUNNER_TEMP/seco.txt" 2>&1; c=$?
+          cat "$RUNNER_TEMP/seco.txt"; echo "codigo=$c"; exit $c
+      - name: git_status
+        continue-on-error: true
+        run: |
+          echo "--- git status --short (inicio) ---"; git status --short; echo "--- git status --short (fin) ---"
