@@ -561,7 +561,10 @@ def samsung_cerradas(pedir, skus, hay_tiempo=None, dormir=time.sleep, tope=6):
 # categoria ahorrosPaypal6000 "Ahorros Paypal de $6,000". El carrito de invitado rechaza el codigo porque pide tener
 # elegida la forma de pago: se lee, no se prueba.
 COSTCO_FICHA = "https://www.costco.com.mx/rest/v2/mexico/products/%s?fields=FULL&lang=es_MX&curr=MXN"
-DIAS_PROMO_PAGO = 90   # una promocion de pago que empezo hace mas de esto no cuenta (PAYPAL100 es de 2021 y sigue listada)
+# Encendido: 90 (una promocion de pago que empezo hace mas de esto no cuenta; PAYPAL100 es de 2021 y sigue listada).
+# Apagado para el Black Friday 2026 (25 nov 2026): la cifra de PayPal podia heredarla otra promocion; ver
+# cola\6_tercer_lector_avisos.md; el arreglo de fondo esta en la rama linea-B-fondo; para encenderlo, volver a 90.
+DIAS_PROMO_PAGO = -1
 
 
 def _fecha_utc(s):
@@ -1795,6 +1798,10 @@ def selftest():
     # --- Costco: promociones de pago de la ficha (recortes reales de las fichas 648324 y 648321)
     for nombre in ("COSTCO_648324", "COSTCO_648321"):
         assert len(globals()[nombre]) <= 600, (nombre, len(globals()[nombre]))
+    # Apagado (DIAS_PROMO_PAGO = -1, Black Friday 2026): la ficha real no da fila de pago, ni PayPal ni ninguna
+    dias_pp = DIAS_PROMO_PAGO
+    assert dias_pp == -1 and costco_promos(COSTCO_648324, ahora, "uc") == [], costco_promos(COSTCO_648324, ahora)
+    globals()["DIAS_PROMO_PAGO"] = 90   # camino encendido: se sigue probando entero y al final vuelve a -1
     cf = costco_promos(COSTCO_648324, ahora, "uc")
     assert [(x["banco"], x["codigo"], x["valor"], x["unidad"], x["vigencia"]) for x in cf] == [
         ("PayPal", "PP177", 6000.0, "$", "2026-11-23 a 2026-12-02"),
@@ -1809,6 +1816,7 @@ def selftest():
                                  dormir=lambda s: None, ahora=ahora)
     assert len(llamadas) == 4 and sorted(pc) == ["648321", "648324"] and len(err) == 2 and not inc, (llamadas, pc, err)
     assert _codigo_costco("https://www.costco.com.mx/Electronicos/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324") == "648324"
+    globals()["DIAS_PROMO_PAGO"] = dias_pp
 
     # --- vigencia obligatoria de toda fila de banco
     BF = "del 26 al 30 de noviembre de 2026"
@@ -2107,6 +2115,13 @@ def selftest():
     pag_cc = {"/648324?": (200, COSTCO_648324), "/648325?": (200, COSTCO_648321), "/648321?": (200, COSTCO_648321)}
     est, llamadas = {"promos_bancos": {"tiendas": {"BBVA": {"leido": "2026-11-27 12:00", "error": "", "filas": []}}}}, []
     prods_c =[{"id": "fold8", "tiendas": {"Costco": {}}}]
+    # Apagado (DIAS_PROMO_PAGO = -1): ni aviso ni nota de PayPal; la membresia sigue en toda oferta de Costco
+    of_x = [dict(o) for o in base_c]
+    est_x = {"promos_bancos": {"tiendas": {"BBVA": {"leido": "2026-11-27 12:00", "error": "", "filas": []}}}}
+    av = mejorar(of_x, est_x, prods_c, ahora, False, _pedir_falso(pag_cc), abrir, reloj=_Reloj(), dormir=lambda s: None)
+    assert av == [] and not est_x.get("promos_avisado") and all("PayPal" not in o["nota"] for o in of_x), (av, of_x)
+    assert all("Costco pide ser socio" in o["nota"] for o in of_x), of_x
+    globals()["DIAS_PROMO_PAGO"] = 90   # camino encendido: se sigue probando entero y al final vuelve a -1
     av = mejorar(of_c, est, prods_c, ahora, False, _pedir_falso(pag_cc, llamadas=llamadas), abrir, reloj=_Reloj(),
                  dormir=lambda s: None)
     assert len(llamadas) == 3 and est["promos"]["costco"]["leido"] == "2026-11-27 12:00", (llamadas, est["promos"])
@@ -2121,6 +2136,7 @@ def selftest():
     mejorar(of_c, est, prods_c, ahora + dt.timedelta(minutes=30), False, _pedir_falso(pag_cc, llamadas=llamadas), abrir,
             reloj=_Reloj(), dormir=lambda s: None)
     assert len(llamadas) == 3                                                 # menos de 60 minutos: no relee
+    globals()["DIAS_PROMO_PAGO"] = dias_pp
     # BBVA del Buen Fin (13-17 nov): el 25 nov esta vencida y no da nada; el 15 nov da el aviso de banco propio
     prods_a = [{"id": "fold8", "tiendas": {"Amazon": {}}}]
     # E11: el cupon dice "Aplican solo el 17 de noviembre": el 15 aun no empieza (antes se probaba el 15)
