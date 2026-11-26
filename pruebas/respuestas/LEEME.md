@@ -12,6 +12,12 @@ leen las funciones. Las usa `pruebas/casos_confirmacion.py`.
 | `liv_pdp_1186785793.html` | ficha real de Liverpool de la PS5 1 TB estandar ($14,699; Fija, lector CD) | solo recortada |
 | `liv_pdp_1156059630_6999.html` | la ficha del Portal de arriba | ALTERADA: precio $6,999 (arriba del piso) |
 | `liv_pdp_1186785807_2tb_alterada.html` | la ficha real 1186785807 | ALTERADA: hecha pasar por una PS5 Pro sin la palabra "Pro" (titulo "Consola PlayStation 5 de 2 TB", Disco duro y capacidad "2 TB", $14,999), para probar que no entra como Digital |
+| `ipad_amz_busca.html` | seis bloques reales de la busqueda de Amazon "ipad+air+m3+128gb" (M4 11 128 Wi-Fi B0GQVP7LKW, 13 pulgadas, M3 Wi-Fi + Cellular que dice "5G", funda, teclado, renovado) | solo recortada |
+| `ipad_amz_ficha_B0GQVP7LKW.html` | ficha real de Amazon del iPad Air 11 M4 128 GB Wi-Fi ($16,793.61, vende Amazon Mexico) | solo recortada |
+| `ipad_amz_ficha_B0GQVP7LKW_tercero.html` | la ficha de arriba | ALTERADA: vendedor cambiado a "iShop Revendedor MX" |
+| `ipad_liv_busca.html` | cinco renglones reales de la busqueda de Liverpool "ipad+air+11" (128 GB, 256 GB, 13 pulgadas, funda, teclado) | solo recortada |
+| `ipad_liv_pdp_1195646976.html` | ficha real de Liverpool del iPad Air M4 11 128 GB ($18,799, vende Liverpool) | solo recortada |
+| `ipad_cos_busca.json` | tres productos reales de la busqueda de Costco "ipad air" (11 128 GB $14,799, 11 256 GB, 13 pulgadas) | solo recortada |
 | `liv_busca_ps5.html` | busqueda de Liverpool "playstation+5": renglones reales del Portal y del bundle | AGREGADOS dos renglones inventados: el Portal titulado "Consola PS5 Digital" a $6,999 y el tercero de arriba a $8,999 |
 | `liv_busca_fold8.html` | busqueda de Liverpool "galaxy+z+fold8" | solo recortada |
 | `amz_busca_ps5.html` | bloque real de la busqueda de Amazon del articulo B0FTP523RH | ALTERADO el precio de la busqueda ($12,499 a $8,999), para probar que manda el de la ficha |
