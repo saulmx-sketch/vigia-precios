@@ -17,7 +17,7 @@
  },
  "Costco|fold8|normal-512": {
   "leido": "2026-11-23 01:55",
-  "nota": "descuento de tienda $7,000 hasta 2026-11-30",
+  "nota": "descuento de tienda $7,000 ya restado",
   "precio": 37999.0,
   "producto": "Fold8 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
@@ -25,7 +25,7 @@
  },
  "Costco|fold8|ultra-512": {
   "leido": "2026-11-24 17:45",
-  "nota": "descuento de tienda $7,000 hasta 2026-11-30",
+  "nota": "descuento de tienda $7,000 ya restado",
   "precio": 41999.0,
   "producto": "Fold8 Ultra 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
@@ -39,12 +39,20 @@
   "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
   "vendedor": "Gameplanet"
  },
- "Liverpool|fold8|normal": {
-  "leido": "2026-11-19 18:57",
-  "nota": "es el precio mas bajo de sus variantes",
+ "Liverpool|fold8|normal-512": {
+  "leido": "2026-11-25 20:49",
+  "nota": "",
   "precio": 44999.0,
-  "producto": "Fold8 (capacidad sin dato)",
-  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
+  "producto": "Fold8 512 GB",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
+  "vendedor": "Liverpool"
+ },
+ "Liverpool|ps5|digital": {
+  "leido": "2026-11-25 20:49",
+  "nota": "",
+  "precio": 12499.0,
+  "producto": "PS5 Digital (sin lector)",
+  "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
   "vendedor": "Liverpool"
  },
  "Samsung|fold8|normal-512": {

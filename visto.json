@@ -7,16 +7,17 @@
   "Liverpool|fold8|ultra": {
    "desde": "desde 2026-11-19 18:57",
    "precio": 55999.0
-  },
-  "Liverpool|ps5|digital": {
-   "desde": "desde 2026-11-25 07:10",
-   "precio": 24999.0
   }
  },
- "ausente": {},
+ "ausente": {
+  "Liverpool|fold8|normal": 1
+ },
  "avisado": {},
+ "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {},
+ "caida_desde": {
+  "Amazon": "2026-11-26T02:49+00:00"
+ },
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|fold8|normal-512": {
@@ -41,25 +42,31 @@
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   },
   "Costco|fold8|ultra-512": {
    "precio": 41999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   },
   "Liverpool|fold8|normal": {
    "precio": 44999.0,
    "producto": "Fold8 (capacidad sin dato)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349",
    "visto": "2026-11-25 20:34"
+  },
+  "Liverpool|fold8|normal-512": {
+   "precio": 44999.0,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
+   "visto": "2026-11-25 20:49"
   },
   "Liverpool|fold8|ultra": {
    "precio": 55999.0,
@@ -68,28 +75,28 @@
    "visto": "2026-11-19 18:57"
   },
   "Liverpool|ps5|digital": {
-   "precio": 24999.0,
+   "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
-   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1180626294",
-   "visto": "2026-11-25 07:10"
+   "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
+   "visto": "2026-11-25 20:49"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   },
   "Samsung|fold8|ultra-1tb": {
    "precio": 56149.1,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 20:34"
+   "visto": "2026-11-25 20:49"
   }
  },
  "cupones_cosechados": {
@@ -152,7 +159,7 @@
   "fold8|WINDC_600": 1795651895
  },
  "cupones_ultima_busqueda": {
-  "cuando": "2026-11-25 20:34",
+  "cuando": "2026-11-25 20:49",
   "fuentes_leidas": 12,
   "hallados": {
    "AFIHOME": "foro",
@@ -179,7 +186,6 @@
   }
  },
  "diag_amazon": [
-  "11-25 04:25 busqueda ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 04:26 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 04:42 busqueda 200 de 2322 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 04:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
@@ -238,11 +244,12 @@
   "11-25 20:20 busqueda 503 de 1669 bytes, reintento ok; busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 20:21 busqueda 200 de 2283 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 20:35 busqueda ok; busqueda ok",
-  "11-25 20:35 busqueda ok"
+  "11-25 20:35 busqueda ok",
+  "11-25 20:51 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW 503 de 322 bytes"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 0,
+  "Amazon": 1,
   "Costco": 0,
   "Cupones": 0,
   "Elektra": 0,
@@ -252,7 +259,9 @@
   "Samsung": 0
  },
  "sembrado": true,
- "ultimo_error": {},
+ "ultimo_error": {
+  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B0H92G9GNW"
+ },
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    7499.0,
@@ -342,13 +351,15 @@
    34394.83,
    "Amazon México",
    false,
-   "fold8"
+   "fold8",
+   34394.83
   ],
   "B0H773GGWG": [
    38171.64,
    "Amazon México",
    false,
-   "fold8"
+   "fold8",
+   38171.64
   ],
   "B0H773PLWP": [
    34394.83,
@@ -360,7 +371,8 @@
    34394.83,
    "Amazon México",
    false,
-   "fold8"
+   "fold8",
+   34394.83
   ],
   "B0H92G9GNW": [
    37999.05,
