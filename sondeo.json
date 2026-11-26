@@ -1,11 +1,12 @@
 {
  "samsung_pagina": {
   "estado": 200,
-  "bytes": 3339679,
-  "fold8": 1415,
+  "bytes": 3360619,
+  "fold8": 1410,
   "precios_vistos": [
    "20000",
    "20667",
+   "21419",
    "21661",
    "22000",
    "22237",
@@ -14,8 +15,7 @@
    "22386",
    "22434",
    "22438",
-   "22828",
-   "22858"
+   "22828"
   ],
   "bloqueo": false,
   "final": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
@@ -65,89 +65,87 @@
   "precios_vistos": [],
   "bloqueo": true,
   "final": "https://www.walmart.com.mx/search?q=galaxy+z+fold8+ultra",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=f42fd680-e824-11f1-a2af-4235c3a14e08\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=75fd1df9-e93e-11f1-aceb-157c7c379688\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
  },
  "walmart_ficha": {
-  "estado": 412,
-  "bytes": 396,
-  "fold8": 0,
-  "precios_vistos": [],
+  "estado": 200,
+  "bytes": 964753,
+  "fold8": 40,
+  "precios_vistos": [
+   "20000",
+   "20616",
+   "21087",
+   "21175",
+   "21193",
+   "21556",
+   "21807",
+   "21955",
+   "21983",
+   "22561",
+   "22689",
+   "22713"
+  ],
   "bloqueo": true,
   "final": "https://www.walmart.com.mx/ip/Smartphone-Samsung-Galaxy-ZFold8-Ultra-512GB-Grafito-Desbloqueado/00880609919959",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=f44de9fe-e824-11f1-8ca0-149b4a92e7e4\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+  "inicio": "<!DOCTYPE html><html lang=\"es-MX\"><head><meta charset=\"utf-8\"/><script id=\"ttp-marker\" blocking=\"render\" nonce=\"NbHSOIzwcsSNhuxQ\">(()=>{window.performance.mark("
  },
  "sams_busca": {
   "estado": 412,
   "bytes": 396,
   "fold8": 0,
-  "precios_vistos": [
-   "48493"
-  ],
+  "precios_vistos": [],
   "bloqueo": true,
   "final": "https://www.sams.com.mx/search?q=galaxy+z+fold8",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=f48493b4-e824-11f1-9332-e7f711e7043a\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\""
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=766b60dc-e93e-11f1-9572-51a33de0440f\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\""
  },
  "bodega_busca": {
   "estado": 412,
   "bytes": 396,
   "fold8": 0,
   "precios_vistos": [
-   "52611"
+   "65973"
   ],
   "bloqueo": true,
   "final": "https://www.bodegaaurrera.com.mx/search?q=galaxy+z+fold8",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=f4c52611-e824-11f1-9732-29d692ca24ff\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=76a1976b-e93e-11f1-84eb-e9a65973b440\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
  },
  "amazon_ficha": {
   "estado": 200,
-  "bytes": 1721300,
-  "fold8": 66,
+  "bytes": 861582,
+  "fold8": 13,
   "precios_vistos": [
    "20000",
    "20200",
    "20512",
    "21063",
-   "21132",
-   "21506",
-   "21617",
    "21875",
    "21999",
-   "22004",
-   "25027",
-   "28337"
+   "22049",
+   "30000",
+   "32767",
+   "34394",
+   "35798",
+   "40000"
   ],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
   "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
  },
  "amazon_busca": {
-  "estado": 200,
-  "bytes": 1950508,
-  "fold8": 772,
-  "precios_vistos": [
-   "20100",
-   "20363",
-   "20512",
-   "20600",
-   "20825",
-   "20899",
-   "21000",
-   "21063",
-   "21132",
-   "21374",
-   "21400",
-   "21506"
-  ],
+  "estado": 503,
+  "bytes": 1669,
+  "fold8": 0,
+  "precios_vistos": [],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/s?k=samsung+galaxy+z+fold8+ultra+512",
-  "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
+  "inicio": "<!doctype html><html><head><meta charset=\"utf-8\"><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"><meta name=\"viewport\" content=\"width=device-width, initial"
  },
  "ml_producto": {
   "estado": 200,
   "bytes": 26509,
   "fold8": 6,
   "precios_vistos": [
-   "39125"
+   "57884"
   ],
   "bloqueo": false,
   "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Fwww.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold",
@@ -157,7 +155,10 @@
   "estado": 200,
   "bytes": 26373,
   "fold8": 6,
-  "precios_vistos": [],
+  "precios_vistos": [
+   "47981",
+   "62262"
+  ],
   "bloqueo": false,
   "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fsamsung-galaxy-z-",
   "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-fronte"
@@ -182,8 +183,8 @@
  },
  "liverpool_busca": {
   "estado": 200,
-  "bytes": 719495,
-  "fold8": 100,
+  "bytes": 691004,
+  "fold8": 98,
   "precios_vistos": [
    "20279",
    "20664",
@@ -213,14 +214,16 @@
  },
  "costco_api": {
   "estado": 200,
-  "bytes": 82813,
+  "bytes": 83995,
   "fold8": 28,
   "precios_vistos": [
    "23999",
    "29499",
    "37999",
+   "41999",
    "44999",
    "47998",
+   "48999",
    "58998",
    "59999"
   ],
@@ -230,7 +233,7 @@
  },
  "costco_busca": {
   "estado": 200,
-  "bytes": 916957,
+  "bytes": 931230,
   "fold8": 0,
   "precios_vistos": [
    "26052",
@@ -240,6 +243,7 @@
    "44112",
    "51787",
    "54753",
+   "59433",
    "60023"
   ],
   "bloqueo": true,
@@ -248,18 +252,19 @@
  },
  "elektra_api": {
   "estado": 206,
-  "bytes": 239216,
-  "fold8": 161,
+  "bytes": 246174,
+  "fold8": 171,
   "precios_vistos": [
-   "22331",
    "26999",
+   "28375",
    "29999",
    "39599",
-   "40599",
    "42599",
-   "43599",
-   "58300",
-   "59059",
+   "44510",
+   "49500",
+   "55383",
+   "59639",
+   "59900",
    "66528"
   ],
   "bloqueo": false,
@@ -299,11 +304,9 @@
  },
  "palacio_busca": {
   "estado": 403,
-  "bytes": 5855,
+  "bytes": 5834,
   "fold8": 3,
-  "precios_vistos": [
-   "37038"
-  ],
+  "precios_vistos": [],
   "bloqueo": true,
   "final": "https://www.elpalaciodehierro.com/buscar?q=galaxy+z+fold8",
   "inicio": "<!DOCTYPE html><html lang=\"en-US\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta http-equiv=\"X-UA"
@@ -319,7 +322,7 @@
  },
  "gameplanet_ps5": {
   "estado": 200,
-  "bytes": 303565,
+  "bytes": 305007,
   "fold8": 0,
   "precios_vistos": [
    "22016",
@@ -337,33 +340,33 @@
   ],
   "bloqueo": false,
   "final": "https://gameplanet.com/catalogo?q=consola%20playstation%205",
-  "inicio": "<!DOCTYPE html><html data-dpl-id=\"20261124-144805\" lang=\"es\" data-mode=\"light\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, i"
+  "inicio": "<!DOCTYPE html><html data-dpl-id=\"20261125-160047\" lang=\"es\" data-mode=\"light\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, i"
  },
  "gameplanet_fold8": {
   "estado": 200,
-  "bytes": 313447,
+  "bytes": 303967,
   "fold8": 5,
   "precios_vistos": [
    "20063",
    "22016",
    "24860",
    "24866",
-   "25187",
-   "25188",
+   "24889",
+   "24900",
    "27201",
-   "32290",
-   "32294",
-   "32297",
-   "32306",
-   "32310"
+   "37457",
+   "37505",
+   "37685",
+   "39756",
+   "47788"
   ],
   "bloqueo": false,
   "final": "https://gameplanet.com/catalogo?q=galaxy%20z%20fold8",
-  "inicio": "<!DOCTYPE html><html data-dpl-id=\"20261124-144805\" lang=\"es\" data-mode=\"light\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, i"
+  "inicio": "<!DOCTYPE html><html data-dpl-id=\"20261125-160047\" lang=\"es\" data-mode=\"light\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, i"
  },
  "sanborns_ps5": {
   "estado": 403,
-  "bytes": 11294,
+  "bytes": 11295,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": false,
@@ -372,7 +375,7 @@
  },
  "sanborns_fold8": {
   "estado": 403,
-  "bytes": 11296,
+  "bytes": 11295,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": false,
@@ -400,5 +403,43 @@
   "bloqueo": false,
   "final": "https://www.promodescuentos.com/rss/grupo/smartphones-samsung",
   "inicio": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <rss xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:dc=\""
+ },
+ "promos": {
+  "samsung_deals": {
+   "ok": true,
+   "http": 200,
+   "segundos": 1.0,
+   "dato": "codigos BF1000, ECO_25, ECO_20, PRO-15; 5 filas de meses"
+  },
+  "samsung_live": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.5,
+   "dato": "codigos ECO_20, BFLIVESEM, PRO-20; 1 filas de meses"
+  },
+  "cerrada_estudiantes": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.9,
+   "dato": "precio $35,999 (lista 53499.0)"
+  },
+  "cerrada_empleados": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.7,
+   "dato": "precio $40,124 (lista 53499.0)"
+  },
+  "amazon_msi": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.6,
+   "dato": "4 filas: tarjetas participantes [12]; Nu [4, 7]; BBVA [15]; Banamex [18, 24]"
+  },
+  "amazon_blackfriday": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.3,
+   "dato": "422763 bytes, 0 renglones de banco"
+  }
  }
 }
