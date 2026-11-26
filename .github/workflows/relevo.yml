@@ -17,7 +17,9 @@ concurrency:
 jobs:
   relevo:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # 12 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
+    # relevo cortado por tope no avisa a nadie.
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
       - name: Relanzar la cadena si quedo detenida

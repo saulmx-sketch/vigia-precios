@@ -43,11 +43,11 @@ completar_termino() {
   for i in 1 2 3; do
     linea=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow vigia.yml --status completed --limit 30 \
       --json databaseId,url,conclusion,updatedAt,event \
-      --jq '[.[] | select(.event != "schedule")][0] | "\(.databaseId)\t\(.url)\t\(.conclusion)\t\(.updatedAt)"') && break
+      --jq '[.[] | select(.event != "schedule")][0] | select(. != null) | "\(.databaseId)\t\(.url)\t\(.conclusion)\t\(.updatedAt)"') && break
     linea=""
-    sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
   done
-  if [ -n "$linea" ] && [ "$linea" != "null" ]; then
+  if [ -n "$linea" ] && [ "${linea%%$'\t'*}" != "null" ]; then
     IFS=$'\t' read -r TERMINO_ID TERMINO_URL TERMINO_CONCLUSION TERMINO_HORA <<< "$linea"
   else
     TERMINO_ID=""; TERMINO_URL=""; TERMINO_CONCLUSION=""; TERMINO_HORA=""
@@ -70,9 +70,12 @@ abrir_aviso() {
 $cuerpo"
   abiertos=""
   for i in 1 2 3; do
-    abiertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --json title --jq '.[].title') && break
+    # Busqueda por titulo (no los 100 mas nuevos: en Black Friday los avisos de precio lo desplazarian);
+    # la busqueda es aproximada, la igualdad exacta la decide el grep de abajo.
+    abiertos=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 --search "\"$titulo\" in:title" \
+      --json title --jq '.[].title') && break
     abiertos=""
-    sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
   done
   if printf '%s\n' "$abiertos" | grep -Fxq -- "$titulo"; then
     echo "aviso ya abierto, no se repite: $titulo"
@@ -88,7 +91,7 @@ $cuerpo"
       echo "aviso abierto: $titulo"
       return 0
     fi
-    sleep $((i * ESPERA_REINTENTO))
+    [ "$i" -lt 3 ] && sleep $((i * ESPERA_REINTENTO))
   done
   echo "no se pudo abrir el aviso: $titulo"
   return 1
