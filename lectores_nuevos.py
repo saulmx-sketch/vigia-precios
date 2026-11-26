@@ -64,8 +64,12 @@ def _del_tipo(t, tipo):
     return None
 
 
-EN_EXISTENCIA = ("InStock", "LimitedAvailability", "OnlineOnly", "InStoreOnly")
-SIN_EXISTENCIA = ("OutOfStock", "SoldOut", "Discontinued")
+# schema.org ItemAvailability. "Hay" = se compra ahora: InStock y LimitedAvailability. Todos los demas estados legitimos
+# (preventa, sobre pedido, solo en tienda, solo en linea, descontinuado, agotado...) son "no esta a la venta ahora",
+# un agotado explicito; "formato cambiado" queda para ausente o desconocido de verdad (revisor R5-H2, director).
+EN_EXISTENCIA = ("InStock", "LimitedAvailability")
+SIN_EXISTENCIA = ("OutOfStock", "SoldOut", "Discontinued", "PreOrder", "PreSale", "BackOrder", "MadeToOrder",
+                  "InStoreOnly", "OnlineOnly", "Reserved")
 
 
 def existencia_si_no(texto):

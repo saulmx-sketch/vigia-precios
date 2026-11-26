@@ -56,7 +56,8 @@ def _probar_enganche_con_pruebas(v):
             for t in NUEVAS:
                 d.pop(t, None)
         sin_ellas = [dict(d) for d in dicts]
-        assert v.tiendas_sin_lector(prods) == sorted(NUEVAS), v.tiendas_sin_lector(prods)
+        # (R5-H1) subconjunto, no igualdad: otra tienda configurada sin lector no debe tumbar esta prueba
+        assert set(NUEVAS) <= set(v.tiendas_sin_lector(prods)), v.tiendas_sin_lector(prods)
 
         def falla(m):
             raise AssertionError("prueba de lectores nuevos que falla a proposito")
@@ -65,12 +66,12 @@ def _probar_enganche_con_pruebas(v):
             v.enganchar_lectores_nuevos(prueba=falla)
         assert "lectores nuevos apagados: sus pruebas fallan: AssertionError" in salida.getvalue(), salida.getvalue()
         assert [dict(d) for d in dicts] == sin_ellas, "una prueba fallida dejo tiendas nuevas dadas de alta"
-        assert v.tiendas_sin_lector(prods) == sorted(NUEVAS)
+        assert set(NUEVAS) <= set(v.tiendas_sin_lector(prods))
         assert "sus pruebas fallan" in v.LECTORES_NUEVOS_ERROR
         with contextlib.redirect_stdout(io.StringIO()):
             v.enganchar_lectores_nuevos(prueba=lambda m: None)
         assert all(t in v.LECTORES and t in v.VENDEDOR_OFICIAL for t in NUEVAS), "pruebas que pasan no dieron de alta"
-        assert v.tiendas_sin_lector(prods) == [] and v.LECTORES_NUEVOS_ERROR == ""
+        assert not set(NUEVAS) & set(v.tiendas_sin_lector(prods)) and v.LECTORES_NUEVOS_ERROR == ""
     finally:
         for d, c in zip(dicts, copias):
             d.clear()
@@ -171,9 +172,10 @@ def _correr_tiendas(v):
             assert alterada != f_fold, "recorte cambiado"
             tabla[FICHA_FOLD8] = (200, alterada)
             _espera_error(lambda: leer(fold, {"consulta": "galaxy z fold8"}, {}), "ficha Soriana sin dato")
-        # (c) agotada: no hay oferta, y es lista vacia legitima (agotado explicito)
-        tabla[FICHA_FOLD8] = (200, f_fold.replace("schema.org/InStock", "schema.org/OutOfStock"))
-        assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == [], "una ficha agotada produjo oferta"
+        # (c) agotada, preventa o solo en tienda: no hay oferta, y es lista vacia legitima (R5-H2)
+        for estado in ("OutOfStock", "PreOrder", "InStoreOnly", "BackOrder"):
+            tabla[FICHA_FOLD8] = (200, f_fold.replace("schema.org/InStock", "schema.org/" + estado))
+            assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == [], "ficha %s produjo oferta o error" % estado
         tabla[FICHA_FOLD8] = (200, f_fold)
         # (H2) una ficha que falla se salta si otra se leyo; si fallan todas las abiertas, RuntimeError
         otra_ps5 = S + "/consola-playstation-5-digital-otra/11999999.html"
@@ -468,6 +470,22 @@ def _probar_cyberpuerta(v, fold, ps5):
             tabla[qf] = (200, alterada)
             with contextlib.redirect_stdout(io.StringIO()):
                 _espera_error(lambda: leer(fold, {"consulta": "galaxy z fold8"}, {}), "Cyberpuerta sin dato")
+        # (R5-H2) estados legitimos que no son "hay" (con y sin el prefijo de schema.org): lista vacia, sin error;
+        # un estado desconocido sigue siendo "formato cambiado"
+        def con_estado(estado):
+            def f(lista):
+                for it in lista["itemListElement"]:
+                    it["item"]["offers"]["availability"] = estado
+            return f
+        for estado in ("PreOrder", "https://schema.org/PreSale", "BackOrder", "MadeToOrder", "InStoreOnly",
+                       "http://schema.org/OnlineOnly", "Discontinued", "SoldOut", "Reserved"):
+            tabla[qf] = (200, _cp_alterar(b_fold, con_estado(estado)))
+            with contextlib.redirect_stdout(io.StringIO()):
+                assert leer(fold, {"consulta": "galaxy z fold8"}, {}) == [], estado
+        tabla[qf] = (200, _cp_alterar(b_fold, con_estado("EnCamino")))
+        with contextlib.redirect_stdout(io.StringIO()):
+            _espera_error(lambda: leer(fold, {"consulta": "galaxy z fold8"}, {}), "estado desconocido")
+        tabla[qf] = (200, b_fold)
         # (d) 403, 503 o pagina sin ld+json: RuntimeError; (H1) ItemList vacio tambien
         for resp in ((403, "<html>Access Denied</html>"), (503, ""), (200, "<html><body>sin datos</body></html>"),
                      (200, '<script type="application/ld+json">{"@context":"https://schema.org","@graph":'
@@ -491,6 +509,8 @@ def _probar_cyberpuerta(v, fold, ps5):
             tabla[CP_FICHA] = (200, ficha.replace('"availability":"InStock"', '"availability":"OutOfStock"'))
             assert v.FICHAS["Cyberpuerta"](CP_FICHA)["existencia"] is False
             tabla[CP_FICHA] = (200, ficha.replace('"availability":"InStock"', '"availability":"PreOrder"'))
+            assert v.FICHAS["Cyberpuerta"](CP_FICHA)["existencia"] is False    # preventa: no esta a la venta ahora
+            tabla[CP_FICHA] = (200, ficha.replace('"availability":"InStock"', '"availability":"EnCamino"'))
             assert v.FICHAS["Cyberpuerta"](CP_FICHA)["existencia"] is None
             # (H3) clave sin region = no importado; clave de otra region = importado
             assert f["importado"] is False and f["sku"] == "SM-F971B/512/VA", f
