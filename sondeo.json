@@ -1,7 +1,7 @@
 {
  "samsung_pagina": {
   "estado": 200,
-  "bytes": 3360619,
+  "bytes": 3360874,
   "fold8": 1410,
   "precios_vistos": [
    "20000",
@@ -62,43 +62,23 @@
   "estado": 412,
   "bytes": 396,
   "fold8": 0,
-  "precios_vistos": [],
-  "bloqueo": true,
-  "final": "https://www.walmart.com.mx/search?q=galaxy+z+fold8+ultra",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=75fd1df9-e93e-11f1-aceb-157c7c379688\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
- },
- "walmart_ficha": {
-  "estado": 200,
-  "bytes": 964753,
-  "fold8": 40,
   "precios_vistos": [
-   "20000",
-   "20616",
-   "21087",
-   "21175",
-   "21193",
-   "21556",
-   "21807",
-   "21955",
-   "21983",
-   "22561",
-   "22689",
-   "22713"
+   "65973"
   ],
   "bloqueo": true,
-  "final": "https://www.walmart.com.mx/ip/Smartphone-Samsung-Galaxy-ZFold8-Ultra-512GB-Grafito-Desbloqueado/00880609919959",
-  "inicio": "<!DOCTYPE html><html lang=\"es-MX\"><head><meta charset=\"utf-8\"/><script id=\"ttp-marker\" blocking=\"render\" nonce=\"NbHSOIzwcsSNhuxQ\">(()=>{window.performance.mark("
+  "final": "https://www.walmart.com.mx/search?q=galaxy+z+fold8+ultra",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=5fa6dfaa-e945-11f1-8236-e9a65973b440\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
  },
- "sams_busca": {
+ "walmart_ficha": {
   "estado": 412,
   "bytes": 396,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": true,
-  "final": "https://www.sams.com.mx/search?q=galaxy+z+fold8",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=766b60dc-e93e-11f1-9572-51a33de0440f\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\""
+  "final": "https://www.walmart.com.mx/ip/Smartphone-Samsung-Galaxy-ZFold8-Ultra-512GB-Grafito-Desbloqueado/00880609919959",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=5fd7d5aa-e945-11f1-94d5-aa82b2953c07\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
  },
- "bodega_busca": {
+ "sams_busca": {
   "estado": 412,
   "bytes": 396,
   "fold8": 0,
@@ -106,47 +86,67 @@
    "65973"
   ],
   "bloqueo": true,
+  "final": "https://www.sams.com.mx/search?q=galaxy+z+fold8",
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=5ff8a9b7-e945-11f1-886b-e9a65973b440\\u0026vid=\\u0026g=b\",\"appId\":\"PX87wpO5aK\",\"jsClientSrc\":\"/px/PX87wpO5aK/init.js\""
+ },
+ "bodega_busca": {
+  "estado": 412,
+  "bytes": 396,
+  "fold8": 0,
+  "precios_vistos": [],
+  "bloqueo": true,
   "final": "https://www.bodegaaurrera.com.mx/search?q=galaxy+z+fold8",
-  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=76a1976b-e93e-11f1-84eb-e9a65973b440\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
+  "inicio": "{\"redirectUrl\":\"/blocked?url=Lw==\\u0026uuid=601fd796-e945-11f1-b477-b680f1ffd7ff\\u0026vid=\\u0026g=b\",\"appId\":\"PXAFlYiz9n\",\"jsClientSrc\":\"/px/PXAFlYiz9n/init.js\""
  },
  "amazon_ficha": {
   "estado": 200,
-  "bytes": 861582,
-  "fold8": 13,
+  "bytes": 1684484,
+  "fold8": 69,
   "precios_vistos": [
    "20000",
    "20200",
    "20512",
    "21063",
+   "21132",
+   "21506",
+   "21617",
    "21875",
    "21999",
-   "22049",
-   "30000",
-   "32767",
-   "34394",
-   "35798",
-   "40000"
+   "22004",
+   "25027",
+   "28337"
   ],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/dp/B0H92G9GNW?th=1&psc=1",
   "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
  },
  "amazon_busca": {
-  "estado": 503,
-  "bytes": 1669,
-  "fold8": 0,
-  "precios_vistos": [],
+  "estado": 200,
+  "bytes": 1544456,
+  "fold8": 605,
+  "precios_vistos": [
+   "20100",
+   "20300",
+   "20500",
+   "20512",
+   "20700",
+   "20899",
+   "21000",
+   "21063",
+   "21132",
+   "21200",
+   "21374",
+   "21400"
+  ],
   "bloqueo": false,
   "final": "https://www.amazon.com.mx/s?k=samsung+galaxy+z+fold8+ultra+512",
-  "inicio": "<!doctype html><html><head><meta charset=\"utf-8\"><meta http-equiv=\"x-ua-compatible\" content=\"ie=edge\"><meta name=\"viewport\" content=\"width=device-width, initial"
+  "inicio": "<!doctype html><html lang=\"es-mx\" class=\"a-no-js\" data-19ax5a9jf=\"dingo\"><!-- sp:feature:head-start --> <head><script>var aPageStart = (new Date()).getTime();</"
  },
  "ml_producto": {
   "estado": 200,
   "bytes": 26509,
   "fold8": 6,
-  "precios_vistos": [
-   "57884"
-  ],
+  "precios_vistos": [],
   "bloqueo": false,
   "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Fwww.mercadolibre.com.mx%2Fsamsung-galaxy-z-fold",
   "inicio": "<!DOCTYPE html><html lang=\"es-MX\" data-cdn=\"https://http2.mlstatic.com\" data-assets-prefix=\"https://http2.mlstatic.com/frontend-assets/suspicious-traffic-fronte"
@@ -156,8 +156,7 @@
   "bytes": 26373,
   "fold8": 6,
   "precios_vistos": [
-   "47981",
-   "62262"
+   "65694"
   ],
   "bloqueo": false,
   "final": "https://www.mercadolibre.com.mx/gz/account-verification?go=https%3A%2F%2Flistado.mercadolibre.com.mx%2Fsamsung-galaxy-z-",
@@ -183,8 +182,8 @@
  },
  "liverpool_busca": {
   "estado": 200,
-  "bytes": 691004,
-  "fold8": 98,
+  "bytes": 700547,
+  "fold8": 101,
   "precios_vistos": [
    "20279",
    "20664",
@@ -214,7 +213,7 @@
  },
  "costco_api": {
   "estado": 200,
-  "bytes": 83995,
+  "bytes": 83998,
   "fold8": 28,
   "precios_vistos": [
    "23999",
@@ -252,7 +251,7 @@
  },
  "elektra_api": {
   "estado": 206,
-  "bytes": 246174,
+  "bytes": 246133,
   "fold8": 171,
   "precios_vistos": [
    "26999",
@@ -273,7 +272,7 @@
  },
  "coppel_busca": {
   "estado": 403,
-  "bytes": 379,
+  "bytes": 377,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": true,
@@ -304,7 +303,7 @@
  },
  "palacio_busca": {
   "estado": 403,
-  "bytes": 5834,
+  "bytes": 5855,
   "fold8": 3,
   "precios_vistos": [],
   "bloqueo": true,
@@ -313,16 +312,18 @@
  },
  "telcel_busca": {
   "estado": 403,
-  "bytes": 390,
+  "bytes": 388,
   "fold8": 0,
-  "precios_vistos": [],
+  "precios_vistos": [
+   "41636"
+  ],
   "bloqueo": true,
   "final": "https://www.telcel.com/tienda/buscar?q=fold8",
   "inicio": "<HTML><HEAD> <TITLE>Access Denied</TITLE> </HEAD><BODY> <H1>Access Denied</H1> You don't have permission to access \"http&#58;&#47;&#47;www&#46;telcel&#46;com&"
  },
  "gameplanet_ps5": {
   "estado": 200,
-  "bytes": 305007,
+  "bytes": 303579,
   "fold8": 0,
   "precios_vistos": [
    "22016",
@@ -366,7 +367,7 @@
  },
  "sanborns_ps5": {
   "estado": 403,
-  "bytes": 11295,
+  "bytes": 11296,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": false,
@@ -375,7 +376,7 @@
  },
  "sanborns_fold8": {
   "estado": 403,
-  "bytes": 11295,
+  "bytes": 11296,
   "fold8": 0,
   "precios_vistos": [],
   "bloqueo": false,
@@ -405,41 +406,77 @@
   "inicio": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <rss xmlns:content=\"http://purl.org/rss/1.0/modules/content/\" xmlns:wfw=\"http://wellformedweb.org/CommentAPI/\" xmlns:dc=\""
  },
  "promos": {
+  "cupondescuento_samsung": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.8,
+   "dato": "692960 bytes, 28 codigos de Samsung: BFLIVESEM, EXTRA5, BF1000, FOLD8_20CLUB, EPPLIVESEM, BFINMP, ECO_CLUB25, BFPLUS40, EPP10_NOV, BFPLUS30, S26CLUB_NOV, BF26_5, ECO_25, FOLD8_25CLUB, KIA_ECOSAMSUNG, ECO_CLUB30, PRO-20, PRO-15, CART5_EPP, BPMAS25, ECO_20, ECO_30, DACRM26, BEFLIVESEM, MEMHOME, BARRAS"
+  },
+  "eluniversal_cs_samsung": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.9,
+   "dato": "32387 bytes, 21 codigos de Samsung: WINDC_600, CARRITO5, NEWTV26, S26U-CLUBMAMA, MOMCLUB_15, PRO-25, PRO-15, LIVESEM, BARRAS-25, MEMHOME, PRO-20, CBHOME, EXTRA5, PRO-5, AFIHOME, ECO_25, ECO_20, BFPLUS45, KIA_ECOSAMSUNG, BFLIVESEM, BF1000"
+  },
+  "cuponesmexico_samsung": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.1,
+   "dato": "106748 bytes, 11 codigos de Samsung: BF1000, BFLIVESEM, ECO_25, PRO-15, ECO_20, EXTRA5, EXTRA01, GALAXYMP, KUESKINUEVO, REDMAGIC, HONOR"
+  },
+  "liverpool_promociones": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.4,
+   "dato": "539480 bytes, 0 tarjetas con PDF de BBVA, PayPal o Revolut: "
+  },
   "samsung_deals": {
    "ok": true,
    "http": 200,
-   "segundos": 1.0,
-   "dato": "codigos BF1000, ECO_25, ECO_20, PRO-15; 5 filas de meses"
+   "segundos": 0.3,
+   "dato": "codigos BF1000, ECO_25, ECO_20, PRO-15, HS26_ECO, PRO-20, PRO-5; 5 filas de meses"
   },
   "samsung_live": {
    "ok": true,
    "http": 200,
-   "segundos": 0.5,
+   "segundos": 0.1,
    "dato": "codigos ECO_20, BFLIVESEM, PRO-20; 1 filas de meses"
+  },
+  "samsung_cyber": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.6,
+   "dato": "codigos BF1000, ECO_25, ECO_20, PRO-15, HS26_ECO, PRO-20, PRO-5; 5 filas de meses"
+  },
+  "costco_ficha_648324": {
+   "ok": true,
+   "http": 200,
+   "segundos": 0.1,
+   "dato": "2 promociones de pago: PP177 $6,000; VS178 sin cifra"
   },
   "cerrada_estudiantes": {
    "ok": true,
    "http": 200,
-   "segundos": 0.9,
+   "segundos": 0.4,
    "dato": "precio $35,999 (lista 53499.0)"
   },
   "cerrada_empleados": {
    "ok": true,
    "http": 200,
-   "segundos": 0.7,
+   "segundos": 0.5,
    "dato": "precio $40,124 (lista 53499.0)"
   },
   "amazon_msi": {
    "ok": true,
    "http": 200,
-   "segundos": 0.6,
+   "segundos": 0.5,
    "dato": "4 filas: tarjetas participantes [12]; Nu [4, 7]; BBVA [15]; Banamex [18, 24]"
   },
   "amazon_blackfriday": {
    "ok": true,
    "http": 200,
-   "segundos": 0.3,
-   "dato": "422763 bytes, 0 renglones de banco"
+   "segundos": 0.2,
+   "dato": "434884 bytes, 0 renglones de banco"
   }
  }
 }
