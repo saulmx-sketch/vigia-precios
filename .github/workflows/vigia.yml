@@ -22,7 +22,8 @@ jobs:
   salvavidas:
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    # revisor F (H4): el peor caso de relevo.sh solo en esperas suma unos 495 s; relevo.yml le da 15 min
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       # Pendiente 5 (26 nov): el mismo relevo.sh que usa relevo.yml. Antes el horario contaba una sola vez: si caia
