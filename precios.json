@@ -1,7 +1,7 @@
 {
  "Amazon|fold8|normal-512": {
   "leido": "2026-11-25 00:00",
-  "nota": "",
+  "nota": "con cupon en la ficha, sin restar",
   "precio": 34394.83,
   "producto": "Fold8 512 GB",
   "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
@@ -17,7 +17,7 @@
  },
  "Costco|fold8|normal-512": {
   "leido": "2026-11-23 01:55",
-  "nota": "descuento de tienda $7,000 ya restado",
+  "nota": "descuento de tienda $7,000 ya restado; Costco anuncia otra promoción al pagar (VS178) sin decir de cuánto; pagando con PayPal quedaría en $31,999, hasta 2026-12-01; se aplica sola al elegir PayPal (no probado); Costco pide ser socio: membresía Dorada $600 al año si no lo eres",
   "precio": 37999.0,
   "producto": "Fold8 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
@@ -25,11 +25,27 @@
  },
  "Costco|fold8|ultra-512": {
   "leido": "2026-11-24 17:45",
-  "nota": "descuento de tienda $7,000 ya restado",
+  "nota": "descuento de tienda $7,000 ya restado; Costco anuncia otra promoción al pagar (VS178) sin decir de cuánto; Costco pide ser socio: membresía Dorada $600 al año si no lo eres",
   "precio": 41999.0,
   "producto": "Fold8 Ultra 512 GB",
   "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
   "vendedor": "Costco (pide membresia)"
+ },
+ "Cyberpuerta|fold8|normal-512": {
+  "leido": "2026-11-25 22:57",
+  "nota": "Cyberpuerta no dice de qué región es el modelo: confirma en la ficha que sea versión México",
+  "precio": 34319.0,
+  "producto": "Fold8 512 GB",
+  "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-FOLD8-5G-7-6-Dual-SIM-512GB-12GB-RAM-Morado.html",
+  "vendedor": "Cyberpuerta"
+ },
+ "Cyberpuerta|fold8|ultra-512": {
+  "leido": "2026-11-25 22:57",
+  "nota": "Cyberpuerta no dice de qué región es el modelo: confirma en la ficha que sea versión México",
+  "precio": 39999.0,
+  "producto": "Fold8 Ultra 512 GB",
+  "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-Fold8-Ultra-5G-8-Dual-SIM-512GB-12GB-RAM-Negro.html",
+  "vendedor": "Cyberpuerta"
  },
  "Gameplanet|ps5|digital": {
   "leido": "2026-11-24 10:53",
@@ -57,26 +73,42 @@
  },
  "Samsung|fold8|normal-512": {
   "leido": "2026-11-25 22:41",
-  "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $40,799; promocion vigente hasta 2026-12-01",
+  "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $40,799; promocion vigente hasta 2026-12-01; hasta 24 meses sin intereses con BBVA",
   "precio": 31639.2,
   "producto": "Fold8 512 GB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
   "vendedor": "Samsung"
  },
  "Samsung|fold8|ultra-1tb": {
-  "leido": "2026-11-23 00:39",
-  "nota": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
-  "precio": 56149.1,
+  "leido": "2026-11-25 22:57",
+  "nota": "con cupones FOLD8_25CLUB + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01; hasta 24 meses sin intereses con BBVA",
+  "precio": 46624.25,
   "producto": "Fold8 Ultra 1 TB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
   "vendedor": "Samsung"
  },
  "Samsung|fold8|ultra-512": {
   "leido": "2026-11-23 14:28",
-  "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $43,999; promocion vigente hasta 2026-12-01",
+  "nota": "con cupones FOLD8_20CLUB + BF1000; sin cupon $43,999; promocion vigente hasta 2026-12-01; hasta 24 meses sin intereses con BBVA",
   "precio": 34199.2,
   "producto": "Fold8 Ultra 512 GB",
   "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
   "vendedor": "Samsung"
+ },
+ "Soriana|fold8|normal-512": {
+  "leido": "2026-11-25 22:57",
+  "nota": "",
+  "precio": 36990.0,
+  "producto": "Fold8 512 GB",
+  "url": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
+  "vendedor": "Soriana"
+ },
+ "Soriana|ps5|digital": {
+  "leido": "2026-11-25 22:57",
+  "nota": "",
+  "precio": 11990.0,
+  "producto": "PS5 Digital (sin lector)",
+  "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
+  "vendedor": "Soriana"
  }
 }

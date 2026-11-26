@@ -24,7 +24,7 @@
    "precio": 34394.83,
    "producto": "Fold8 512 GB",
    "url": "https://www.amazon.com.mx/dp/B0H76XJTG2?th=1&psc=1",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Amazon|fold8|ultra-512": {
    "precio": 34394.83,
@@ -36,25 +36,37 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Costco|fold8|normal-512": {
    "precio": 37999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Costco|fold8|ultra-512": {
    "precio": 41999.0,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
+  },
+  "Cyberpuerta|fold8|normal-512": {
+   "precio": 34319.0,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-FOLD8-5G-7-6-Dual-SIM-512GB-12GB-RAM-Morado.html",
+   "visto": "2026-11-25 22:57"
+  },
+  "Cyberpuerta|fold8|ultra-512": {
+   "precio": 39999.0,
+   "producto": "Fold8 Ultra 512 GB",
+   "url": "https://www.cyberpuerta.mx/Celulares-y-Telefonia/Celulares/Celulares/Samsung-Galaxy-Z-Fold8-Ultra-5G-8-Dual-SIM-512GB-12GB-RAM-Negro.html",
+   "visto": "2026-11-25 22:57"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Liverpool|fold8|normal": {
    "precio": 44999.0,
@@ -66,7 +78,7 @@
    "precio": 44999.0,
    "producto": "Fold8 512 GB",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1203150349?skuId=1203150373",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Liverpool|fold8|ultra": {
    "precio": 55999.0,
@@ -78,63 +90,153 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Samsung|fold8|normal-512": {
    "precio": 31639.2,
    "producto": "Fold8 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8/buy/",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Samsung|fold8|ultra-1tb": {
-   "precio": 56149.1,
+   "precio": 46624.25,
    "producto": "Fold8 Ultra 1 TB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
   },
   "Samsung|fold8|ultra-512": {
    "precio": 34199.2,
    "producto": "Fold8 Ultra 512 GB",
    "url": "https://www.samsung.com/mx/smartphones/galaxy-z-fold8-ultra/buy/",
-   "visto": "2026-11-25 22:41"
+   "visto": "2026-11-25 22:57"
+  },
+  "Soriana|fold8|normal-512": {
+   "precio": 36990.0,
+   "producto": "Fold8 512 GB",
+   "url": "https://www.soriana.com/samsung-galaxy-z-fold8-7.6-pulgadas-512gb-lavanda-desbloqueado/11944979.html",
+   "visto": "2026-11-25 22:57"
+  },
+  "Soriana|ps5|digital": {
+   "precio": 11990.0,
+   "producto": "PS5 Digital (sin lector)",
+   "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
+   "visto": "2026-11-25 22:57"
   }
  },
  "cupones_cosechados": {
   "AFIHOME": "2026-11-25",
+  "BARRAS-25": "2026-11-25",
+  "BEFLIVESEM": "2026-11-25",
   "BF1000": "2026-11-25",
   "BF26_5": "2026-11-25",
+  "BFINMP": "2026-11-25",
   "BFLIVESEM": "2026-11-25",
+  "BFPLUS30": "2026-11-25",
+  "BFPLUS40": "2026-11-25",
+  "BFPLUS45": "2026-11-25",
+  "BPMAS25": "2026-11-25",
   "CARRITO5": "2026-11-25",
   "CART5_EPP": "2026-11-25",
   "CBHOME": "2026-11-25",
   "CENEVAL26": "2026-11-25",
   "CRP26TV": "2026-11-25",
+  "DACRM26": "2026-11-25",
   "ECO_20": "2026-11-25",
   "ECO_25": "2026-11-25",
   "ECO_30": "2026-11-25",
+  "ECO_CLUB25": "2026-11-25",
+  "ECO_CLUB30": "2026-11-25",
   "EPP10_NOV": "2026-11-25",
   "EPP1O_NOV": "2026-11-25",
   "EPPLIVESEM": "2026-11-25",
   "EPPMX_QUINCENA": "2026-11-25",
+  "EXTRA01": "2026-11-25",
+  "EXTRA5": "2026-11-25",
   "FLASHBP25": "2026-11-25",
   "FOLD8_20CLUB": "2026-11-25",
+  "FOLD8_25CLUB": "2026-11-25",
+  "GALAXYMP": "2026-11-25",
+  "HS26_ECO": "2026-11-25",
+  "KIA_ECOSAMSUNG": "2026-11-25",
+  "KUESKINUEVO": "2026-11-25",
+  "LIVESEM": "2026-11-25",
   "MEMBER_NOV15": "2026-11-25",
   "MEMHOME": "2026-11-25",
+  "MOMCLUB_15": "2026-11-25",
+  "NEWTV26": "2026-11-25",
   "PRO-15": "2026-11-25",
   "PRO-20": "2026-11-25",
+  "PRO-25": "2026-11-25",
+  "PRO-5": "2026-11-25",
   "S26CLUB_NOV": "2026-11-25",
+  "S26U-CLUBMAMA": "2026-11-25",
   "WINDC_600": "2026-11-25"
+ },
+ "cupones_origen": {
+  "AFIHOME": "foro",
+  "BARRAS-25": "cuponera",
+  "BEFLIVESEM": "cuponera",
+  "BF1000": "Samsung",
+  "BF26_5": "foro",
+  "BFINMP": "cuponera",
+  "BFLIVESEM": "Samsung",
+  "BFPLUS30": "cuponera",
+  "BFPLUS40": "cuponera",
+  "BFPLUS45": "cuponera",
+  "BPMAS25": "cuponera",
+  "CARRITO5": "foro",
+  "CART5_EPP": "foro",
+  "CBHOME": "foro",
+  "CENEVAL26": "foro",
+  "CRP26TV": "foro",
+  "DACRM26": "cuponera",
+  "ECO_20": "Samsung",
+  "ECO_25": "Samsung",
+  "ECO_30": "Samsung",
+  "ECO_CLUB25": "cuponera",
+  "ECO_CLUB30": "cuponera",
+  "EPP10_NOV": "foro",
+  "EPPLIVESEM": "foro",
+  "EPPMX_QUINCENA": "foro",
+  "EXTRA01": "cuponera",
+  "EXTRA5": "cuponera",
+  "FLASHBP25": "foro",
+  "FOLD8_20CLUB": "foro",
+  "FOLD8_25CLUB": "cuponera",
+  "GALAXYMP": "cuponera",
+  "HS26_ECO": "Samsung",
+  "KIA_ECOSAMSUNG": "cuponera",
+  "KUESKINUEVO": "cuponera",
+  "LIVESEM": "cuponera",
+  "MEMHOME": "foro",
+  "MOMCLUB_15": "cuponera",
+  "NEWTV26": "cuponera",
+  "PRO-15": "Samsung",
+  "PRO-20": "Samsung",
+  "PRO-25": "cuponera",
+  "PRO-5": "Samsung",
+  "S26CLUB_NOV": "foro",
+  "S26U-CLUBMAMA": "cuponera",
+  "WINDC_600": "cuponera"
  },
  "cupones_reprobados": {
   "fold8|AFIHOME": 1795663317,
+  "fold8|BARRAS-25": 1795669189,
+  "fold8|BEFLIVESEM": 1795669189,
   "fold8|BF26_10": 1795663317,
   "fold8|BF26_5": 1795663317,
+  "fold8|BFINMP": 1795669189,
+  "fold8|BFPLUS30": 1795669189,
+  "fold8|BFPLUS40": 1795669189,
+  "fold8|BFPLUS45": 1795669189,
+  "fold8|BPMAS25": 1795669189,
   "fold8|CARRITO5": 1795663317,
   "fold8|CART5_EPP": 1795663317,
   "fold8|CBHOME": 1795663317,
   "fold8|CENEVAL26": 1795663317,
   "fold8|CLUB_FOLD30": 1795663317,
   "fold8|CRP26TV": 1795663317,
+  "fold8|DACRM26": 1795669189,
   "fold8|ECO_20": 1795663317,
   "fold8|ECO_25": 1795663317,
   "fold8|ECO_30": 1795663317,
@@ -144,50 +246,83 @@
   "fold8|EPP1O_NOV": 1795663317,
   "fold8|EPPLIVESEM": 1795663317,
   "fold8|EPPMX_QUINCENA": 1795663317,
+  "fold8|EXTRA01": 1795669189,
+  "fold8|EXTRA5": 1795669189,
   "fold8|FLASHBP25": 1795663317,
   "fold8|FOLD8MEMBER_20": 1795663317,
   "fold8|FOLD8U_20CLUB": 1795663317,
   "fold8|FOLD8U_35CLUB": 1795663317,
+  "fold8|GALAXYMP": 1795669189,
+  "fold8|HS26_ECO": 1795669189,
+  "fold8|KIA_ECOSAMSUNG": 1795669189,
+  "fold8|KUESKINUEVO": 1795669189,
   "fold8|LIVESEM": 1795663317,
   "fold8|MEMBER_NOV15": 1795663317,
   "fold8|MEMHOME": 1795663317,
+  "fold8|MOMCLUB_15": 1795669189,
+  "fold8|NEWTV26": 1795669189,
   "fold8|PRO-15": 1795663317,
   "fold8|PRO-20": 1795663317,
+  "fold8|PRO-25": 1795669189,
+  "fold8|PRO-5": 1795669189,
   "fold8|PROMODESC_FOLD8U": 1795663317,
   "fold8|S26CLUB_NOV": 1795663317,
   "fold8|S26CRP_NOV": 1795663317,
+  "fold8|S26U-CLUBMAMA": 1795669189,
   "fold8|WINDC_600": 1795663317
  },
  "cupones_ultima_busqueda": {
-  "cuando": "2026-11-25 22:41",
-  "fuentes_leidas": 12,
+  "cuando": "2026-11-25 22:57",
+  "fuentes_leidas": 23,
   "hallados": {
    "AFIHOME": "foro",
+   "BARRAS-25": "cuponera",
+   "BEFLIVESEM": "cuponera",
    "BF1000": "Samsung",
    "BF26_5": "foro",
-   "BFLIVESEM": "foro",
+   "BFINMP": "cuponera",
+   "BFLIVESEM": "Samsung",
+   "BFPLUS30": "cuponera",
+   "BFPLUS40": "cuponera",
+   "BFPLUS45": "cuponera",
+   "BPMAS25": "cuponera",
    "CARRITO5": "foro",
    "CART5_EPP": "foro",
    "CBHOME": "foro",
    "CENEVAL26": "foro",
    "CRP26TV": "foro",
+   "DACRM26": "cuponera",
    "ECO_20": "Samsung",
    "ECO_25": "Samsung",
    "ECO_30": "Samsung",
+   "ECO_CLUB25": "cuponera",
+   "ECO_CLUB30": "cuponera",
    "EPP10_NOV": "foro",
    "EPPLIVESEM": "foro",
    "EPPMX_QUINCENA": "foro",
+   "EXTRA01": "cuponera",
+   "EXTRA5": "cuponera",
    "FLASHBP25": "foro",
    "FOLD8_20CLUB": "foro",
+   "FOLD8_25CLUB": "cuponera",
+   "GALAXYMP": "cuponera",
+   "HS26_ECO": "Samsung",
+   "KIA_ECOSAMSUNG": "cuponera",
+   "KUESKINUEVO": "cuponera",
+   "LIVESEM": "cuponera",
    "MEMHOME": "foro",
+   "MOMCLUB_15": "cuponera",
+   "NEWTV26": "cuponera",
    "PRO-15": "Samsung",
-   "PRO-20": "foro",
-   "S26CLUB_NOV": "foro"
+   "PRO-20": "Samsung",
+   "PRO-25": "cuponera",
+   "PRO-5": "Samsung",
+   "S26CLUB_NOV": "foro",
+   "S26U-CLUBMAMA": "cuponera",
+   "WINDC_600": "cuponera"
   }
  },
  "diag_amazon": [
-  "11-25 06:22 busqueda 503 de 1669 bytes, reintento ok",
-  "11-25 06:38 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 06:39 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 06:55 busqueda 200 de 2319 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 06:57 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
@@ -245,18 +380,1255 @@
   "11-25 22:26 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
   "11-25 22:27 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-25 22:43 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
-  "11-25 22:44 busqueda 200 de 2283 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok"
+  "11-25 22:44 busqueda 200 de 2283 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
+  "11-25 23:00 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B0H76XJTG2 ok; ficha B0H773GGWG ok; ficha B0H773PLWP ok; ficha B0H779SQRZ ok; ficha B0H92G9GNW ok",
+  "11-25 23:00 busqueda 503 de 1669 bytes, reintento ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
   "Amazon": 0,
+  "Chedraui": 0,
   "Costco": 0,
   "Cupones": 0,
+  "Cyberpuerta": 0,
   "Elektra": 0,
   "Foro": 0,
   "Gameplanet": 0,
   "Liverpool": 0,
-  "Samsung": 0
+  "Samsung": 0,
+  "Soriana": 0
+ },
+ "promos": {
+  "cerradas": {
+   "error": "",
+   "leido": "2026-11-25 22:57",
+   "precios": {
+    "empleados_mx": {
+     "SM-F976BZKMLTM": {
+      "lista": 53499.0,
+      "precio": 40124.0,
+      "sku_pagina": "SM-F976BZKMLTM",
+      "url": "https://www.samsung.com/mx/multistore/empleados_mx/pd.SM-F976BZKMLTM/"
+     }
+    },
+    "estudiantes_mx": {
+     "SM-F976BZKMLTM": {
+      "lista": 53499.0,
+      "precio": 35999.0,
+      "sku_pagina": "SM-F976BZKMLTM",
+      "url": "https://www.samsung.com/mx/multistore/estudiantes_mx/pd.SM-F976BZKMLTM/"
+     }
+    }
+   },
+   "precios_leido": "2026-11-25 22:57",
+   "variantes": {
+    "SM-F971BZKMLTM": [
+     "fold8",
+     "normal-512"
+    ],
+    "SM-F976BZKMLTM": [
+     "fold8",
+     "ultra-512"
+    ],
+    "SM-F976BZKVLTM": [
+     "fold8",
+     "ultra-1tb"
+    ]
+   }
+  },
+  "codigos": {
+   "Amazon": {
+    "ACCESSBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "AFIRMEBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "AFIRMEPB26": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "AFIRMESV26": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "BBVABF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "BNMXBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "BNRTBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "DEBITOSAN": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "HSBCPBDD26": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "INVEXBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "INVEXPB26": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "KUESKI30": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "KUESKIBF150": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "KUESKIBUENFIN": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "KUESKIDAYS": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "MIFELBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "MIFELPB26": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "PRIME200": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "PRIMERA1126": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "SANTBF26": {
+     "fuente": "https://www.cupondescuento.com.mx/amazon.com.mx",
+     "visto": "2026-11-25"
+    },
+    "primera1126": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/8?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    }
+   },
+   "Costco": {
+    "APPMP12": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "MSF1A": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "PFAPM": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS132": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS169": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS170": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS171": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS172": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    },
+    "VS174": {
+     "fuente": "https://www.cupondescuento.com.mx/costco.com.mx",
+     "visto": "2026-11-25"
+    }
+   },
+   "Liverpool": {
+    "GPIAGUINOV24": {
+     "fuente": "https://www.cupondescuento.com.mx/liverpool.com.mx",
+     "visto": "2026-11-25"
+    },
+    "H10LVHS25": {
+     "fuente": "https://api.couponstudio.com.br/cp/page/article/122?auth=db29072f6b1993aaa074f9046e5d2567e713ed6cbd7da04e65fa843c89afbeaa&ctx=app",
+     "visto": "2026-11-25"
+    },
+    "LIVERPOOL500": {
+     "fuente": "https://www.cupondescuento.com.mx/liverpool.com.mx",
+     "visto": "2026-11-25"
+    },
+    "POCKETMENOS5": {
+     "fuente": "https://www.cupondescuento.com.mx/liverpool.com.mx",
+     "visto": "2026-11-25"
+    }
+   }
+  },
+  "costco": {
+   "error": "",
+   "leido": "2026-11-25 22:57",
+   "productos": {
+    "648321": {
+     "filas": [
+      {
+       "banco": "forma de pago sin nombre",
+       "beneficio": "promocion de pago VS178 sin cifra publica",
+       "codigo": "VS178",
+       "meses": [],
+       "minimo": null,
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": null,
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-Ultra-8-512GB-Grafito/p/648321",
+       "valor": null,
+       "vigencia": "2026-11-25 a 2026-12-12",
+       "vigente": true
+      }
+     ],
+     "leido": "2026-11-25 22:57"
+    },
+    "648324": {
+     "filas": [
+      {
+       "banco": "PayPal",
+       "beneficio": "Ahorros Paypal de $6,000 (codigo PP177, solo pagando con PayPal)",
+       "codigo": "PP177",
+       "meses": [],
+       "minimo": null,
+       "pide": "pide elegir PayPal al pagar",
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": "$",
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
+       "valor": 6000.0,
+       "vigencia": "2026-11-23 a 2026-12-01",
+       "vigente": true
+      },
+      {
+       "banco": "forma de pago sin nombre",
+       "beneficio": "promocion de pago VS178 sin cifra publica",
+       "codigo": "VS178",
+       "meses": [],
+       "minimo": null,
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": null,
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Grafito/p/648324",
+       "valor": null,
+       "vigencia": "2026-11-25 a 2026-12-12",
+       "vigente": true
+      }
+     ],
+     "leido": "2026-11-25 22:57"
+    },
+    "648325": {
+     "filas": [
+      {
+       "banco": "PayPal",
+       "beneficio": "Ahorros Paypal de $6,000 (codigo PP177, solo pagando con PayPal)",
+       "codigo": "PP177",
+       "meses": [],
+       "minimo": null,
+       "pide": "pide elegir PayPal al pagar",
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": "$",
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Lavanda/p/648325",
+       "valor": 6000.0,
+       "vigencia": "2026-11-23 a 2026-12-01",
+       "vigente": true
+      },
+      {
+       "banco": "forma de pago sin nombre",
+       "beneficio": "promocion de pago VS178 sin cifra publica",
+       "codigo": "VS178",
+       "meses": [],
+       "minimo": null,
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": null,
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Lavanda/p/648325",
+       "valor": null,
+       "vigencia": "2026-11-25 a 2026-12-12",
+       "vigente": true
+      }
+     ],
+     "leido": "2026-11-25 22:57"
+    },
+    "648326": {
+     "filas": [
+      {
+       "banco": "PayPal",
+       "beneficio": "Ahorros Paypal de $6,000 (codigo PP177, solo pagando con PayPal)",
+       "codigo": "PP177",
+       "meses": [],
+       "minimo": null,
+       "pide": "pide elegir PayPal al pagar",
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": "$",
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Crema/p/648326",
+       "valor": 6000.0,
+       "vigencia": "2026-11-23 a 2026-12-01",
+       "vigente": true
+      },
+      {
+       "banco": "forma de pago sin nombre",
+       "beneficio": "promocion de pago VS178 sin cifra publica",
+       "codigo": "VS178",
+       "meses": [],
+       "minimo": null,
+       "tipo": "descuento",
+       "tope": null,
+       "unidad": null,
+       "url": "https://www.costco.com.mx/Electronicos/Celulares-y-Smart-Watch/Celulares/Samsung-Galaxy-Z-Fold-8-512GB-Crema/p/648326",
+       "valor": null,
+       "vigencia": "2026-11-25 a 2026-12-12",
+       "vigente": true
+      }
+     ],
+     "leido": "2026-11-25 22:57"
+    }
+   }
+  },
+  "costco_pares": {
+   "648324": [
+    "PP177",
+    6000.0
+   ],
+   "648325": [
+    "PP177",
+    6000.0
+   ],
+   "648326": [
+    "PP177",
+    6000.0
+   ]
+  },
+  "cuponeras_leido": "2026-11-25 22:57"
+ },
+ "promos_avisado": {
+  "Costco|fold8|normal-512|PayPal|PP177": {
+   "fecha": "2026-11-25",
+   "precio": 31999.0
+  }
+ },
+ "promos_bancos": {
+  "tiendas": {
+   "Amazon": {
+    "error": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins respondio 503 de 1669 bytes",
+    "filas": [],
+    "leido": "2026-11-25 22:57"
+   },
+   "BBVA": {
+    "error": "",
+    "filas": [
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 13, 15, 18, 20 y 24 MSI). Aplica en tienda física.",
+      "comercio": "Bodega Aurrera",
+      "meses": [
+       12,
+       13,
+       15,
+       18,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 13, 15, 18, 20 y 24 MSI). Aplica en tienda física.",
+      "comercio": "Walmart Supercenter",
+      "meses": [
+       12,
+       13,
+       15,
+       18,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 13, 15, 18, 20 y 24 MSI). Aplica en tienda física.",
+      "comercio": "sam’s club",
+      "meses": [
+       12,
+       13,
+       15,
+       18,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 y 15 MSI). Aplica en tienda física y en línea",
+      "comercio": "Chedraui",
+      "meses": [
+       13,
+       15
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 y 15 MSI). Aplica en tienda física y en línea",
+      "comercio": "Selecto Chedraui",
+      "meses": [
+       13,
+       15
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 18, 20 y 24 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Liverpool",
+      "meses": [
+       13,
+       15,
+       18,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": "Liverpool",
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $8,500, 12 MSI). Aplica en tienda física y en línea.",
+      "comercio": "The Home Depot",
+      "meses": [
+       12
+      ],
+      "minimo": 8500.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Suburbia",
+      "meses": [
+       12
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "GAP",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Banana Republic",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Fabletics",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Dockers",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 y 20 MSI). Aplica en tienda física.",
+      "comercio": "Livestore",
+      "meses": [
+       12,
+       20
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Williams Sonoma",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Pottery Barn",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Pottery Barn Kids",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "West Elm",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Dupuis",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda física y en línea.",
+      "comercio": "Toys R Us",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 18 y 20 MSI). Aplica en tienda física.",
+      "comercio": "Sears",
+      "meses": [
+       13,
+       15,
+       18,
+       20
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 18 y 20 MSI). Aplica en tienda en línea.",
+      "comercio": "Sanborns",
+      "meses": [
+       13,
+       15,
+       18,
+       20
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 15 y 18 MSI). Aplica en tienda en línea",
+      "comercio": "Mercado Libre",
+      "meses": [
+       12,
+       15,
+       18
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 15, 18 y 24 MSI). Aplica en tienda en línea",
+      "comercio": "Mercado Pago",
+      "meses": [
+       12,
+       15,
+       18,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 y 15 MSI). Aplica en tienda en línea",
+      "comercio": "Amazon",
+      "meses": [
+       12,
+       15
+      ],
+      "minimo": 5000.0,
+      "tienda": "Amazon",
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 20 y 24 MSI). Aplica en tienda en línea",
+      "comercio": "Bodega Aurrera en Línea",
+      "meses": [
+       13,
+       15,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 20 y 24 MSI). Aplica en tienda en línea",
+      "comercio": "walmart.com.mx",
+      "meses": [
+       13,
+       15,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13, 15, 20 y 24 MSI). Aplica en tienda en línea",
+      "comercio": "sams.com.mx",
+      "meses": [
+       13,
+       15,
+       20,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 13 MSI). Aplica en tienda en línea",
+      "comercio": "Telcel",
+      "meses": [
+       13
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 MSI). ",
+      "comercio": "Viva",
+      "meses": [
+       12
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $8,000, 12 meses (Pagos Diferidos)). ",
+      "comercio": "Aeroméxico",
+      "meses": [
+       12
+      ],
+      "minimo": 8000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 18 y 24 MSI). ",
+      "comercio": "Best Day",
+      "meses": [
+       12,
+       18,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 18 y 24 MSI). ",
+      "comercio": "Despegar",
+      "meses": [
+       12,
+       18,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12, 18 y 24 MSI). ",
+      "comercio": "PriceTravel",
+      "meses": [
+       12,
+       18,
+       24
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 meses (Pagos Diferidos)). ",
+      "comercio": "Volaris",
+      "meses": [
+       12
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "bonificación al comprar a MSI (monto mínimo $5,000, 12 MSI). ",
+      "comercio": "Expedia",
+      "meses": [
+       12
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": null,
+      "vigencia": "13 al 17 de noviembre de 2026",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Compra mínima de $5,000 a 12 y 15 MSI para obtener 15% (10+5%) de bonificación",
+      "codigo": "",
+      "comercio": "Mercado Libre",
+      "meses": [
+       12,
+       15
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": 2500.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 15.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Compra mínima de $6,000 a 12 y 18 MSI para obtener 20% de bonificación",
+      "codigo": "",
+      "comercio": "Walmart.com.mx",
+      "meses": [
+       12,
+       18
+      ],
+      "minimo": 6000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": 3000.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 20.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Compra mínima de $5,000 a 12 y 15 MSI para obtener 15% (10+5%) de bonificación",
+      "codigo": "",
+      "comercio": "Mercado Pago",
+      "meses": [
+       12,
+       15
+      ],
+      "minimo": 5000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": 2500.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 15.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Compra mínima de $6,000 a 12 y 18 MSI para obtener 20% de bonificación",
+      "codigo": "",
+      "comercio": "Bodega Aurrera en línea",
+      "meses": [
+       12,
+       18
+      ],
+      "minimo": 6000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": 3000.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 20.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Compra mínima de $6,000 a 12 y 18 MSI para obtener 20% de bonificación",
+      "codigo": "",
+      "comercio": "sam's club",
+      "meses": [
+       12,
+       18
+      ],
+      "minimo": 6000.0,
+      "tienda": null,
+      "tipo": "bonificacion",
+      "tope": 3000.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 20.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Cupón del 10% de descuento al comprar $4,500 a 3, 6, 9, 12 y 15 MSI. Código BBVABF26",
+      "codigo": "BBVABF26",
+      "comercio": "Amazon",
+      "meses": [
+       3,
+       6,
+       9,
+       12,
+       15
+      ],
+      "minimo": 4500.0,
+      "tienda": "Amazon",
+      "tipo": "descuento",
+      "tope": 500.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 10.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Cupón del 10% de descuento al comprar $2,000 a 3, 6 y 9 MSI",
+      "codigo": "",
+      "comercio": "Mercado Pago",
+      "meses": [
+       3,
+       6,
+       9
+      ],
+      "minimo": 2000.0,
+      "tienda": null,
+      "tipo": "descuento",
+      "tope": 1000.0,
+      "unidad": "%",
+      "url": "https://www.bbva.mx/buen-fin",
+      "valor": 10.0,
+      "vigencia": "17 de noviembre",
+      "vigente": false
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "Modo Black: estrenas hoy y pagas hasta marzo 2027 a 3 MSI; inscripción en la App BBVA",
+      "comercio": "cualquiera (compras a una exhibición)",
+      "hasta": "marzo 2027",
+      "meses": [
+       3
+      ],
+      "minimo": 3500.0,
+      "modo_black": true,
+      "tienda": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.bbva.mx/black-friday.html",
+      "valor": null,
+      "vigencia": "27 de noviembre",
+      "vigente": false
+     }
+    ],
+    "leido": "2026-11-25 22:57"
+   },
+   "Liverpool": {
+    "error": "",
+    "filas": [],
+    "leido": "2026-11-25 22:57"
+   },
+   "Samsung": {
+    "error": "",
+    "filas": [
+     {
+      "banco": "BBVA",
+      "beneficio": "hasta 24 MSI con tarjetas participantes como BBVA, Citibanamex, Banorte, HSBC y más",
+      "meses": [
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.samsung.com/mx/offer/deals/",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "Banorte",
+      "beneficio": "hasta 24 MSI con tarjetas participantes como BBVA, Citibanamex, Banorte, HSBC y más",
+      "meses": [
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.samsung.com/mx/offer/deals/",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "Banamex",
+      "beneficio": "hasta 24 MSI con tarjetas participantes como BBVA, Citibanamex, Banorte, HSBC y más",
+      "meses": [
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.samsung.com/mx/offer/deals/",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "HSBC",
+      "beneficio": "hasta 24 MSI con tarjetas participantes como BBVA, Citibanamex, Banorte, HSBC y más",
+      "meses": [
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.samsung.com/mx/offer/deals/",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "tarjetas participantes",
+      "beneficio": "Hasta 24 MSI con tarjetas bancarias participantes, combinables con Galaxy Canje y Samsung Rewards",
+      "meses": [
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.samsung.com/mx/offer/deals/",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     }
+    ],
+    "leido": "2026-11-25 22:57"
+   }
+  }
  },
  "sembrado": true,
  "ultimo_error": {},
