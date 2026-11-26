@@ -140,12 +140,14 @@ def _correr(v):
     # F4. PS5 Pro de Liverpool sin la palabra "Pro" (2 TB): no se le pega "Digital" y la variante la rechaza
     with open(os.path.join(RESP, "liv_pdp_1186785807_2tb_alterada.html"), encoding="utf-8") as f:
         fi = v.ficha_liverpool_texto(f.read(), "1186785807")
-    assert "igital" not in fi["titulo"] and "2 TB" in fi["titulo"], fi["titulo"]
-    assert v.variante(ps, fi["titulo"]) is None
+    tit = v.titulo_con_atributos(ps, "Liverpool", fi["titulo"], fi["atributos"])   # reglas de productos.json (ps5)
+    assert "igital" not in tit and "2 TB" in tit, tit
+    assert v.variante(ps, tit) is None
     assert v.variante(ps, "Consola PS5 Digital 2 TB") is None and v.variante(ps, "Consola PS5 Digital 825 GB")["id"] == "digital"
-    assert v.consola_de_ficha({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "2 TB"}) == ""
-    assert v.consola_de_ficha({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "825 GB",
-                               "Capacidad de memoria RAM": "2 TB"}) == " Digital (sin lector de disco)"
+    agrega = lambda attrs: v.titulo_con_atributos(ps, "Liverpool", "X", attrs)[1:]
+    assert agrega({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "2 TB"}) == ""
+    assert agrega({"Tipo de consola": "Fija", "Lector integrado": "Sin lector", "Disco duro": "825 GB",
+                   "Capacidad de memoria RAM": "2 TB"}) == " Digital (sin lector de disco)"
 
     # P1. Una ficha rara (precio "8,499.00") no tumba los avisos; la oferta buena de detras sale igual
     v.VENDEDOR_OFICIAL["TiendaX"] = r"^\s*tiendax\s*$"

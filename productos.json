@@ -75,6 +75,16 @@
    "variantes": [
     {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "ninguna": ["\\b2\\s*tb\\b"], "lista": 12499}
    ],
+   "_ficha_atributos": "Liverpool titula su PS5 Digital sin decir digital ('Consola PS5 de 825 GB edicion bundle'); su ficha lo dice. Medido el 25 nov 2026: 1186785807 Tipo de consola 'Fija' y Lector integrado 'Sin lector' (Digital); 1186785793 'Fija' y 'CD' (con lector); 1156059630, el PlayStation Portal, 'Fija/portatil' (no se anade nada). La PS5 Pro tambien es fija y sin lector: con 2 TB en el titulo o en un atributo de capacidad no se anade Digital (revisor R1-F4).",
+   "ficha_atributos": {
+    "Liverpool": [
+     {"si": {"Tipo de consola": "^\\s*fija\\s*$", "Lector integrado": "^\\s*sin lector\\s*$"},
+      "no_si": "\\b2\\s*tb\\b", "no_si_atributos": "^(?!.*(expansi|ram\\b)).*(disco\\s+duro|capacidad|almacenamiento)",
+      "agrega": "Digital (sin lector de disco)"},
+     {"si": {"Tipo de consola": "^\\s*fija\\s*$", "Lector integrado": "^(?!\\s*sin lector\\s*$).*\\S"},
+      "agrega": "con lector de disco"}
+    ]
+   },
    "tiendas": {
     "Amazon": {"consultas": ["playstation+5+digital"]},
     "Costco": {"consulta": "playstation 5"},
