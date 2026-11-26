@@ -44,7 +44,9 @@ HORAS_SIN_LEER = {"Amazon": 6, "Gameplanet": 2}
 HORAS_SIN_LEER_DEFECTO = 2
 # Nunca interesan: accesorios, usados, importados declarados en el titulo.
 EXCLUIR = (r"\b(funda|mica|protector|case|carcasa|cargador|reacondicionad[oa]|seminuevo|usado|refurbished|open\s*box|renewed|"
-           r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version)\b")
+           r"importad[oa]|versi[oó]n\s+(internacional|global|china|usa)|international|global\s+version|"
+           # equipo no nuevo o que no es el equipo (revisor R3-H4 y H5, 25 nov 2026)
+           r"caja\s+abierta|exhibici[oó]n|empaque\s+da[nñ]ado|preventa|garant[ií]a\s+extendida)\b")
 # Quien cuenta como vendedor oficial en cada tienda cuando el producto pide "solo_vendedor_oficial".
 # {marca} se cambia por la marca del producto. Tienda que no aparece aqui = NO oficial (desde el 25 nov 2026, revisor
 # R1-F3: una tienda nueva sin su regla dejaba pasar a cualquier revendedor); toda tienda que vende ella misma va aqui.
@@ -1322,6 +1324,69 @@ def publicar_aviso(av, avisado, seco, sin_avisos, abrir=None, niveles=None):
         return False
 
 
+LECTORES_NUEVOS_ERROR = ""      # por que no se cargaron los lectores nuevos (lo usa main() al decir "lector no cargado")
+_ENGANCHANDO = []
+
+
+def _pruebas_lectores_nuevos(v):
+    """correr(v) de pruebas\\casos_lectores_nuevos.py, sin red ni reloj; si la carpeta o el archivo faltan, no hace nada."""
+    ruta = os.path.join(AQUI, "pruebas", "casos_lectores_nuevos.py")
+    if not os.path.exists(ruta):
+        return
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("prueba_casos_lectores_nuevos", ruta)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    def sin_red(*a, **k):
+        raise AssertionError("una prueba de lectores nuevos quiso usar la red o dormir")
+    guardados = (v.pedir, urllib.request.urlopen, time.sleep)
+    try:
+        v.pedir = urllib.request.urlopen = time.sleep = sin_red
+        mod.correr(v)
+    finally:
+        v.pedir, urllib.request.urlopen, time.sleep = guardados
+
+
+def enganchar_lectores_nuevos(prueba=None):
+    """Suma los lectores de lectores_nuevos.py (Soriana, Cyberpuerta, Chedraui) y corre sus pruebas. Si el archivo falta,
+    nada; si registrar truena o sus pruebas fallan, deja LECTORES, VENDEDOR_OFICIAL y FICHAS como estaban, lo dice en
+    un renglon y el vigia sigue con sus lectores de siempre (main() dira "lector no cargado" de esas tiendas)."""
+    global LECTORES_NUEVOS_ERROR
+    if _ENGANCHANDO:           # las pruebas prueban este mismo enganche: sin recursion
+        return
+    yo = sys.modules[__name__]
+    antes = [(d, dict(d)) for d in (LECTORES, VENDEDOR_OFICIAL, getattr(yo, "FICHAS", None)) if isinstance(d, dict)]
+    etapa = "registrar"
+    _ENGANCHANDO.append(1)
+    try:
+        import lectores_nuevos
+        lectores_nuevos.registrar(yo)
+        etapa = "pruebas"
+        (prueba or _pruebas_lectores_nuevos)(yo)
+        LECTORES_NUEVOS_ERROR = ""
+    except Exception as ex:
+        if etapa == "registrar" and isinstance(ex, ModuleNotFoundError) and ex.name == "lectores_nuevos":
+            LECTORES_NUEVOS_ERROR = "no esta lectores_nuevos.py"
+            return
+        for d, copia in antes:
+            d.clear()
+            d.update(copia)
+        LECTORES_NUEVOS_ERROR = ("sus pruebas fallan: " if etapa == "pruebas" else "") + "%s: %s" % (type(ex).__name__, ex)
+        print("lectores nuevos apagados: %s" % LECTORES_NUEVOS_ERROR[:300])
+    finally:
+        _ENGANCHANDO.clear()
+
+
+def tiendas_sin_lector(prods):
+    """Tiendas configuradas en algun producto que no tienen lector cargado (revisor R3-H6): main() las pasa por fuente()
+    como falla, para que corra el aviso de horas sin leer de siempre en vez de desaparecer en silencio."""
+    return sorted({t for p in prods for t in p["tiendas"] if t not in LECTORES})
+
+
+enganchar_lectores_nuevos()
+
+
 # ------------------------------------------------------------------------------- foro (respaldo)
 def a_numero(txt):
     m = re.search(r"\$?\s*([\d][\d,\.]*)", txt or "")
@@ -1912,6 +1977,10 @@ def selftest():
         for nombre in sorted(os.listdir(carpeta)) if os.path.isdir(carpeta) else []:
             if not (nombre.startswith("casos_") and nombre.endswith(".py")):
                 continue
+            # las pruebas de lectores nuevos ya corren al arrancar y, si fallan, apagan solo esos lectores; en la nube
+            # (SELFTEST_SOLO_NUCLEO=1) no se dejan aqui, porque un fallo de este paso apaga todos los avisos de precio
+            if nombre == "casos_lectores_nuevos.py" and os.environ.get("SELFTEST_SOLO_NUCLEO") == "1":
+                continue
             spec = importlib.util.spec_from_file_location("prueba_" + nombre[:-3], os.path.join(carpeta, nombre))
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
@@ -2020,6 +2089,11 @@ def main():
         if res is not None:
             leidas.add(tienda)
             ofertas += res
+    for tienda in tiendas_sin_lector(prods):   # configurada y sin lector: falla visible, con su aviso a las horas
+
+        def sin_lector(tienda=tienda):
+            raise RuntimeError("lector no cargado: %s" % (LECTORES_NUEVOS_ERROR or "ninguna funcion lee %s" % tienda))
+        fuente(tienda, sin_lector)
 
     mejores = {}
     for o in ofertas:

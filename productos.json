@@ -14,7 +14,9 @@
     "_regla": "Saul 2026-11-19: deben ser ventas con garantia y de samsung mx, no me sirve un tercero que vende importados",
     "solo_vendedor_oficial": true,
     "permite_importados": false,
-    "importacion_estimada": 0.2
+    "importacion_estimada": 0.2,
+    "_clave_region": "Revisor R3-H3 y director, 25 nov 2026: Cyberpuerta vende Fold8 con claves de otra region (F971BLVMGTO, SM-F971BZKMLEM). Forma derivada de los sku reales de Cyberpuerta y de los de Samsung Mexico de este archivo: F + 3 cifras + B + 3 letras de color y memoria + 3 de region; Mexico = LTM. Clave de otra region = importado (fuera); clave sin region (SM-F971B/512/VA) = entra con nota de confirmar",
+    "clave_region": {"Cyberpuerta": {"forma": "^(?:SM-)?F\\d{3}B[A-Z]{3}([A-Z]{3})$", "vale": "^LTM$"}}
    },
    "variantes": [
     {"id": "ultra-1tb", "nombre": "Fold8 Ultra 1 TB", "todas": ["ultra", "\\b1\\s*tb\\b|1024\\s*gb"], "lista": 63499},
@@ -44,7 +46,9 @@
     "Amazon": {"consultas": ["samsung+galaxy+z+fold8+ultra", "samsung+galaxy+z+fold8+512"]},
     "Costco": {"consulta": "galaxy z fold"},
     "Elektra": {"consulta": "galaxy z fold8"},
-    "Liverpool": {"consulta": "galaxy+z+fold8"}
+    "Liverpool": {"consulta": "galaxy+z+fold8"},
+    "Soriana": {"consulta": "galaxy z fold8"},
+    "Cyberpuerta": {"consulta": "galaxy z fold8"}
    },
    "foro": {
     "feeds": ["grupo/smartphones-samsung", "grupo/samsung", "grupo/celulares", "tendencias", "todas"]
@@ -80,7 +84,10 @@
     "Costco": {"consulta": "playstation 5"},
     "Elektra": {"consulta": "consola playstation 5"},
     "Liverpool": {"consulta": "playstation+5"},
-    "Gameplanet": {"consulta": "consola playstation 5"}
+    "Gameplanet": {"consulta": "consola playstation 5"},
+    "Soriana": {"consulta": "playstation 5 digital"},
+    "Cyberpuerta": {"consulta": "playstation 5 digital"},
+    "Chedraui": {"consulta": "consola playstation 5 digital"}
    },
    "foro": {
     "feeds": ["grupo/ps5", "grupo/playstation", "grupo/consolas", "grupo/videojuegos", "tendencias", "todas"]

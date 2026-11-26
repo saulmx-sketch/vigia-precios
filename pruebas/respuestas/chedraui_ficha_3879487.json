@@ -1,0 +1,29 @@
+{
+ "_origen": "Chedraui, respuesta real del 25 nov 2026, recortada a los campos que lee el lector: https://www.chedraui.com.mx/api/catalog_system/pub/products/search?fq=productId:3879487",
+ "respuesta": [
+  {
+   "productId": "3879487",
+   "productName": "Bundle Consola Playstation 5 Edición Digital de 825 Gb: Astro Bot y Gran Turismo 7",
+   "link": "https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487/p",
+   "items": [
+    {
+     "itemId": "3879487",
+     "nameComplete": "Bundle Consola Playstation 5 Edición Digital de 825 Gb: Astro Bot y Gran Turismo 7",
+     "sellers": [
+      {
+       "sellerId": "1",
+       "sellerName": "Chedraui",
+       "sellerDefault": true,
+       "commertialOffer": {
+        "Price": 12499.0,
+        "ListPrice": 12499.0,
+        "AvailableQuantity": 0,
+        "IsAvailable": false
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
