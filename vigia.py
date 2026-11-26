@@ -271,7 +271,12 @@ def var_por_id(prod, vid):
 def cargar_prospectiva():
     """Topes y cifras de referencia que prospectiva.py calcula con el historial de precios (prospectiva.json).
     Devuelve {} si el modulo o el archivo faltan, el archivo vencio o no pasa su validacion: entonces topes()
-    usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia."""
+    usa las fracciones de productos.json, como siempre. Nada de aqui puede tumbar al vigia.
+    SIN_PROSPECTIVA=1 (vigia.yml lo pone si fallan las pruebas de prospectiva): {} sin importar nada (pendiente de A,
+    26 nov: la variable existia en vigia.yml y ningun .py la leia, asi que el aviso "esa parte queda apagada" mentia)."""
+    if os.environ.get("SIN_PROSPECTIVA", "").lower() in ("1", "true", "yes"):
+        print("   prospectiva apagada (SIN_PROSPECTIVA): topes por fracciones", file=sys.stderr)
+        return {}
     try:
         sys.dont_write_bytecode = True   # sin __pycache__: el paso que guarda el estado en la nube hace "git add -A"
         import prospectiva
@@ -311,6 +316,8 @@ def nivel(precio, prod, var):
 def razon(precio, prod, var, hoy=None):
     """Una o dos frases en lego de por que ese precio es bueno o no (minimo visto con garantia, lo normal del
     mes, lo que se espera en la siguiente temporada). Cadena vacia si no hay datos; nunca lanza excepcion."""
+    if os.environ.get("SIN_PROSPECTIVA", "").lower() in ("1", "true", "yes"):   # sus pruebas fallaron: apagada
+        return ""
     try:
         import prospectiva
         return prospectiva.razon(precio, prospectiva_de(prod, var), hoy) or ""
@@ -607,10 +614,15 @@ def leer_samsung(prod, cfg, estado):
             base, final, buenos, fin, prob, solos = samsung_carrito(sku, cupones)
             probados.update(prob)
             sirven.update(solos)
+            # P5 de la linea B (26 nov): si el tope de tiempo corto la prueba, quedaron codigos sin probar y el precio
+            # puede estar arriba del real; la nota lo dice con "cupones sin probar", y asi promos no lo compara contra
+            # la tienda de estudiantes (daba "bajaria $4,000" cuando la rebaja real era 0)
+            cortada = len(prob) < len(cupones)
             nota = "; ".join(x for x in [
                 ("con cupones " + " + ".join(buenos)) if buenos else
                 "ninguno de %d cupones probados baja el precio" % len(prob),
                 "sin cupon ${:,.0f}".format(base) if buenos else "",
+                ("prueba cortada por tiempo: %d cupones sin probar" % (len(cupones) - len(prob))) if cortada else "",
                 ("promocion vigente hasta " + fin) if fin else "", nota] if x)
             precio = final
         except Exception as ex:

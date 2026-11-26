@@ -525,9 +525,15 @@ def precio_con_fila(precio, fila):
             baja = min(baja, float(fila["tope"]))
         if baja <= 0 or baja > precio * 0.5:   # E6/A2: una rebaja de mas de la mitad es lectura equivocada
             return None
+        if fila.get("tope_relativo") and baja > precio * float(fila["tope_relativo"]):
+            return None   # P5' (26 nov): cifra de categoria de Costco que pasa de su tope relativo: solo nota
         return round(precio - baja, 2)
     except (TypeError, ValueError):
         return None
+
+
+TOPE_CATEGORIA_COSTCO = 0.25   # P5' (26 nov): la cifra de la categoria ahorrosPaypalNNNN es de la tienda, no del articulo
+#                                (medida en un Fold8 de $44,999: 13 %); en un articulo barato daria rebajas de casi la mitad
 
 
 # ------------------------------------------------------------------------------- Samsung: tiendas cerradas
@@ -618,6 +624,7 @@ def costco_promos(texto_ficha, ahora=None, url=""):
         if cod == con_cifra:
             f = _fila(banco, "%s (codigo %s, solo pagando con %s)" % (monto[1], cod, banco), "descuento", url,
                       valor=monto[0], unidad="$", vigencia=vig)
+            f["tope_relativo"] = TOPE_CATEGORIA_COSTCO
         else:
             f = _fila(banco, "promocion de pago %s sin cifra publica" % cod, "descuento", url, vigencia=vig)
         f["codigo"] = cod
@@ -1355,6 +1362,10 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
             if vig is not True:
                 continue
             nuevo = precio_con_fila(precio, f)
+            if nuevo is None and f.get("tope_relativo") and f.get("valor"):
+                _anade(extras, o, "%s anuncia ahorro de ${:,.0f} al pagar con %s (%s); no se resta: pasa de la cuarta "
+                                  "parte del precio y puede no valer para este artículo".format(float(f["valor"]))
+                       % (tienda, f.get("banco"), f.get("codigo") or "?"))
             llave = (f.get("banco"), f.get("codigo") or "")
             if nuevo is not None and nuevo < precio - MARGEN and (llave not in por_banco or nuevo < por_banco[llave][0]):
                 por_banco[llave] = (nuevo, f)
@@ -1742,6 +1753,10 @@ def selftest():
     assert _repartir(_skus_cerradas(tres[:1]), 3) == ["A1", "A2", "A3"]
     assert _repartir(_skus_cerradas(tres), 9) == ["A1", "B1", "D1", "A2", "D2", "A3"]
     assert _que({"nombre": "Producto X"}) == "Producto X" and _que({}) == "el artículo"
+    # P5' (26 nov): la cifra de la categoria de Costco no pasa de la cuarta parte del precio del articulo
+    cat = {"tipo": "descuento", "valor": 6000, "unidad": "$", "tope_relativo": TOPE_CATEGORIA_COSTCO}
+    assert precio_con_fila(44999, cat) == 38999 and precio_con_fila(12499, cat) is None
+    assert precio_con_fila(12499, dict(cat, tope_relativo=None)) == 6499   # sin tope relativo, como antes
     reglas = {"FOLD8_20CLUB": ("pct", 20, "club"), "BFLIVESEM": ("pct", 10, "club"), "BF1000": ("fijo", 1000, ""),
               "LIVESEM": ("sube", 4000, ""), "CENTAVO": ("fijo", 0.5, "")}
     codigos = ["LIVESEM", "MUERTO", "BFLIVESEM", "BF1000", "FOLD8_20CLUB", "CENTAVO"]

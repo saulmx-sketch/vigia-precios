@@ -399,6 +399,20 @@ def _correr(v):
         v.FICHAS.pop("TiendaX", None)
         v.VENDEDOR_OFICIAL.pop("TiendaX", None)
 
+    # --- 12. (26 nov, P5 de B) carrito de Samsung cortado por tiempo: la nota dice "cupones sin probar" (promos no
+    # lo compara con la tienda de estudiantes); completo, no lo dice
+    carrito0 = v.samsung_carrito
+    try:
+        for probados, debe in ((["A"], True), (None, False)):   # None: probo todos los que recibio
+            v.samsung_carrito = lambda sku, cupones, p=probados: (43999.0, 43999.0, [], "", list(cupones if p is None else p), [])
+            v.pedir = Red([(r"searchapi\.samsung\.com/", "sam_catalogo.json")])
+            est = {"cupones_cosechados": {"A": "", "B": "", "C": ""}}
+            ofs = v.leer_samsung(fold, fold["tiendas"]["Samsung"], est)
+            assert ofs, "sin ofertas de Samsung"
+            assert all(("cupones sin probar" in o["nota"]) == debe for o in ofs), [(o["nota"], debe) for o in ofs]
+    finally:
+        v.samsung_carrito = carrito0
+
 
 if __name__ == "__main__":
     sys.path.insert(0, os.path.dirname(AQUI))
