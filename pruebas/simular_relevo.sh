@@ -7,7 +7,7 @@ trap 'rm -rf "$TMP"' EXIT
 chmod +x "$RAIZ/pruebas/gh_falso/gh" 2>/dev/null
 export PATH="$RAIZ/pruebas/gh_falso:$PATH"
 export GITHUB_REPOSITORY="falso/vigia-precios" GITHUB_REPOSITORY_OWNER="duenofalso"
-export ESPERA_REINTENTO=0 ESPERA_RECUENTO=0
+export ESPERA_REINTENTO=0 ESPERA_RECUENTO=0 ESPERA_AVISO=0
 TAB=$'\t'
 ULT="ultima=111${TAB}https://github.com/falso/vigia-precios/actions/runs/111${TAB}failure${TAB}2026-11-25T15:30:00Z"
 fallos=0
@@ -87,6 +87,23 @@ caso 16_planB_lanzo_tarde "$(printf 'cuentas=0 1\n%s' "$VISTA_OK")" 0 0 0 "la ca
 caso 17_planB_sin_cuenta_success "$(printf 'cuentas=x x x x x\n%s' "$VISTA_OK")" 0 0 0 "se asume cadena viva" TERMINO_ID=500
 # Si "gh run view" falla: sigue sin conclusion y cuenta normal.
 caso 18_planB_vista_falla "$(printf 'vista=x\ncuentas=1')" 0 0 0 "no se pudo leer la corrida 500" TERMINO_ID=500
+# Ronda 5, H4: sin hora ni liga el aviso lo dice con palabras (no la medianoche de hoy).
+caso 19_sin_hora_ni_liga "$(printf 'cuentas=0 0\nlanza=ok')" 0 1 1 "a una hora que GitHub no informó" \
+  TERMINO_ID=600 TERMINO_URL=https://github.com/falso/vigia-precios/actions/runs/600 TERMINO_CONCLUSION=failure TERMINO_EVENTO=workflow_dispatch
+for t in "la número 600, falló a una hora que GitHub no informó"; do
+  grep -Fq -- "$t" "$TMP/19_sin_hora_ni_liga/log" && echo "OK    19_sin_hora_ni_liga el aviso dice [$t]" \
+    || { echo "FALLA 19_sin_hora_ni_liga sin [$t]"; fallos=$((fallos+1)); }
+done
+grep -Fq -- "a las 18:00" "$TMP/19_sin_hora_ni_liga/log" && { echo "FALLA 19_sin_hora_ni_liga invento la hora 18:00"; fallos=$((fallos+1)); } \
+  || echo "OK    19_sin_hora_ni_liga no inventa la medianoche"
+# H4: plan B con "gh run view" fallido y sin ultima corrida: lo dice.
+caso 19b_sin_nada "$(printf 'vista=x\ncuentas=0 0\nlanza=ok\nultima=')" 0 1 1 "No pude saber cuál fue la última corrida" TERMINO_ID=500
+# H7: corrida no numerica = vacio; la cuenta usa 0 y no se llama "gh run view abc".
+caso 20_corrida_no_numerica "cuentas=1" 0 0 0 "no es un numero: se trata como vacio" "TERMINO_ID=12 abc"
+grep -Fq -- "select(.databaseId != 0)" "$TMP/20_corrida_no_numerica/log" && ! grep -q "run view" "$TMP/20_corrida_no_numerica/log" \
+  && echo "OK    20_corrida_no_numerica cuenta con 0 y sin run view" || { echo "FALLA 20_corrida_no_numerica"; fallos=$((fallos+1)); }
+# H6: un estado que no es active ni disabled_manually sigue como activo y lo imprime.
+caso 21_estado_inesperado "$(printf 'estado=disabled_inactivity\ncuentas=0 0\nlanza=ok\n%s' "$ULT")" 0 1 1 "estado inesperado del flujo vigia (\"disabled_inactivity\")"
 n=$(grep -c "^gh workflow run" "$TMP/13_lanzo_pese_al_500/log")
 [ "$n" = 1 ] && echo "OK    13_lanzo_pese_al_500 lanzo $n vez" || { echo "FALLA 13_lanzo_pese_al_500 lanzo $n veces (esperada 1)"; fallos=$((fallos+1)); }
 

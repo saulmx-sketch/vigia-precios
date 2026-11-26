@@ -19,15 +19,19 @@ permissions:
   actions: write
   issues: write
   contents: read
-concurrency:
-  group: relevo
-  cancel-in-progress: false
+# Concurrencia por trabajo, no por flujo: el "vigilar" de cada corrida tiene su propio grupo (no retiene ni
+# reemplaza al relevo por evento mientras pasa sus 13 min en "espera", ni a otro "vigilar"); los relevos por
+# evento comparten el suyo. Dos relevos a la vez no lanzan dos: relevo.sh vuelve a contar antes de cada intento.
 jobs:
   vigilar:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment: espera
-    timeout-minutes: 12
+    concurrency:
+      group: relevo-vigilar-${{ inputs.corrida || github.run_id }}
+      cancel-in-progress: false
+    # Peor caso medido por suma (ronda 5): ~555 s de esperas + ~30 llamadas a gh de hasta 25 s cada una.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Relanzar la cadena si quedo detenida (plan B)
@@ -38,9 +42,12 @@ jobs:
   relevo:
     if: github.event_name == 'workflow_run'
     runs-on: ubuntu-latest
-    # 12 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
+    concurrency:
+      group: relevo-evento
+      cancel-in-progress: false
+    # 15 y no 5: con GitHub fallando, cuentas + 45 s + 5 lanzamientos + aviso pasan de 5 minutos, y un
     # relevo cortado por tope no avisa a nadie.
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
       - name: Relanzar la cadena si quedo detenida
