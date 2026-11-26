@@ -68,10 +68,11 @@ def main():
         while os.path.exists(os.path.join(DIR, f"_prueba_{asin}_{rango}_{n}.png")):
             n += 1
         guardar(asin, rango, f"_prueba_{asin}_{rango}_{n}.png", extra)
-    elif modo == "bajar":
+    elif modo in ("bajar", "largo", "corto"):   # largo = solo rango maximo; corto = solo 90 dias
+        rangos = {"bajar": (RANGO_MAX, "90"), "largo": (RANGO_MAX,), "corto": ("90",)}[modo]
         primero = True
         for asin in sys.argv[2:]:
-            for rango in (RANGO_MAX, "90"):
+            for rango in rangos:
                 if not primero:
                     time.sleep(PAUSA)
                 primero = False

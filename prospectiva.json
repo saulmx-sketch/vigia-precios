@@ -1,5 +1,5 @@
 {
- "generado": "2026-11-25T20:29:38-06:00",
+ "generado": "2026-11-25T20:37:30-06:00",
  "metodo": "Precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos (lecturas del vigia y historia/). El piso esperado repite lo que hizo el modelo anterior (o la misma consola el anio pasado) en las mismas fechas, a la escala del precio de hoy; los topes salen de ese piso y del minimo de los ultimos 120 dias.",
  "variantes": {
   "fold8|normal": {
@@ -434,6 +434,7 @@
     "condicion": "cupón FOLDS10_SCLUB",
     "fecha": "2026-08-13",
     "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 24999,
     "rastro": "historia/foro_fold8.csv:1183316",
     "tienda": "Samsung"
@@ -442,12 +443,15 @@
     "condicion": "",
     "fecha": "2026-11-11",
     "fuente": "keepa",
+    "garantia": "si",
     "precio": 31020,
     "rastro": "historia/keepa_fold8.csv:B0H773GGWG:2026-11-11",
     "tienda": "Amazon"
    },
    "minimo_ciclo": {
     "fecha": "2026-08-13",
+    "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 24999,
     "rastro": "historia/foro_fold8.csv:1183316",
     "tienda": "Samsung"
@@ -767,6 +771,7 @@
     "condicion": "cupón FOLD8U_35CLUB + ePromoter",
     "fecha": "2026-10-12",
     "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 25317,
     "rastro": "historia/foro_fold8.csv:1198652",
     "tienda": "Samsung"
@@ -775,6 +780,7 @@
     "condicion": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
     "fecha": "2026-11-19",
     "fuente": "propio",
+    "garantia": "si",
     "precio": 56149.1,
     "rastro": "historial_precios.csv:2026-11-19 20:09|Samsung|ultra-1tb",
     "tienda": "Samsung"
@@ -1033,6 +1039,7 @@
     "condicion": "cupón PROMODESC_FOLD8U",
     "fecha": "2026-10-13",
     "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 23464,
     "rastro": "historia/foro_fold8.csv:1198861",
     "tienda": "Samsung"
@@ -1041,12 +1048,15 @@
     "condicion": "",
     "fecha": "2026-11-23",
     "fuente": "propio",
+    "garantia": "si",
     "precio": 32399,
     "rastro": "historial_precios.csv:2026-11-23 20:59|Amazon|ultra-512",
     "tienda": "Amazon"
    },
    "minimo_ciclo": {
     "fecha": "2026-10-13",
+    "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 23464,
     "rastro": "historia/foro_fold8.csv:1198861",
     "tienda": "Samsung"
@@ -1303,6 +1313,7 @@
     "condicion": "cupón WMCYBERMONDAY; 24 meses sin intereses; Walmart: Ps5 slim digital con Astro bot y Grand turismo 7 con BBVA bonificación",
     "fecha": "2025-12-01",
     "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 6675,
     "rastro": "historia/foro_ps5.csv:1112722",
     "tienda": "Walmart"
@@ -1311,12 +1322,15 @@
     "condicion": "cupón WMBF13; 12 MESES SIN INTERESES; Con el 25% de bonificación de BBVA , pagando a 12 MESES SIN INTERESES , el precio final…",
     "fecha": "2026-11-13",
     "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 7717,
     "rastro": "historia/foro_ps5.csv:1208849",
     "tienda": "Walmart"
    },
    "minimo_ciclo": {
     "fecha": "2026-11-13",
+    "fuente": "foro",
+    "garantia": "sin dato",
     "precio": 7717,
     "rastro": "historia/foro_ps5.csv:1208849",
     "tienda": "Walmart"
