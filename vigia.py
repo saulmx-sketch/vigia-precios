@@ -76,7 +76,9 @@ PAGINAS_CUPON_SAMSUNG = ["https://www.samsung.com/mx/offer/", "https://www.samsu
                          "https://www.samsung.com/mx/smartphones/all-smartphones/",
                          "https://www.samsung.com/mx/apps/samsung-shop-app/",
                          # medidas el 25 nov 2026: dan BF1000 y BFLIVESEM (este, hasta ese dia, solo llegaba por el foro)
-                         "https://www.samsung.com/mx/offer/deals/", "https://www.samsung.com/mx/offer/samsung-live/"]
+                         "https://www.samsung.com/mx/offer/deals/", "https://www.samsung.com/mx/offer/samsung-live/",
+                         # medida el 25 nov 2026 con vigia.pedir: 200, 678 KB, da BF1000, ECO_25, ECO_20, PRO-15
+                         "https://www.samsung.com/mx/offer/cyber"]
 BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cupones_foro" de cada producto
 DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
 HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
