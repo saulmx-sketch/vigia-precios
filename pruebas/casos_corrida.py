@@ -757,12 +757,136 @@ def e13_servidor_lento(v):
     return "; ".join(hechos) + "; despues, corrida normal: todo leido"
 
 
+def amazon_con_cupon(precio="7,200"):
+    """Ficha grabada de B0FTP523RH con el precio cambiado y la etiqueta de cupon de ficha que lee promos.amazon_ficha
+    (texto tomado de promos.FICHA_CUPON); busqueda grabada con " con cupón" en el bloque."""
+    f = lee("amz_ficha_B0FTP523RH.html").replace("$12,499.00", "$%s.00" % precio).replace(
+        '"a-price-whole">12,499<', '"a-price-whole">%s<' % precio)
+    f = f.replace('<span id="taxIn', '<span id="couponTextpctch18" class="couponLabelText"> Aplica el cup&oacute;n de '
+                  '$220.01 </span><span id="taxIn', 1)
+    # la busqueda tambien baja: con la misma cifra de busqueda, _leer_amazon reusa el precio de ficha recordado
+    # (vendedor_amazon) y no relee la ficha (ver la salida H8, ronda 6)
+    s = lee("amz_busca_ps5.html").replace("$8,999.00</span>", "$%s.00</span><span> con cupón</span>" % precio, 1)
+    m = mundo_base()
+    m[r"amazon\.com\.mx/s\?k="] = (200, s)
+    m[r"amazon\.com\.mx/dp/B0FTP523RH"] = (200, f)
+    return m
+
+
+def e14_promos(v):
+    """promos (linea B) encendido: SIN_PROMOS fuera, promos.mejorar con dormir y reloj del arnes (su default ato el
+    time.sleep y el time.monotonic reales al importarse). urlopen directo (promos._bajar) se anota y responde error."""
+    pr = getattr(v, "promos", None)
+    if pr is None or not hasattr(pr, "mejorar"):
+        return "sin promos.py cargado (escena saltada)"
+    directas = []
+    orig_mejorar, orig_urlopen = pr.mejorar, v.urllib.request.urlopen
+
+    def urlopen_falso(req, *a, **k):
+        directas.append(getattr(req, "full_url", req))
+        raise urllib.error.URLError("sin red en la prueba (urlopen directo)")
+
+    def correr(b, m, **kw):
+        def mejorar(*a, **k):
+            k.setdefault("dormir", lambda s: None)
+            k.setdefault("reloj", lambda: b.mono)
+            return orig_mejorar(*a, **k)
+        pr.mejorar = mejorar
+        try:
+            r = b.correr(m, env=dict(kw.pop("env", {}), SIN_PROMOS=None), **kw)
+        finally:
+            pr.mejorar = orig_mejorar
+        return r
+
+    def precio_avisos(avs):
+        return [a for a in asuntos(avs) if not a.startswith(("Otra forma de pago", "Otra tienda"))]
+    hechos = []
+    v.urllib.request.urlopen = urlopen_falso
+    try:
+        # (a) dia normal, cuatro corridas: 0 avisos de precio, ningun aviso aparte repetido
+        b = Banco(v)
+        try:
+            aparte, extra_por_host, todas = [], {}, []
+            for i in range(4):
+                c, avs, srv, sal = correr(b, mundo_base())
+                afirma(c == 0 and not precio_avisos(avs), ("14a: aviso de precio", i, asuntos(avs)), b)
+                aparte += [a for a in asuntos(avs) if a not in precio_avisos(avs)]
+                todas.append(len(srv.pedidas))
+            afirma(len(aparte) == len(set(aparte)), ("14a: aviso aparte repetido", aparte), b)
+            hechos.append("(a) 4 corridas: 0 avisos de precio, %d aparte sin repetir; peticiones por corrida %s"
+                          % (len(aparte), todas))
+        finally:
+            b.borrar()
+        # (d) peticiones de mas: misma primera corrida con y sin promos
+        b1, b2 = Banco(v), Banco(v)
+        try:
+            _, _, s_sin, _ = b1.correr(mundo_base())
+            _, _, s_con, _ = correr(b2, mundo_base())
+            sin = {}
+            for u in s_sin.pedidas:
+                sin[u] = sin.get(u, 0) + 1
+            de_mas = {}
+            for u in s_con.pedidas:
+                if sin.get(u, 0):
+                    sin[u] -= 1
+                else:
+                    h = re.sub(r"^https?://([^/]+).*$", r"\1", u)
+                    de_mas[h] = de_mas.get(h, 0) + 1
+            no_grabadas = sorted({re.sub(r"^https?://([^/]+).*$", r"\1", u) for u in s_con.pedidas
+                                  if not any(re.search(p, u) for p in mundo_base())})
+            hechos.append("(d) primera corrida: %d peticiones sin promos, %d con promos; de mas por sitio: %s; "
+                          "sin grabar (404): %s; urlopen directo: %d" % (
+                              len(s_sin.pedidas), len(s_con.pedidas),
+                              ", ".join("%s %d" % kv for kv in sorted(de_mas.items())) or "ninguna",
+                              ", ".join(no_grabadas) or "ninguna", len(directas)))
+        finally:
+            b1.borrar()
+            b2.borrar()
+        # (b) baja real confirmada en Costco: exactamente un aviso, con el precio de la ficha
+        b = Banco(v)
+        try:
+            correr(b, mundo_base())
+            todos = []
+            for i in range(3):
+                c, avs, srv, _ = correr(b, costco_a(19000.0))
+                todos += precio_avisos(avs)
+                if i == 0:
+                    cu = dict(avs).get("GANGA $19,000 · Fold8 512 GB · Costco", "")
+            afirma(todos == ["GANGA $19,000 · Fold8 512 GB · Costco"] and "Confirmado" in cu, ("14b", todos), b)
+            hechos.append("(b) Costco a $19,000 en listado y ficha, 3 corridas: 1 aviso GANGA confirmado a $19,000")
+        finally:
+            b.borrar()
+        # (c) Amazon con cupon de ficha: precio de tabla fijo entre corridas y un solo aviso
+        b = Banco(v)
+        try:
+            correr(b, mundo_base())
+            precios, todos = [], []
+            for i in range(4):
+                c, avs, srv, _ = correr(b, amazon_con_cupon())
+                todos += precio_avisos(avs)
+                precios.append(b.json(b.precios).get("Amazon|ps5|digital", {}).get("precio"))
+            nota = b.json(b.precios).get("Amazon|ps5|digital", {}).get("nota", "")
+            ok = len(set(precios)) == 1 and len([a for a in todos if "Amazon" in a]) == 1
+            pendiente("14c", ok, "precio de Amazon fijo y un solo aviso", "precios %s, avisos %s" % (precios, todos))
+            actua = ("RESTAR_CUPON_FICHA_AMAZON=False (el cupon no se resta: el precio queda en el de la ficha; "
+                     "TOPE_CUPON no llega a usarse)" if precios[0] == 7200.0 else "se resto un cupon: %s" % precios[0])
+            hechos.append("(c) Amazon con cupon de $220.01 en la ficha a $7,200, 4 corridas: precios %s, avisos %s, "
+                          "nota '%s'; actua %s" % (precios, todos, nota, actua))
+        finally:
+            b.borrar()
+    finally:
+        v.urllib.request.urlopen = orig_urlopen
+        pr.mejorar = orig_mejorar
+    return "; ".join(hechos)
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
            ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
            ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
-           ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento)]
+           ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento),
+           ("14 promos encendido", e14_promos)]
 
 
 def foto_repo():
