@@ -1038,6 +1038,25 @@ LECTORES_BANCOS["Liverpool"] = lector_bancos_liverpool
 LECTORES_BANCOS["BBVA"] = lector_bancos_bbva
 
 
+def _que(o):
+    """Como se nombra el articulo en los pasos de un aviso (pendiente 8: decia "el teléfono" tambien para la consola)."""
+    return (o or {}).get("nombre") or "el artículo"
+
+
+def _repartir(skus, n):
+    """Hasta n SKU de {sku: [prod, variante]}, turnando productos (pendiente 8: con list(skus)[:3], un tercer producto
+    de Samsung nunca se leia en la tienda de estudiantes). Con un solo producto da lo mismo que list(skus)[:n]."""
+    por_prod = {}
+    for sku, info in skus.items():
+        por_prod.setdefault(info[0], []).append(sku)
+    salida, filas = [], list(por_prod.values())
+    while len(salida) < n and any(filas):
+        for fila in filas:
+            if fila and len(salida) < n:
+                salida.append(fila.pop(0))
+    return salida
+
+
 def _skus_cerradas(prods):
     """Un SKU por producto y variante de Samsung: {sku: [prod, variante]}."""
     out, vistos = {}, set()
@@ -1237,7 +1256,7 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
     previo = caja.get("cerradas") if isinstance(caja.get("cerradas"), dict) else {}
     if skus and _vencido(previo.get("leido"), ahora, MINUTOS_CERRADAS):
         try:
-            precios, errores, _ = samsung_cerradas(pedir, list(skus)[:3], hay_tiempo, dormir)
+            precios, errores, _ = samsung_cerradas(pedir, _repartir(skus, 3), hay_tiempo, dormir)
             bueno = bool(precios or not errores)
             if not precios and previo.get("precios"):   # E11: 200 sin precio (reto) no borra los precios buenos
                 bueno = False
@@ -1370,8 +1389,8 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                     requisito = "PayPal"
                     pide = "elegir PayPal como forma de pago; la promoción (%s la llama %s) se aplica sola, no se teclea" % (
                         tienda, codigo)
-                    pasos = "pon el teléfono en el carrito, elige PayPal y revisa que el total baje a ${:,.0f} antes de " \
-                            "confirmar.".format(nuevo)
+                    pasos = ("agrega al carrito %s, elige PayPal y revisa que el total baje a ${:,.0f} antes de "
+                             "confirmar.".format(nuevo) % _que(o))
                     if tienda == "Costco":
                         pide += "; y ser socio de Costco (membresía Dorada ${:,.0f} al año)".format(COSTCO_MEMBRESIA)
                         pasos = ("entra con tu cuenta de Costco, " + pasos +
@@ -1382,17 +1401,17 @@ def _mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue, hay_tiempo
                     requisito = "tarjeta %s (código %s)" % (banco, codigo)
                     pide = "pagar con una tarjeta %s y teclear el código %s al pagar%s" % (banco, codigo,
                                                                                            ("; " + cond) if cond else "")
-                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s, teclea el código %s y mira el total en "
+                    pasos = ("agrega al carrito %s, elige la tarjeta %s, teclea el código %s y mira el total en "
                              "la última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
-                             % (banco, codigo))
+                             % (_que(o), banco, codigo))
                 else:
                     _anade(extras, o, "pagando con {} quedaría en ${:,.0f}, hasta {} (no probado: se ve al pagar)".format(
                         banco, nuevo, hasta or "?"))
                     requisito = "tarjeta %s" % banco
                     pide = "pagar con una tarjeta %s%s" % (banco, ("; " + cond) if cond else "")
-                    pasos = ("pon el teléfono en el carrito, elige la tarjeta %s como forma de pago y mira el total en la "
+                    pasos = ("agrega al carrito %s, elige la tarjeta %s como forma de pago y mira el total en la "
                              "última pantalla, antes de confirmar; si no baja a ${:,.0f}, no te conviene.".format(nuevo)
-                             % banco)
+                             % (_que(o), banco))
                 if precio - nuevo >= AHORRO_PROPIO:
                     _aviso(ahora, estado, seco, abrir_issue, avisos, o, clave, nuevo, requisito, pide, lit,
                            f.get("url", ""), cierre=cierre, hasta=hasta, pasos=pasos)
@@ -1713,6 +1732,16 @@ def _pedir_falso(paginas, reloj=None, paso=0.0, llamadas=None):
 
 
 def selftest():
+    # pendiente 8 (26 nov): un tercer producto de Samsung entra a la tienda de estudiantes aunque el primero tenga 3
+    # variantes; con un solo producto, el mismo orden de siempre; los pasos del aviso nombran el articulo
+    tres = [{"id": "a", "tiendas": {"Samsung": {"skus": {"A1": ["v1"], "A2": ["v2"], "A3": ["v3"]}}}},
+            {"id": "b", "tiendas": {"Samsung": {"skus": {"B1": ["w1"]}}}},
+            {"id": "c", "tiendas": {"Amazon": {}}},
+            {"id": "d", "tiendas": {"Samsung": {"skus": {"D1": ["x1"], "D2": ["x2"]}}}}]
+    assert _repartir(_skus_cerradas(tres), 3) == ["A1", "B1", "D1"], _repartir(_skus_cerradas(tres), 3)
+    assert _repartir(_skus_cerradas(tres[:1]), 3) == ["A1", "A2", "A3"]
+    assert _repartir(_skus_cerradas(tres), 9) == ["A1", "B1", "D1", "A2", "D2", "A3"]
+    assert _que({"nombre": "Producto X"}) == "Producto X" and _que({}) == "el artículo"
     reglas = {"FOLD8_20CLUB": ("pct", 20, "club"), "BFLIVESEM": ("pct", 10, "club"), "BF1000": ("fijo", 1000, ""),
               "LIVESEM": ("sube", 4000, ""), "CENTAVO": ("fijo", 0.5, "")}
     codigos = ["LIVESEM", "MUERTO", "BFLIVESEM", "BF1000", "FOLD8_20CLUB", "CENTAVO"]

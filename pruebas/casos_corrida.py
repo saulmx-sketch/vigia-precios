@@ -489,6 +489,9 @@ def e5_tienda_caida(v):
     try:
         b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
         caida = con(mundo_base(), cos=(403, "<html>Access Denied</html>"))
+        # la tienda entera caida: tambien la busqueda de la PS5 (desde el 26 nov cada producto se lee aparte; si cae
+        # uno solo, el aviso es de "Costco (producto)": escena 15)
+        caida[r"costco\.com\.mx/rest/v2/mexico/products/search\?query=playstation"] = (403, "<html>Access Denied</html>")
         todos = []
         for i in range(4):
             c, avs, srv, _ = b.correr(caida, avanza=_dt.timedelta(hours=1))
@@ -601,7 +604,9 @@ def e9_ficha_basura(v):
         m[ELEKTRA_PS5] = elektra_ps5()
         c, avs, srv, _ = b.correr(m)
         afirma(c == 0 and asuntos(avs) == ["GANGA $7,400 · PS5 Digital (sin lector) · Elektra"], ("9 listado", asuntos(avs)), b)
-        afirma(b.json()["fallos_fuente"]["Costco"] == 1, b.json()["fallos_fuente"], b)
+        # desde el 26 nov cada producto se lee aparte: cae "Costco (fold8)" y la PS5 de Costco se sigue leyendo
+        ff = b.json()["fallos_fuente"]
+        afirma(ff.get("Costco (fold8)") == 1 and ff.get("Costco") == 0, ff, b)
     finally:
         b.borrar()
     return "ficha de Costco con %s: la corrida sigue, Costco sale 'ficha sin releer' y Elektra confirmado; listado basura: Costco cae, Elektra avisa" % (
@@ -908,13 +913,47 @@ def e14_promos(v):
     return "; ".join(hechos)
 
 
+def e15_producto_caido(v):
+    """Pendiente 4 (26 nov): la busqueda de un producto falla en una tienda; los demas de esa tienda se leen igual,
+    el caido no da 'Agotado', conserva su precio en la tabla y tiene su propio aviso a las horas."""
+    k_ps, k_fold = "Liverpool|ps5|digital", "Liverpool|fold8|normal-512"
+    b = Banco(v)
+    try:
+        b.correr(mundo_base(), avanza=_dt.timedelta(hours=1))
+        caida = dict(mundo_base())
+        caida[r"liverpool\.com\.mx/tienda\?s=playstation"] = (503, "<html>Service Unavailable</html>")
+        todos = []
+        for i in range(4):
+            c, avs, srv, _ = b.correr(caida, avanza=_dt.timedelta(hours=1))
+            todos.append(asuntos(avs))
+            tabla = b.json(b.precios)
+            afirma(tabla.get(k_ps, {}).get("precio") == 12499.0, ("15: la tabla perdio la PS5 de Liverpool", i, tabla.get(k_ps)), b)
+            afirma(k_fold in tabla, ("15: el Fold8 de Liverpool no se leyo", i), b)
+            afirma(srv.cuantas(r"liverpool\.com\.mx/tienda/pdp/p/1203150349") >= 1, ("15: no abrio la ficha del Fold8", i), b)
+            afirma(not any(a.startswith("Agotado") for a in asuntos(avs)), ("15: agotado con el producto caido", avs), b)
+        afirma(todos == [[], [], ["El vigia no puede leer Liverpool (ps5) desde hace 2 horas"], []], ("15: avisos", todos), b)
+        est = b.json()
+        afirma(est["fallos_fuente"].get("Liverpool") == 0 and est["fallos_fuente"].get("Liverpool (ps5)") == 4,
+               ("15: cuentas de fallas", est["fallos_fuente"]), b)
+        afirma(k_ps not in est.get("ausente", {}) and k_ps not in est.get("agotados", {}), est.get("ausente"), b)
+        c, avs, srv, _ = b.correr(mundo_base())
+        afirma(asuntos(avs) == ["El vigia volvio a leer Liverpool (ps5)"], ("15f", asuntos(avs)), b)
+        est = b.json()
+        afirma("Liverpool (ps5)" not in est.get("caida_desde", {}) and not est["fallos_fuente"].get("Liverpool (ps5)"),
+               ("15g: quedo la caida", est.get("caida_desde")), b)
+        return ("6 corridas: busqueda de la PS5 en Liverpool con 503 cuatro veces; el Fold8 se lee igual, la PS5 "
+                "conserva $12,499 sin 'Agotado'; 'no puede leer Liverpool (ps5)' una vez; al volver, 'volvio a leer'")
+    finally:
+        b.borrar()
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
            ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
            ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
            ("12 lectores apagados", e12_lectores_apagados), ("13 servidor lento", e13_servidor_lento),
-           ("14 promos encendido", e14_promos)]
+           ("14 promos encendido", e14_promos), ("15 producto caido", e15_producto_caido)]
 
 
 def foto_repo():
