@@ -114,7 +114,30 @@ def mundo_base():
         m[r"liverpool\.com\.mx/tienda/pdp/p/" + pid] = arch
     m[r"gameplanet\.com/catalogo\?q="] = (200, GP_CATALOGO)
     m[r"gameplanet\.com/products/"] = "gp_pdp_fortnite.html"
+    # lectores_nuevos.py (las mismas grabadas y direcciones que pruebas\casos_lectores_nuevos.py)
+    m[r"soriana\.com/buscar\?q=galaxy\+z\+fold8"] = "soriana_busca_galaxy_z_fold8.html"
+    m[r"soriana\.com/buscar\?q=playstation\+5\+digital"] = "soriana_busca_playstation_5_digital.html"
+    m[r"soriana\.com/buscar\?q="] = "soriana_busca_vacia.html"
+    m[r"soriana\.com/.*/11944979\.html"] = "soriana_ficha_fold8.html"
+    m[r"soriana\.com/.*/11912222\.html"] = "soriana_ficha_ps5.html"
+    m[r"soriana\.com/.*/11864204\.html"] = "soriana_ficha_unidad_disco.html"
+    m[r"cyberpuerta\.mx/index\.php\?cl=search&searchparam=galaxy"] = "cyberpuerta_busca_galaxy_z_fold8.html"
+    m[r"cyberpuerta\.mx/index\.php\?cl=search&searchparam=playstation"] = "cyberpuerta_busca_playstation_5_digital.html"
+    m[r"cyberpuerta\.mx/.*Samsung-Galaxy-Z-FOLD8-5G-7-6-Dual-SIM-512GB-12GB-RAM-Morado\.html"] = "cyberpuerta_ficha_fold8_morado.html"
+    m[r"chedraui\.com\.mx/api/catalog_system/pub/products/search\?fq=productId:3879487"] = (200, chedraui("chedraui_ficha_3879487.json"))
+    m[r"chedraui\.com\.mx/api/catalog_system/pub/products/search\?ft="] = (
+        200, chedraui("chedraui_busca_consola_playstation_5_digital.json"))
     return m
+
+
+# Tiendas a las que el servidor falso sabe responder. Una tienda de productos.json que no este aqui (o sin lector
+# cargado) se quita de la copia de productos.json de cada escena: asi una tienda nueva no rompe estas escenas.
+SERVIDAS = ("Samsung", "Amazon", "Costco", "Elektra", "Liverpool", "Gameplanet", "Soriana", "Cyberpuerta", "Chedraui")
+NUEVAS = ("Soriana", "Cyberpuerta", "Chedraui")   # las de lectores_nuevos.py (escena 12)
+
+
+def chedraui(n):
+    return json.dumps(json.loads(lee(n))["respuesta"])
 
 
 def con(base, **cambios):
@@ -157,7 +180,16 @@ class Banco:
         self.v = v
         self.dir = tempfile.mkdtemp(prefix="vigia_corrida_")
         self.config = os.path.join(self.dir, "productos.json")
-        shutil.copyfile(os.path.join(RAIZ, "productos.json"), self.config)
+        with open(os.path.join(RAIZ, "productos.json"), encoding="utf-8") as f:
+            cfg = json.load(f)
+        self.quitadas = set()
+        for p in cfg["productos"]:   # solo tiendas con respuesta en el servidor falso y con lector cargado
+            for t in list(p["tiendas"]):
+                if t not in SERVIDAS or t not in v.LECTORES:
+                    self.quitadas.add(t)
+                    del p["tiendas"][t]
+        self.escribe(self.config, json.dumps(cfg, ensure_ascii=False))
+        self.tiendas = sorted({t for p in cfg["productos"] for t in p["tiendas"]})
         self.estado = os.path.join(self.dir, "visto.json")
         self.precios = os.path.join(self.dir, "precios.json")
         self.historial = os.path.join(self.dir, "historial_precios.csv")
@@ -263,7 +295,7 @@ def e1_dia_normal(v):
         c, avs, srv, _ = b.correr(mundo_base())
         afirma(c == 0 and avs == [], ("1a: avisos en un dia normal", asuntos(avs)), b)
         est = b.json()
-        nombres = {"Foro", "Cupones", "Samsung", "Amazon", "Costco", "Elektra", "Liverpool", "Gameplanet"}
+        nombres = {"Foro", "Cupones"} | set(b.tiendas)
         afirma(set(est["fallos_fuente"]) == nombres and not any(est["fallos_fuente"].values()),
                ("1a: alguna fuente fallo (el mundo falso esta incompleto)", est["fallos_fuente"], est.get("ultimo_error")), b)
         tabla = b.json(b.precios)
@@ -535,11 +567,62 @@ def e11_seco(v):
         b.borrar()
 
 
+def e12_lectores_apagados(v):
+    """Lectores nuevos apagados al arrancar porque su prueba falla (enganchar_lectores_nuevos con una prueba que
+    falla, como en casos_lectores_nuevos.py): sus tiendas salen como "lector no cargado", sin "Agotado" de sus
+    articulos, la tabla conserva su ultimo precio y la corrida termina."""
+    nuevas = [t for t in NUEVAS if t in v.LECTORES]
+    if not nuevas:
+        return "sin lectores_nuevos.py cargado: nada que apagar (escena saltada)"
+    b = Banco(v)   # se arma con los lectores encendidos: la copia de productos.json conserva las tres tiendas
+    dicts = [d for d in (v.LECTORES, v.VENDEDOR_OFICIAL, getattr(v, "FICHAS", None)) if isinstance(d, dict)]
+    copias, error, candado = [dict(d) for d in dicts], v.LECTORES_NUEVOS_ERROR, list(v._ENGANCHANDO)
+    try:
+        b.correr(mundo_base())
+        tabla0 = b.json(b.precios)
+        suyas = sorted(k for k in b.json()["conocidos"] if k.split("|")[0] in nuevas)
+        afirma(suyas, ("12: los lectores nuevos no dieron ningun articulo en la corrida de partida", tabla0), b)
+        for d in dicts:
+            for t in NUEVAS:
+                d.pop(t, None)
+        del v._ENGANCHANDO[:]
+
+        def falla(m):
+            raise AssertionError("prueba de lectores nuevos que falla a proposito (escena 12)")
+        with contextlib.redirect_stdout(io.StringIO()) as sal:
+            v.enganchar_lectores_nuevos(prueba=falla)
+        afirma("lectores nuevos apagados" in sal.getvalue() and not any(t in v.LECTORES for t in NUEVAS),
+               ("12: el enganche no apago", sal.getvalue()), b)
+        for i in range(v.AUSENCIAS_AGOTADO + 1):
+            c, avs, srv, salida = b.correr(mundo_base())
+            afirma(c == 0 and avs == [], ("12: avisos con los lectores apagados", i, asuntos(avs)), b)
+            est, tabla = b.json(), b.json(b.precios)
+            for t in nuevas:
+                afirma(est["ultimo_error"].get(t, "").startswith("lector no cargado: sus pruebas fallan"),
+                       ("12: %s no salio como lector no cargado" % t, est["ultimo_error"].get(t)), b)
+                afirma(est["fallos_fuente"][t] == i + 1, (t, est["fallos_fuente"]), b)
+            for k in suyas:
+                afirma(k not in est.get("agotados", {}) and k not in est.get("ausente", {}), ("12: ausencia", k), b)
+                afirma(tabla.get(k) == tabla0.get(k), ("12: la tabla perdio", k), b)
+            afirma(not any(re.search(r"soriana|cyberpuerta|chedraui", u) for u in srv.pedidas), "12: pidio a una apagada", b)
+        return ("lectores nuevos apagados (prueba que falla): %d corridas sin avisos, %s como 'lector no cargado', "
+                "sin 'Agotado' ni ausencias de sus %d articulos y con su precio en la tabla" % (
+                    v.AUSENCIAS_AGOTADO + 1, ", ".join(nuevas), len(suyas)))
+    finally:
+        for d, cp in zip(dicts, copias):
+            d.clear()
+            d.update(cp)
+        v.LECTORES_NUEVOS_ERROR = error
+        v._ENGANCHANDO[:] = candado
+        b.borrar()
+
+
 ESCENAS = [("1 dia normal", e1_dia_normal), ("2 baja real confirmada", e2_baja_confirmada),
            ("3 el listado miente", e3_listado_miente), ("4 ficha caida", e4_ficha_caida),
            ("5 tienda caida", e5_tienda_caida), ("6 agotado y regreso", e6_agotado_regreso),
            ("7 pruebas fallidas", e7_pruebas_fallidas), ("8 aviso que falla", e8_aviso_que_falla),
-           ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco)]
+           ("9 ficha basura", e9_ficha_basura), ("10 estado viejo", e10_estado_viejo), ("11 modo seco", e11_seco),
+           ("12 lectores apagados", e12_lectores_apagados)]
 
 
 def foto_repo():
