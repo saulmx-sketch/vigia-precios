@@ -75,16 +75,20 @@ jobs:
         id: pruebas_a
         if: hashFiles('prospectiva.py') != ''
         continue-on-error: true
-        timeout-minutes: 2
+        timeout-minutes: 1
         run: python3 prospectiva.py --selftest
       - name: Pruebas de promociones
         id: pruebas_b
         if: hashFiles('promos.py') != ''
         continue-on-error: true
-        timeout-minutes: 2
+        timeout-minutes: 1
         run: python3 promos.py --selftest
+      # "cancelled" (la prueba llego a su tope) cuenta como falla, igual que "failure".
       - name: Aviso de pruebas fallidas
-        if: steps.pruebas.outcome == 'failure' || steps.pruebas_a.outcome == 'failure' || steps.pruebas_b.outcome == 'failure'
+        if: >-
+          steps.pruebas.outcome == 'failure' || steps.pruebas.outcome == 'cancelled' ||
+          steps.pruebas_a.outcome == 'failure' || steps.pruebas_a.outcome == 'cancelled' ||
+          steps.pruebas_b.outcome == 'failure' || steps.pruebas_b.outcome == 'cancelled'
         continue-on-error: true
         timeout-minutes: 2
         env:
@@ -95,23 +99,25 @@ jobs:
           LIGA: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           cuerpo="Antes de revisar las tiendas, el vigía corre sus propias pruebas. En la corrida de $(date -u -d '-6 hours' '+%d-%m-%Y a las %H:%M') (hora de la Ciudad de México) fallaron:"
-          [ "$P_NUCLEO" = "failure" ] && cuerpo="$cuerpo
-          - Las pruebas del núcleo: mientras sigan fallando, el vigía lee y guarda precios, pero NO manda avisos de precio."
-          [ "$P_A" = "failure" ] && cuerpo="$cuerpo
-          - Las pruebas de prospectiva: esa parte queda apagada; los avisos de precio siguen."
-          [ "$P_B" = "failure" ] && cuerpo="$cuerpo
-          - Las pruebas de promociones: esa parte queda apagada; los avisos de precio siguen."
+          partes=""
+          fallo() { [ "$1" = "failure" ] || [ "$1" = "cancelled" ]; }
+          if fallo "$P_NUCLEO"; then partes="$partes, núcleo"; cuerpo="$cuerpo
+          - Las pruebas del núcleo: mientras sigan fallando, el vigía lee y guarda precios, pero NO manda avisos de precio."; fi
+          if fallo "$P_A"; then partes="$partes, prospectiva"; cuerpo="$cuerpo
+          - Las pruebas de prospectiva: esa parte queda apagada; los avisos de precio siguen."; fi
+          if fallo "$P_B"; then partes="$partes, promociones"; cuerpo="$cuerpo
+          - Las pruebas de promociones: esa parte queda apagada; los avisos de precio siguen."; fi
           cuerpo="$cuerpo
 
-          Cada corrida vuelve a probar: si la prueba pasa, la parte se prende sola. Liga a la corrida: $LIGA"
-          bash .github/scripts/aviso.sh libre "Fallaron pruebas del vigía: una parte quedó apagada" "$cuerpo"
+          (Una prueba que no terminó a tiempo cuenta como fallida.) Cada corrida vuelve a probar: si la prueba pasa, la parte se prende sola. Liga a la corrida: $LIGA"
+          bash .github/scripts/aviso.sh libre "Fallaron pruebas del vigía (${partes#, }): esa parte quedó apagada" "$cuerpo"
       - name: Revisar tiendas y foro
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRUEBA: ${{ inputs.prueba }}
           SIN_AVISOS_PRECIO: ${{ steps.pruebas.outcome != 'success' && '1' || '' }}
-          SIN_PROSPECTIVA: ${{ steps.pruebas_a.outcome == 'failure' && '1' || '' }}
-          SIN_PROMOS: ${{ steps.pruebas_b.outcome == 'failure' && '1' || '' }}
+          SIN_PROSPECTIVA: ${{ (steps.pruebas_a.outcome == 'failure' || steps.pruebas_a.outcome == 'cancelled') && '1' || '' }}
+          SIN_PROMOS: ${{ (steps.pruebas_b.outcome == 'failure' || steps.pruebas_b.outcome == 'cancelled') && '1' || '' }}
         run: python3 vigia.py
       - name: Guardar memoria y bitacora de precios
         if: always()
