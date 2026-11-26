@@ -1,0 +1,317 @@
+{
+ "generado": "2026-11-25T19:38:41-06:00",
+ "metodo": "Se juntaron los precios con garantia en Mexico que se pueden pagar sin canje y sin bancos ajenos (lecturas del vigia y archivos de historia/); el minimo es el mas barato visto, lo normal es el precio mas bajo tipico de cada dia en los ultimos 30 dias, y los topes siguen siendo los porcentajes de productos.json.",
+ "variantes": {
+  "fold8|normal": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 48499,
+   "minimo": null,
+   "minimo_30d": null,
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {},
+    "validas": {
+     "propio": 1
+    }
+   },
+   "nombre": "Fold8 (capacidad sin dato)",
+   "percentiles": null,
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": null,
+   "topes": [
+    19900,
+    21800,
+    23600
+   ],
+   "topes_manual": [
+    19900,
+    21800,
+    23600
+   ],
+   "topes_origen": "fracciones"
+  },
+  "fold8|normal-1tb": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 57600,
+   "minimo": null,
+   "minimo_30d": null,
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {},
+    "validas": {}
+   },
+   "nombre": "Fold8 1 TB",
+   "percentiles": null,
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": null,
+   "topes": [
+    23700,
+    25900,
+    28000
+   ],
+   "topes_manual": [
+    23700,
+    25900,
+    28000
+   ],
+   "topes_origen": "fracciones"
+  },
+  "fold8|normal-512": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 48499,
+   "minimo": {
+    "condicion": "promo (cupones FOLD8MEMBER_20 + LIVESEM)",
+    "fecha": "2026-10-23",
+    "fuente": "antecedente",
+    "precio": 26495,
+    "rastro": "historia/antecedentes.csv:RA-9",
+    "tienda": "Samsung"
+   },
+   "minimo_30d": {
+    "condicion": "",
+    "fecha": "2026-11-11",
+    "fuente": "keepa",
+    "precio": 31020,
+    "rastro": "historia/keepa_fold8.csv:B0H773GGWG:2026-11-11",
+    "tienda": "Amazon"
+   },
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {
+     "garantia_sin_confirmar": 5,
+     "sin_garantia": 19
+    },
+    "validas": {
+     "antecedente": 7,
+     "keepa": 81,
+     "propio": 26
+    }
+   },
+   "nombre": "Fold8 512 GB",
+   "percentiles": {
+    "n": 46,
+    "p10": 31639.2,
+    "p25": 34610,
+    "p50": 37185
+   },
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": {
+    "n": 19,
+    "precio": 36000
+   },
+   "topes": [
+    19900,
+    21800,
+    23600
+   ],
+   "topes_manual": [
+    19900,
+    21800,
+    23600
+   ],
+   "topes_origen": "fracciones"
+  },
+  "fold8|ultra": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 53499,
+   "minimo": null,
+   "minimo_30d": null,
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {},
+    "validas": {
+     "propio": 1
+    }
+   },
+   "nombre": "Fold8 Ultra (capacidad sin dato)",
+   "percentiles": null,
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": null,
+   "topes": [
+    22000,
+    24000,
+    26000
+   ],
+   "topes_manual": [
+    22000,
+    24000,
+    26000
+   ],
+   "topes_origen": "fracciones"
+  },
+  "fold8|ultra-1tb": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 63499,
+   "minimo": {
+    "condicion": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
+    "fecha": "2026-11-19",
+    "fuente": "propio",
+    "precio": 56149.1,
+    "rastro": "historial_precios.csv:2026-11-19 20:09|Samsung|ultra-1tb",
+    "tienda": "Samsung"
+   },
+   "minimo_30d": {
+    "condicion": "con cupones BFLIVESEM + BF1000; sin cupon $63,499; promocion vigente hasta 2026-12-01",
+    "fecha": "2026-11-19",
+    "fuente": "propio",
+    "precio": 56149.1,
+    "rastro": "historial_precios.csv:2026-11-19 20:09|Samsung|ultra-1tb",
+    "tienda": "Samsung"
+   },
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {},
+    "validas": {
+     "antecedente": 2,
+     "propio": 10
+    }
+   },
+   "nombre": "Fold8 Ultra 1 TB",
+   "percentiles": {
+    "n": 6,
+    "p10": 56149.1,
+    "p25": 56149.1,
+    "p50": 57324.05
+   },
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": null,
+   "topes": [
+    26100,
+    28500,
+    30900
+   ],
+   "topes_manual": [
+    26100,
+    28500,
+    30900
+   ],
+   "topes_origen": "fracciones"
+  },
+  "fold8|ultra-512": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 53499,
+   "minimo": {
+    "condicion": "promo (PROMODESC_FOLD8U), solo Grafito, envio desde 12 nov",
+    "fecha": "2026-10-23",
+    "fuente": "antecedente",
+    "precio": 26081,
+    "rastro": "historia/antecedentes.csv:RA-16",
+    "tienda": "Samsung"
+   },
+   "minimo_30d": {
+    "condicion": "",
+    "fecha": "2026-11-23",
+    "fuente": "propio",
+    "precio": 32399,
+    "rastro": "historial_precios.csv:2026-11-23 20:59|Amazon|ultra-512",
+    "tienda": "Amazon"
+   },
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {
+     "garantia_sin_confirmar": 8,
+     "sin_garantia": 18
+    },
+    "validas": {
+     "antecedente": 7,
+     "keepa": 46,
+     "propio": 12
+    }
+   },
+   "nombre": "Fold8 Ultra 512 GB",
+   "percentiles": {
+    "n": 39,
+    "p10": 32407.8,
+    "p25": 34312.42,
+    "p50": 37710
+   },
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": {
+    "n": 16,
+    "precio": 35004.5
+   },
+   "topes": [
+    22000,
+    24000,
+    26000
+   ],
+   "topes_manual": [
+    22000,
+    24000,
+    26000
+   ],
+   "topes_origen": "fracciones"
+  },
+  "ps5|digital": {
+   "ajeno": null,
+   "baja_mas": [],
+   "lista": 12499,
+   "minimo": {
+    "condicion": "",
+    "fecha": "2025-11-17",
+    "fuente": "keepa",
+    "precio": 6900,
+    "rastro": "historia/keepa_ps5.csv:B0FTP523RH:2025-11-17",
+    "tienda": "Amazon"
+   },
+   "minimo_30d": {
+    "condicion": "",
+    "fecha": "2026-11-13",
+    "fuente": "keepa",
+    "precio": 10730,
+    "rastro": "historia/keepa_ps5.csv:B0FTP523RH:2026-11-13",
+    "tienda": "Amazon"
+   },
+   "n_datos": {
+    "ajeno": 0,
+    "descartadas": {
+     "garantia_sin_confirmar": 12,
+     "sin_garantia": 147
+    },
+    "validas": {
+     "antecedente": 1,
+     "keepa": 120,
+     "propio": 4
+    }
+   },
+   "nombre": "PS5 Digital (sin lector)",
+   "percentiles": {
+    "n": 121,
+    "p10": 7990,
+    "p25": 8540,
+    "p50": 9590
+   },
+   "pisos_esperados": [],
+   "sin_confirmar_bajo": null,
+   "tipico": {
+    "n": 5,
+    "precio": 11870
+   },
+   "topes": [
+    7500,
+    9000,
+    10800
+   ],
+   "topes_manual": [
+    7500,
+    9000,
+    10800
+   ],
+   "topes_origen": "fracciones"
+  }
+ },
+ "vence": "2026-12-25",
+ "version": 1
+}
