@@ -7,6 +7,8 @@
    "marca": "samsung",
    "patron": "fold\\s*-?\\s*8|zfold8|fold\\s*ultra\\s*8",
    "excluir": "",
+   "_olvidar": "25 nov 2026: Liverpool se lee por ficha y la ficha siempre da la capacidad; sus claves sin capacidad ya no salen de ninguna tienda (el mismo telefono es ahora Liverpool|fold8|normal-512) y mandaban un Agotado falso",
+   "olvidar": ["Liverpool|fold8|normal", "Liverpool|fold8|ultra"],
    "piso": 12000,
    "fracciones": [0.411, 0.449, 0.486],
    "topes_fijos": {},
