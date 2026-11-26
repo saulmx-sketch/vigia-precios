@@ -100,6 +100,17 @@ URLS = {
     "heb_busca_ps5": "https://www.heb.com.mx/catalogsearch/result/?q=playstation+5",
     "mixup_inicio": "https://www.mixup.com/",
     "profeco_qqp": "https://datos.profeco.gob.mx/datos_abiertos/qqp.php",
+    # --- ronda 3 ---
+    "profeco_buenfin": "https://elbuenfin.profeco.gob.mx/",
+    "profeco_qqp_inicio": "https://qqp.profeco.gob.mx/",
+    "ml_dev_crear_app": "https://developers.mercadolibre.com.mx/es_ar/crea-una-aplicacion-en-mercado-libre-es",
+    "ml_devcenter": "https://developers.mercadolibre.com.mx/devcenter",
+    "ml_form_alta": "https://forms.gle/2Q39SStHLJNQLjuK9",
+    "ml_articulo_fold8": "https://articulo.mercadolibre.com.mx/MLM-3166627273",
+    "cyberpuerta_ps5_digital": "https://www.cyberpuerta.mx/index.php?cl=search&searchparam=playstation+5+digital",
+    "soriana_fold8_b": "https://www.soriana.com/buscar?q=samsung+galaxy+z+fold",
+    "chedraui_ficha_ps5": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?fq=productId:3879487",
+    "chedraui_ps5_digital_b": "https://www.chedraui.com.mx/api/catalog_system/pub/products/search?ft=playstation%205%20digital",
 }
 
 FOLD = re.compile(r"fold\s?-?8", re.I)
