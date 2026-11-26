@@ -3,6 +3,7 @@
 FOLD8_20CLUB
 BF1000
 BFLIVESEM      # 10 %, aviso de la app Samsung Shop del 19-nov-2026 (vale al 22-nov); no se suma al de 20 %
+FOLD8_25CLUB   # 25 % en el Ultra 1 TB, leido el 25-nov-2026 en cupondescuento.com.mx (ese dia: $63,499 -> $47,624; con BF1000 $46,624); no aplica a los de 512
 ECO_30
 FOLD8U_35CLUB
 PROMODESC_FOLD8U

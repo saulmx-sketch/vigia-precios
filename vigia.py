@@ -26,6 +26,11 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+try:   # cupon de ficha de Amazon, bancos y tiendas cerradas de Samsung; si falta o falla, todo sigue como antes
+    import promos
+except Exception:
+    promos = None
+
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ESTADO = os.path.join(AQUI, "visto.json")
 PRECIOS = os.path.join(AQUI, "precios.json")
@@ -66,7 +71,7 @@ TIENDAS_FORO = (r"samsung|walmart|bodega|sam'?s|amazon|mercado\s*libre|liverpool
                 r"lenovo|apple|xiaomi|motorola|sony|lg\b|hp\b|dell")
 BANCOS_PROPIOS = {"BBVA": r"bbva|bancomer", "Revolut": r"revolut", "PayPal": r"paypal"}
 BANCOS_AJENOS = {"Banorte": r"banorte", "Santander": r"santander", "Banamex": r"banamex|citibanamex",
-                 "HSBC": r"hsbc", "Scotiabank": r"scotiabank", "Amex": r"amex|american\s*express",
+                 "HSBC": r"hsbc", "Scotiabank": r"scotiabank", "Amex": r"\bamex\b|american\s+express",
                  "Inbursa": r"inbursa", "Afirme": r"afirme", "BanCoppel": r"bancoppel",
                  "Mercado Pago": r"mercado\s*pago", "Nu": r"\bnu\b", "Hey Banco": r"hey\s*banco"}
 SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v2/mx"
@@ -76,12 +81,24 @@ SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v
 # cada hilo el campo voucherCode con la tienda (linkHost) y la fecha (publishedAt).
 PAGINAS_CUPON_SAMSUNG = ["https://www.samsung.com/mx/offer/", "https://www.samsung.com/mx/offer/black-friday/",
                          "https://www.samsung.com/mx/smartphones/all-smartphones/",
-                         "https://www.samsung.com/mx/apps/samsung-shop-app/"]
+                         "https://www.samsung.com/mx/apps/samsung-shop-app/",
+                         # medidas el 25 nov 2026: dan BF1000 y BFLIVESEM (este, hasta ese dia, solo llegaba por el foro)
+                         "https://www.samsung.com/mx/offer/deals/", "https://www.samsung.com/mx/offer/samsung-live/",
+                         # medida el 25 nov 2026 con vigia.pedir: 200, 678 KB, da BF1000, ECO_25, ECO_20, PRO-15
+                         "https://www.samsung.com/mx/offer/cyber"]
 BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cupones_foro" de cada producto
 DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
 HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
-TOPE_CUPONES = 40        # codigos probados por corrida y producto (los recien hallados primero)
+HORAS_REPROBADO_CUPONERA = 12   # el que solo publica una cuponera y no bajo nada descansa mas: son muchos (41 el 25 nov
+#                                 2026) y casi todos de otros productos; probarlos cada 3 h duplicaba el tiempo del carrito
+TOPE_CUPONES = 30        # codigos probados por corrida y producto (los recien hallados primero). Era 40; con 40 la
+#                          corrida de ensayo del 25 nov 2026 tardo 243 s (101 s con 24). Lo que no cabe entra en la corrida
+#                          siguiente, porque lo ya probado sin exito descansa.
 SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
+# Codigos de tienda cerrada (empleados o estudiantes: llevan "EPP"). En el carrito normal se rechazaron 24 de 24 el
+# 25 nov 2026 (8 codigos x 3 modelos). Se siguen cosechando (quedan en visto.json), pero no se prueban en el carrito.
+# Expresion acotada: "EPP" como pieza del codigo (CART5_EPP, EPP10_NOV, EPPLIVESEM), no dentro de una palabra (PEPPER10).
+MARCA_TIENDA_CERRADA = re.compile(r"(^|_)EPP|EPP($|_|\d)")
 NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|"
                          r"CUPON|CODIGO|ASESOR|EPROMOTER|DESCUENTO|GRATIS|ENVIO)$")
 
@@ -278,6 +295,13 @@ def cupones_en_texto(plano):
         for c in codigos_de(m.group(1)):
             if c not in salida:
                 salida.append(c)
+    # /offer/cyber/ los escribe de otra forma: "Cupon 20%: PRO-20", "10% con HS26_ECO" (medido el 25 nov 2026);
+    # la segunda exige guion o guion bajo para no tomar "10% con BBVA"
+    for m in re.finditer(r"(?i:cup[oó]n)\s*\d{1,2}\s*%\s*:\s*([A-Z0-9][A-Z0-9_\-]{3,21})\b|"
+                         r"\d{1,2}\s*%\s+con\s+([A-Z][A-Z0-9]*[_\-][A-Z0-9_\-]{1,18})\b", plano):
+        for c in codigos_de(m.group(1) or m.group(2)):
+            if c not in salida:
+                salida.append(c)
     return salida
 
 
@@ -330,6 +354,17 @@ def cosechar_cupones(prods, estado, ahora):
                 pass
             for c in codigos_de(crudo):
                 hallados.setdefault(c, "foro")
+    if promos:
+        try:   # cuponeras medidas el 25 nov 2026 (promos.FUENTES_EXTRA); si fallan enteras, la cosecha queda como antes
+            extra = promos.cosechar_extra_si_toca(pedir, estado, ahora)   # cada 2 h; entre lecturas no pide nada
+            for crudo in extra.get("Samsung") or {}:
+                for c in codigos_de(crudo):
+                    hallados.setdefault(c, "cuponera")
+            leidas += promos.ULTIMA_COSECHA.get("leidas", 0)
+            promos.guardar_codigos(estado, extra, ahora)   # Amazon, Liverpool, Costco: solo como dato
+            print("   cuponeras: %s" % promos.ULTIMA_COSECHA.get("resumen", ""))
+        except Exception as ex:
+            print("   cuponeras sin leer (%s)" % str(ex)[:100])
     if not leidas:
         raise RuntimeError("ninguna fuente de cupones respondio")
     hoy = ahora.astimezone(MX).strftime("%Y-%m-%d")
@@ -337,13 +372,21 @@ def cosechar_cupones(prods, estado, ahora):
         cosecha[c] = hoy
     limite = (ahora.astimezone(MX) - dt.timedelta(days=DIAS_CUPON)).strftime("%Y-%m-%d")
     estado["cupones_cosechados"] = {c: f for c, f in cosecha.items() if f >= limite}
+    # origen duradero de cada codigo (Samsung, foro o cuponera): lo de Samsung o del foro no se rebaja a cuponera
+    origen = estado.get("cupones_origen") if isinstance(estado.get("cupones_origen"), dict) else {}
+    for c, o in hallados.items():
+        if not (o == "cuponera" and origen.get(c) in ("Samsung", "foro")):
+            origen[c] = o
+    estado["cupones_origen"] = {c: o for c, o in origen.items() if c in estado["cupones_cosechados"]}
     estado["cupones_ultima_busqueda"] = {"cuando": ahora.astimezone(MX).strftime("%Y-%m-%d %H:%M"),
                                          "fuentes_leidas": leidas, "hallados": hallados}
     return sorted(hallados)
 
 
 def cupones_candidatos(prod, estado):
-    """Primero lo recien hallado (lo mas fresco), luego la lista fija; fuera los reprobados de las ultimas horas."""
+    """Primero la lista fija, luego lo recien hallado en Samsung y en el foro y al final lo que solo publica una
+    cuponera (origen duradero en estado['cupones_origen']; la ultima busqueda, de respaldo); fuera los reprobados de las
+    ultimas horas. Asi el tope nunca deja fuera a la lista fija."""
     lista = []
     try:
         with open(os.path.join(AQUI, prod["tiendas"]["Samsung"].get("cupones", "cupones_samsung.txt")), encoding="utf-8") as f:
@@ -354,9 +397,16 @@ def cupones_candidatos(prod, estado):
     if not isinstance(cosecha, dict):
         cosecha = {c: "" for c in cosecha}
     reprobados = estado.get("cupones_reprobados", {})
+    ultima = (estado.get("cupones_ultima_busqueda") or {}).get("hallados") or {}
+    ultima = ultima if isinstance(ultima, dict) else {}
+    duradero = estado.get("cupones_origen") if isinstance(estado.get("cupones_origen"), dict) else {}
+    frescos = sorted(cosecha, key=lambda k: cosecha[k], reverse=True)
+    de_cuponera = [c for c in frescos if (duradero.get(c) or ultima.get(c)) == "cuponera" and c not in lista]
     salida = []
-    for c in sorted(cosecha, key=lambda k: cosecha[k], reverse=True) + lista:
-        if c in salida or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < HORAS_REPROBADO * 3600:
+    # orden: lista fija primero, luego lo fresco de Samsung y del foro, al final lo de cuponera
+    for c in lista + [c for c in frescos if c not in de_cuponera] + de_cuponera:
+        horas = HORAS_REPROBADO_CUPONERA if c in de_cuponera else HORAS_REPROBADO
+        if c in salida or MARCA_TIENDA_CERRADA.search(c.upper()) or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < horas * 3600:
             continue
         salida.append(c)
     return salida[:TOPE_CUPONES]
@@ -418,6 +468,8 @@ def samsung_carrito(sku, cupones):
     # Pasada 2: se parte del mejor y se le suman los demas solo si bajan el total.
     mejor_total, mejor, fin_d = base, [], d
     for cup in sorted(solos, key=solos.get):
+        if time.time() - inicio > SEGUNDOS_CARRITO * 2:
+            break
         prueba = mejor + [cup]
         t2, puestos, d2 = dejar_solo(prueba)
         if all(c in puestos for c in prueba) and t2 < mejor_total - 1:
@@ -450,6 +502,7 @@ def leer_samsung(prod, cfg, estado):
     probados, sirven = set(), set()
     for vid, (sku, precio, color, cta, pagina) in venta.items():
         nota = "preventa" if cta == "preOrder" else ""
+        buenos, fin = [], ""   # si el carrito falla, la oferta no hereda los cupones del modelo anterior
         try:
             base, final, buenos, fin, prob, solos = samsung_carrito(sku, cupones)
             probados.update(prob)
@@ -466,6 +519,7 @@ def leer_samsung(prod, cfg, estado):
         var = var_por_id(prod, vid)
         of = oferta(prod, "Samsung", "%s %s" % (var["nombre"], color), precio, pagina, "Samsung", nota, var=var)
         if of:
+            of["cupones"], of["vigencia"] = list(buenos), fin or ""   # en el orden en que quedaron aplicados
             salida.append(of)
     # Lo que no bajo el precio de ningun modelo descansa HORAS_REPROBADO; lo que si sirvio se sigue probando siempre.
     reprobados = estado.setdefault("cupones_reprobados", {})
@@ -502,7 +556,14 @@ def ficha_amazon(t):
         if r:
             raise RuntimeError("Amazon respondio %s en la ficha" % r)
         titulo, precio, vend, imp = _ficha_amazon(p)
-        agotado = re.search(r"No disponible por el momento|Actualmente no disponible", p)
+        if promos and precio is not None:   # linea B: el mismo cupon de ficha que resta _leer_amazon, con su candado
+            try:
+                f2, _ = promos.amazon_precio(precio, promos.amazon_ficha(p))
+                if f2 is not None and precio * 0.5 <= f2 <= precio:
+                    precio = f2
+            except Exception:
+                pass
+        agotado =re.search(r"No disponible por el momento|Actualmente no disponible", p)
         return {"titulo": titulo, "precio": precio, "vendedor": vend, "importado": imp, "url": url,
                 "existencia": True if precio is not None else False if agotado else None}
     return _ficha_amazon(t)
@@ -564,15 +625,22 @@ def _leer_amazon(prod, cfg, estado, diag):
                 continue
             if variante(prod, titulo) and precio >= prod["piso"]:
                 visto.add(m.group(1))
-                candidatas.append((m.group(1), titulo, precio, "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""))
+                nota = "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""
+                promo_b = None
+                if promos and nota:
+                    try:   # cupon del bloque de busqueda (promos.py); se aplica abajo sobre el precio de la ficha
+                        promo_b = promos.amazon_busqueda(bloque)
+                    except Exception:
+                        promo_b = None
+                candidatas.append((m.group(1), titulo, precio, nota, promo_b))
     salida = []
     if not fallo:
         # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio de busqueda (eso
         # alimenta la tabla, nunca basta para avisar: lo que va a avisar pasa por confirmar()).
-        for asin, titulo, precio, nota in candidatas:
+        for asin, titulo, precio, nota, promo_b in candidatas:
             url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
             previo = memo.get(asin)
-            paga = precio
+            paga, leida = precio, False
             # quinto elemento: el precio que dio la ficha (la version d6ab147 solo lee los cuatro primeros). Lo
             # recordado sin el (escrito antes del 25 nov) se trata como no recordado: se relee la ficha una vez.
             if previo and previo[0] == precio and len(previo) > 4 and previo[4]:
@@ -587,7 +655,7 @@ def _leer_amazon(prod, cfg, estado, diag):
                         continue   # la ficha leida no tiene precio a pagar: agotado o sin oferta propia
                     # La busqueda y la ficha pueden mostrar ofertas distintas (otro vendedor, usado): manda la ficha,
                     # que es la del vendedor leido.
-                    paga = pf
+                    paga, leida = pf, True
                 elif previo and previo[0] == precio:
                     # ficha rechazada (pasa en la nube) y lo recordado es viejo, sin precio de ficha: como antes, el
                     # vendedor recordado con el precio de busqueda, para no vaciar la tabla; no se reescribe la memoria
@@ -597,8 +665,20 @@ def _leer_amazon(prod, cfg, estado, diag):
                         salida.append(of)
                     continue
             if vend:
-                memo[asin] = [precio, vend, importado, prod["id"], paga]
-            of = oferta(prod, "Amazon", titulo, paga, url, vend or "sin confirmar", nota, importado=importado)
+                memo[asin] = [precio, vend, importado, prod["id"], paga]   # la memoria guarda el precio sin cupon
+            final = paga
+            if promos and (nota or leida):
+                try:   # promos.py: cupon de ficha (de la ficha leida ahora o, si no se leyo, del bloque de busqueda)
+                    promo = promos.amazon_ficha(t) if leida else promo_b
+                    if promo:
+                        f2, n = promos.amazon_precio(paga, promo)
+                        if f2 is not None and paga * 0.5 <= f2 <= paga:
+                            final, nota = f2, (n or nota)
+                except Exception:
+                    final = paga
+            of = oferta(prod, "Amazon", titulo, final, url, vend or "sin confirmar", nota, importado=importado)
+            if of and final < paga:
+                of["cupones"] = []   # el cupon de ficha se recorta en la pagina: no es un codigo que se teclee
             if of and (vend or not solo_oficial):
                 salida.append(of)
         return salida
@@ -619,7 +699,16 @@ def _leer_amazon(prod, cfg, estado, diag):
             continue   # agotado o sin precio a la vista: hoy no se ofrece
         if vend:
             memo[asin] = [precio, vend, importado, prod["id"], precio]
-        of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", "", importado=importado)
+        nota, final = "", precio
+        if promos:
+            try:   # promos.py: cupon de ficha que no pide nada (Prime, banco, app); si falla, como antes
+                final, nota = promos.amazon_precio(precio, promos.amazon_ficha(t))
+                final = final if final is not None and precio * 0.5 <= final <= precio else precio
+            except Exception:
+                nota, final = "", precio
+        of = oferta(prod, "Amazon", titulo, final, url, vend or "sin confirmar", nota, importado=importado)
+        if of and final < precio:
+            of["cupones"] = []   # el cupon de ficha se recorta en la pagina: no es un codigo que se teclee
         if of and (vend or not solo_oficial):
             salida.append(of)
     return salida
@@ -1880,7 +1969,7 @@ def selftest():
     est_c = {"cupones_cosechados": {"NUEVO10": "2026-11-25", "VIEJO5": "2026-11-10"},
              "cupones_reprobados": {"fold8|VIEJO5": int(time.time())}}
     cand = cupones_candidatos(prods[0], est_c)
-    assert cand[0] == "NUEVO10" and "VIEJO5" not in cand, cand
+    assert "NUEVO10" in cand and "VIEJO5" not in cand, cand   # linea B (E6): la lista fija va primero; lo nuevo, detras
     # --- robustez (25 nov 2026)
     import io
     import contextlib
@@ -2058,6 +2147,12 @@ def main():
         if res is not None:
             leidas.add(tienda)
             ofertas += res
+
+    if promos and not os.environ.get("SIN_PROMOS"):
+        try:
+            promos.mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue)
+        except Exception as ex:
+            print("promos: se omite (%s)" % str(ex)[:120])
 
     mejores = {}
     for o in ofertas:
