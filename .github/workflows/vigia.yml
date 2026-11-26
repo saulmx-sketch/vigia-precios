@@ -24,9 +24,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
+      - uses: actions/checkout@v5
       - name: Relanzar la cadena solo si esta detenida
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QUIEN_RELANZA: el horario salvavidas
         run: |
           # Reintentos: el 25-nov GitHub respondio HTTP 500 a una sola peticion y la cadena se corto 8 horas.
           for intento in 1 2 3 4 5; do
@@ -42,11 +44,13 @@ jobs:
           for intento in 1 2 3 4 5; do
             if gh workflow run vigia.yml --repo "$GITHUB_REPOSITORY" --ref main; then
               echo "la cadena estaba detenida: relanzada (intento $intento)"
+              bash .github/scripts/aviso.sh relanzada || true
               exit 0
             fi
             sleep $((intento * 15))
           done
           echo "no se pudo relanzar la cadena tras 5 intentos"
+          bash .github/scripts/aviso.sh detenida || true
           exit 1
   revisar:
     if: github.event_name != 'schedule'
@@ -55,10 +59,56 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
+      # Pruebas antes de revisar. Si una falla se apaga solo su parte y la revision de precios sigue:
+      # un vigia ciego en Black Friday por una prueba fragil es peor que el fallo que evita.
+      - name: Pruebas del nucleo
+        id: pruebas
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          SELFTEST_SOLO_NUCLEO: '1'
+        run: python3 vigia.py --selftest
+      - name: Pruebas de prospectiva
+        id: pruebas_a
+        if: hashFiles('prospectiva.py') != ''
+        continue-on-error: true
+        timeout-minutes: 2
+        run: python3 prospectiva.py --selftest
+      - name: Pruebas de promociones
+        id: pruebas_b
+        if: hashFiles('promos.py') != ''
+        continue-on-error: true
+        timeout-minutes: 2
+        run: python3 promos.py --selftest
+      - name: Aviso de pruebas fallidas
+        if: steps.pruebas.outcome == 'failure' || steps.pruebas_a.outcome == 'failure' || steps.pruebas_b.outcome == 'failure'
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          P_NUCLEO: ${{ steps.pruebas.outcome }}
+          P_A: ${{ steps.pruebas_a.outcome }}
+          P_B: ${{ steps.pruebas_b.outcome }}
+          LIGA: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          cuerpo="Antes de revisar las tiendas, el vigía corre sus propias pruebas. En la corrida de $(date -u -d '-6 hours' '+%d-%m-%Y a las %H:%M') (hora de la Ciudad de México) fallaron:"
+          [ "$P_NUCLEO" = "failure" ] && cuerpo="$cuerpo
+          - Las pruebas del núcleo: mientras sigan fallando, el vigía lee y guarda precios, pero NO manda avisos de precio."
+          [ "$P_A" = "failure" ] && cuerpo="$cuerpo
+          - Las pruebas de prospectiva: esa parte queda apagada; los avisos de precio siguen."
+          [ "$P_B" = "failure" ] && cuerpo="$cuerpo
+          - Las pruebas de promociones: esa parte queda apagada; los avisos de precio siguen."
+          cuerpo="$cuerpo
+
+          Cada corrida vuelve a probar: si la prueba pasa, la parte se prende sola. Liga a la corrida: $LIGA"
+          bash .github/scripts/aviso.sh libre "Fallaron pruebas del vigía: una parte quedó apagada" "$cuerpo"
       - name: Revisar tiendas y foro
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRUEBA: ${{ inputs.prueba }}
+          SIN_AVISOS_PRECIO: ${{ steps.pruebas.outcome != 'success' && '1' || '' }}
+          SIN_PROSPECTIVA: ${{ steps.pruebas_a.outcome == 'failure' && '1' || '' }}
+          SIN_PROMOS: ${{ steps.pruebas_b.outcome == 'failure' && '1' || '' }}
         run: python3 vigia.py
       - name: Guardar memoria y bitacora de precios
         if: always()
