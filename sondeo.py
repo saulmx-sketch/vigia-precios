@@ -76,6 +76,12 @@ def main():
         salida[nombre] = {"estado": estado, "bytes": len(texto), "fold8": folds, "precios_vistos": tops,
                           "bloqueo": bloqueo, "final": final[:120], "inicio": re.sub(r"\s+", " ", texto[:160])}
         print("%-22s %3s %8d fold8=%-3d bloqueo=%-5s %s" % (nombre, estado, len(texto), folds, bloqueo, tops[:6]))
+    try:   # TEMPORAL linea-B: quitar antes del corte
+        import promos   # TEMPORAL linea-B: quitar antes del corte
+        salida["promos"] = promos.sondeo()   # TEMPORAL linea-B: quitar antes del corte
+        print("promos", json.dumps(salida["promos"], ensure_ascii=False)[:600])   # TEMPORAL linea-B: quitar antes del corte
+    except Exception as e:   # TEMPORAL linea-B: quitar antes del corte
+        salida["promos"] = {"error": repr(e)[:200]}   # TEMPORAL linea-B: quitar antes del corte
     with open("sondeo.json", "w", encoding="utf-8") as f:
         json.dump(salida, f, ensure_ascii=False, indent=1)
 

@@ -26,6 +26,11 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+try:   # cupon de ficha de Amazon, bancos y tiendas cerradas de Samsung; si falta o falla, todo sigue como antes
+    import promos
+except Exception:
+    promos = None
+
 AQUI = os.path.dirname(os.path.abspath(__file__))
 ESTADO = os.path.join(AQUI, "visto.json")
 PRECIOS = os.path.join(AQUI, "precios.json")
@@ -69,12 +74,17 @@ SAMSUNG_API = "https://p1-smb-api-cdn.shop.samsung.com/tokocommercewebservices/v
 # cada hilo el campo voucherCode con la tienda (linkHost) y la fecha (publishedAt).
 PAGINAS_CUPON_SAMSUNG = ["https://www.samsung.com/mx/offer/", "https://www.samsung.com/mx/offer/black-friday/",
                          "https://www.samsung.com/mx/smartphones/all-smartphones/",
-                         "https://www.samsung.com/mx/apps/samsung-shop-app/"]
+                         "https://www.samsung.com/mx/apps/samsung-shop-app/",
+                         # medidas el 25 nov 2026: dan BF1000 y BFLIVESEM (este, hasta ese dia, solo llegaba por el foro)
+                         "https://www.samsung.com/mx/offer/deals/", "https://www.samsung.com/mx/offer/samsung-live/"]
 BUSQUEDAS_CUPON_FORO = ["samsung", "samsung cupon", "samsung codigo"]   # + "cupones_foro" de cada producto
 DIAS_CUPON = 21          # codigo publicado o visto hace mas de esto: se olvida
 HORAS_REPROBADO = 3      # codigo que no bajo ningun precio del producto: se vuelve a probar pasadas estas horas
 TOPE_CUPONES = 40        # codigos probados por corrida y producto (los recien hallados primero)
 SEGUNDOS_CARRITO = 90    # tope de tiempo de prueba de cupones por modelo (el trabajo de GitHub dura maximo 12 min)
+# Codigos de tienda cerrada (empleados o estudiantes: llevan "EPP"). En el carrito normal se rechazaron 24 de 24 el
+# 25 nov 2026 (8 codigos x 3 modelos). Se siguen cosechando (quedan en visto.json), pero no se prueban en el carrito.
+MARCA_TIENDA_CERRADA = "EPP"
 NO_ES_CUPON = re.compile(r"^(SAMSUNG|GALAXY|ULTRA|FOLD\d?|FLIP\d?|MSI|IVA|MXN|BBVA|PAYPAL|SANTANDER|BANORTE|"
                          r"CUPON|CODIGO|ASESOR|EPROMOTER|DESCUENTO|GRATIS|ENVIO)$")
 
@@ -303,7 +313,7 @@ def cupones_candidatos(prod, estado):
     reprobados = estado.get("cupones_reprobados", {})
     salida = []
     for c in sorted(cosecha, key=lambda k: cosecha[k], reverse=True) + lista:
-        if c in salida or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < HORAS_REPROBADO * 3600:
+        if c in salida or MARCA_TIENDA_CERRADA in c.upper() or time.time() - reprobados.get("%s|%s" % (prod["id"], c), 0) < HORAS_REPROBADO * 3600:
             continue
         salida.append(c)
     return salida[:TOPE_CUPONES]
@@ -397,6 +407,7 @@ def leer_samsung(prod, cfg, estado):
     probados, sirven = set(), set()
     for vid, (sku, precio, color, cta, pagina) in venta.items():
         nota = "preventa" if cta == "preOrder" else ""
+        buenos, fin = [], ""   # si el carrito falla, la oferta no hereda los cupones del modelo anterior
         try:
             base, final, buenos, fin, prob, solos = samsung_carrito(sku, cupones)
             probados.update(prob)
@@ -412,6 +423,7 @@ def leer_samsung(prod, cfg, estado):
         var = var_por_id(prod, vid)
         of = oferta(prod, "Samsung", "%s %s" % (var["nombre"], color), precio, pagina, "Samsung", nota, var=var)
         if of:
+            of["cupones"], of["vigencia"] = list(buenos), fin or ""   # en el orden en que quedaron aplicados
             salida.append(of)
     # Lo que no bajo el precio de ningun modelo descansa HORAS_REPROBADO; lo que si sirvio se sigue probando siempre.
     reprobados = estado.setdefault("cupones_reprobados", {})
@@ -493,11 +505,18 @@ def _leer_amazon(prod, cfg, estado, diag):
                 continue
             if variante(prod, titulo) and precio >= prod["piso"]:
                 visto.add(m.group(1))
-                candidatas.append((m.group(1), titulo, precio, "con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""))
+                nota, final = ("con cupon en la ficha" if re.search(r"cup[oó]n", bloque, re.I) else ""), precio
+                if promos and nota:
+                    try:   # promos.py resta el cupon de ficha si la busqueda da su cifra y cuadra; si no, como antes
+                        final, n = promos.amazon_precio(precio, promos.amazon_busqueda(bloque))
+                        nota, final = (n or nota), (final if final is not None and precio * 0.5 <= final <= precio else precio)
+                    except Exception:
+                        final = precio
+                candidatas.append((m.group(1), titulo, precio, nota, final))
     salida = []
     if not fallo:
         # Quien vende y si viene de fuera solo se ve en la ficha. Se recuerda por articulo y precio.
-        for asin, titulo, precio, nota in candidatas:
+        for asin, titulo, precio, nota, final in candidatas:
             url = "https://www.amazon.com.mx/dp/%s?th=1&psc=1" % asin
             previo = memo.get(asin)
             if previo and previo[0] == precio:
@@ -508,7 +527,9 @@ def _leer_amazon(prod, cfg, estado, diag):
                 _, _, vend, importado = ficha_amazon(t)
             if vend:
                 memo[asin] = [precio, vend, importado, prod["id"]]
-            of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", nota, importado=importado)
+            of = oferta(prod, "Amazon", titulo, final, url, vend or "sin confirmar", nota, importado=importado)
+            if of and final < precio:
+                of["cupones"] = []   # el cupon de ficha se recorta en la pagina: no es un codigo que se teclee
             if of and (vend or not solo_oficial):
                 salida.append(of)
         return salida
@@ -529,7 +550,16 @@ def _leer_amazon(prod, cfg, estado, diag):
             continue   # agotado o sin precio a la vista: hoy no se ofrece
         if vend:
             memo[asin] = [precio, vend, importado, prod["id"]]
-        of = oferta(prod, "Amazon", titulo, precio, url, vend or "sin confirmar", "", importado=importado)
+        nota, final = "", precio
+        if promos:
+            try:   # promos.py: cupon de ficha que no pide nada (Prime, banco, app); si falla, como antes
+                final, nota = promos.amazon_precio(precio, promos.amazon_ficha(t))
+                final = final if final is not None and precio * 0.5 <= final <= precio else precio
+            except Exception:
+                nota, final = "", precio
+        of = oferta(prod, "Amazon", titulo, final, url, vend or "sin confirmar", nota, importado=importado)
+        if of and final < precio:
+            of["cupones"] = []   # el cupon de ficha se recorta en la pagina: no es un codigo que se teclee
         if of and (vend or not solo_oficial):
             salida.append(of)
     return salida
@@ -1043,6 +1073,12 @@ def main():
         if res is not None:
             leidas.add(tienda)
             ofertas += res
+
+    if promos and not os.environ.get("SIN_PROMOS"):
+        try:
+            promos.mejorar(ofertas, estado, prods, ahora, seco, pedir, abrir_issue)
+        except Exception as ex:
+            print("promos: se omite (%s)" % str(ex)[:120])
 
     mejores = {}
     for o in ofertas:
