@@ -6,6 +6,14 @@ Uso:
     py -X utf8 historia\\cosechar_foro.py --sin-red         solo con lo que ya esta en el cache
     py -X utf8 historia\\cosechar_foro.py --salida <carpeta>  donde van los CSV (por omision, esta carpeta historia)
 
+  Cualquier otro producto, sin tocar este archivo (sale <salida>\\foro_<producto-id>.csv):
+    py -X utf8 historia\\cosechar_foro.py --producto-id ipad-air --consulta "ipad air" [--consulta "ipad air m4"]
+        --patron "ipad\\s*air" --piso 9000 [--excluir "<regex>"] [--variante "m4-128-wifi=\\bm4\\b.*\\b128"]
+        [--tope-paginas 12] [--tope-hilos 300] [--pausa 2] --salida <carpeta>
+    --patron: lo que debe decir el titulo del hilo; --piso: precio minimo creible (abajo = accesorio o error);
+    --excluir: titulos que se descartan; --variante id=regex (repetible): la primera que case en el titulo, o en la
+    descripcion si el titulo no dice; si ninguna casa, 'sin-dato'. Sin --variante, todo va a 'sin-dato'.
+
 Fuente: la busqueda del foro (https://www.promodescuentos.com/search?q=...&sortBy=new&time_frame=0&page=N, toda la historia). Cada hilo de la
 lista viene como JSON en el atributo data-vue3 del componente ThreadMainListItemNormalizer (titulo, precio,
 tienda, fecha de publicacion, expirado, temperatura, cupon). La descripcion completa solo esta en la pagina del
@@ -140,6 +148,13 @@ def plano(texto):
 
 # ------------------------------------------------------------------------------- clasificacion
 def variante(producto, titulo, desc):
+    cfg = PRODUCTOS.get(producto) or {}
+    if cfg.get("generico"):
+        for fuente in (titulo, desc):
+            for vid, pat in cfg.get("variantes") or []:
+                if re.search(pat, fuente or "", re.I):
+                    return vid
+        return "sin-dato"
     t = titulo.lower()
     if producto == "ps5":
         if re.search(r"\bpro\b", t):
@@ -275,7 +290,7 @@ def cosechar(producto, sin_red, salida, revision):
     try:
         for q in cfg["consultas"]:
             propios = set()
-            for pag in range(1, TOPE_PAGINAS + 1):
+            for pag in range(1, cfg.get("tope_paginas", TOPE_PAGINAS) + 1):
                 url = BASE + "/search?q=" + urllib.parse.quote(q) + "&sortBy=new" + FILTRO_FECHA + ("&page=%d" % pag if pag > 1 else "")
                 texto = bajar(url, nombre_cache(q, pag), sin_red)
                 if texto is None:
@@ -297,6 +312,11 @@ def cosechar(producto, sin_red, salida, revision):
         precio = numero(th.get("price"))
         if not re.search(cfg["patron"], titulo, re.I) or precio is None or precio < cfg["minimo"]:
             continue
+        if cfg.get("excluir") and re.search(cfg["excluir"], titulo, re.I):
+            continue
+        if cfg.get("generico"):
+            pasan.append(th)
+            continue
         if producto != "ps5" and (re.search(OTRAS_MARCAS, titulo, re.I) or not re.search(r"samsung|galaxy|\bz\s*fold|zfold", titulo + " " + ((th.get("merchant") or {}).get("merchantName") or ""), re.I)):
             continue
         pasan.append(th)
@@ -305,13 +325,14 @@ def cosechar(producto, sin_red, salida, revision):
     for n, th in enumerate(pasan):
         tid = th["threadId"]
         detalle = None
-        if n < TOPE_HILOS and bloqueo is None:
+        tope_hilos = cfg.get("tope_hilos", TOPE_HILOS)
+        if n < tope_hilos and bloqueo is None:
             slug = th.get("titleSlug") or "hilo"
             try:
                 detalle = detalle_de_hilo(bajar(BASE + "/ofertas/%s-%s" % (slug, tid), "hilo_%s.html" % tid, sin_red))
             except Bloqueo as e:
                 bloqueo = str(e)
-        elif n < TOPE_HILOS:
+        elif n < tope_hilos:
             ruta = os.path.join(CACHE, "hilo_%s.html" % tid)
             if os.path.exists(ruta):
                 detalle = detalle_de_hilo(open(ruta, encoding="utf-8").read())
@@ -362,16 +383,41 @@ def leer_revision(salida):
 
 
 def main():
+    global PAUSA
     ap = argparse.ArgumentParser()
     ap.add_argument("--producto", choices=sorted(PRODUCTOS))
     ap.add_argument("--sin-red", action="store_true")
     ap.add_argument("--salida", default=AQUI)
+    # producto cualquiera, sin editar PRODUCTOS
+    ap.add_argument("--producto-id")
+    ap.add_argument("--consulta", action="append")
+    ap.add_argument("--patron")
+    ap.add_argument("--piso", type=float)
+    ap.add_argument("--excluir")
+    ap.add_argument("--variante", action="append", default=[])
+    ap.add_argument("--tope-paginas", type=int, default=TOPE_PAGINAS)
+    ap.add_argument("--tope-hilos", type=int, default=TOPE_HILOS)
+    ap.add_argument("--pausa", type=float, default=PAUSA)
     a = ap.parse_args()
+    PAUSA = max(a.pausa, 1.5)
+    productos = [a.producto] if a.producto else ["fold8", "fold7", "fold6", "ps5"]
+    if a.producto_id or a.consulta or a.patron:
+        if not (a.producto_id and a.consulta and a.patron and a.piso is not None):
+            ap.error("un producto nuevo pide --producto-id, --consulta, --patron y --piso")
+        variantes = []
+        for v in a.variante:
+            if "=" not in v:
+                ap.error("--variante va como id=regex: %r" % v)
+            variantes.append(tuple(v.split("=", 1)))
+        PRODUCTOS[a.producto_id] = {"consultas": a.consulta, "patron": a.patron, "minimo": a.piso,
+                                    "excluir": a.excluir, "variantes": variantes, "generico": True,
+                                    "tope_paginas": a.tope_paginas, "tope_hilos": a.tope_hilos}
+        productos = [a.producto_id]
     os.makedirs(CACHE, exist_ok=True)
     os.makedirs(a.salida, exist_ok=True)
     revision = leer_revision(a.salida)
     inicio = time.time()
-    for p in ([a.producto] if a.producto else ["fold8", "fold7", "fold6", "ps5"]):
+    for p in productos:
         bloqueo = cosechar(p, a.sin_red, a.salida, revision)
         if bloqueo:
             print("DETENIDO: el foro mostro su reto antirrobots: " + bloqueo)
