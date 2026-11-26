@@ -73,7 +73,7 @@
     "vendedor_oficial": {"Amazon": "^\\s*amazon(\\s+m[eé]xico)?\\s*$"}
    },
    "variantes": [
-    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "lista": 12499}
+    {"id": "digital", "nombre": "PS5 Digital (sin lector)", "todas": ["digital"], "ninguna": ["\\b2\\s*tb\\b"], "lista": 12499}
    ],
    "tiendas": {
     "Amazon": {"consultas": ["playstation+5+digital"]},
