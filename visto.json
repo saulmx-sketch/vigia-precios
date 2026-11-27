@@ -4,40 +4,38 @@
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {
-  "Amazon": "2026-11-27T05:41+00:00"
- },
+ "caida_desde": {},
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-26 23:26"
+   "visto": "2026-11-26 23:55"
   },
   "Cyberpuerta|ps5|digital": {
    "precio": 13389.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.cyberpuerta.mx/Audio-y-Video/Consolas-y-Juegos/PlayStation-5-PS5/Consolas-PlayStation-5/Sony-PlayStation-5-Slim-Digital-Bundle-Astro-Bot-y-Gran-Turismo-7-1TB-Wi-Fi-Negro-Blanco.html",
-   "visto": "2026-11-26 23:41"
+   "visto": "2026-11-26 23:55"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-26 23:41"
+   "visto": "2026-11-26 23:55"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-26 23:41"
+   "visto": "2026-11-26 23:55"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-26 23:41"
+   "visto": "2026-11-26 23:55"
   }
  },
  "cupones_cosechados": {
@@ -222,7 +220,6 @@
   }
  },
  "diag_amazon": [
-  "11-26 10:58 busqueda ok",
   "11-26 11:14 busqueda ok; busqueda ok",
   "11-26 11:14 busqueda ok",
   "11-26 11:30 busqueda ok; busqueda 503 de 1669 bytes, reintento ok; ficha B0H773GGWG ok; ficha B0H779SQRZ ok; ficha B0H76XJTG2 ok",
@@ -281,11 +278,12 @@
   "11-26 22:59 busqueda ok",
   "11-26 23:13 busqueda ok",
   "11-26 23:27 busqueda 503 de 1669 bytes, reintento ok",
-  "11-26 23:41 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX 503 de 322 bytes"
+  "11-26 23:41 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX 503 de 322 bytes",
+  "11-26 23:56 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
-  "Amazon": 1,
+  "Amazon": 0,
   "Chedraui": 0,
   "Costco": 0,
   "Cupones": 0,
@@ -1537,9 +1535,7 @@
   }
  },
  "sembrado": true,
- "ultimo_error": {
-  "Amazon": "Amazon respondio 503 de 1669 bytes en la busqueda y 503 de 322 bytes en la ficha B09SYJ9NNX"
- },
+ "ultimo_error": {},
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    6999.0,
@@ -1555,7 +1551,7 @@
    false,
    "ps5",
    15989.99,
-   1795754674
+   1795758926
   ],
   "B0F6968Y5G": [
    18750.0,
@@ -1563,7 +1559,7 @@
    false,
    "ps5",
    18750.0,
-   1795754674
+   1795758926
   ],
   "B0FTNL3B9F": [
    14697.86,
@@ -1571,7 +1567,7 @@
    false,
    "ps5",
    14697.86,
-   1795754674
+   1795758926
   ],
   "B0FTP523RH": [
    12499.0,
@@ -1579,7 +1575,7 @@
    false,
    "ps5",
    12499.0,
-   1795754674
+   1795758926
   ],
   "B0G4NPJB3K": [
    15517.97,
@@ -1587,7 +1583,7 @@
    false,
    "ps5",
    15517.97,
-   1795754674
+   1795758926
   ],
   "B0G756CBJ1": [
    27196.86,
@@ -1595,7 +1591,7 @@
    false,
    "ps5",
    27196.86,
-   1795754674
+   1795758926
   ],
   "B0G75WQKTT": [
    12948.0,
@@ -1603,7 +1599,7 @@
    false,
    "ps5",
    12948.0,
-   1795754674
+   1795758926
   ],
   "B0G76569Q9": [
    13319.11,
@@ -1611,7 +1607,7 @@
    false,
    "ps5",
    13319.11,
-   1795754674
+   1795758926
   ],
   "B0G76PM4FZ": [
    17998.0,
@@ -1619,7 +1615,7 @@
    false,
    "ps5",
    17998.0,
-   1795754674
+   1795758926
   ],
   "B0G76R6X1Z": [
    15575.64,
@@ -1627,7 +1623,7 @@
    false,
    "ps5",
    15575.64,
-   1795754674
+   1795758926
   ],
   "B0G76YF472": [
    14498.0,
@@ -1635,7 +1631,7 @@
    false,
    "ps5",
    14498.0,
-   1795754674
+   1795758926
   ],
   "B0G86XR6F3": [
    15846.86,
@@ -1643,7 +1639,7 @@
    false,
    "ps5",
    15846.86,
-   1795754674
+   1795758926
   ],
   "B0GH2GJD6J": [
    16896.86,
@@ -1651,7 +1647,7 @@
    false,
    "ps5",
    16896.86,
-   1795754674
+   1795758926
   ],
   "B0H76XJTG2": [
    37961.23,
