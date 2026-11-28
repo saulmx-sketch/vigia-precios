@@ -11,37 +11,37 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   },
   "Chedraui|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487/p",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   },
   "Cyberpuerta|ps5|digital": {
    "precio": 13389.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.cyberpuerta.mx/Audio-y-Video/Consolas-y-Juegos/PlayStation-5-PS5/Consolas-PlayStation-5/Sony-PlayStation-5-Slim-Digital-Bundle-Astro-Bot-y-Gran-Turismo-7-1TB-Wi-Fi-Negro-Blanco.html",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-28 05:06"
+   "visto": "2026-11-28 05:20"
   }
  },
  "cupones_cosechados": {
@@ -226,7 +226,6 @@
   }
  },
  "diag_amazon": [
-  "11-27 15:08 busqueda ok",
   "11-27 15:22 busqueda ok",
   "11-27 15:36 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok",
   "11-27 15:50 busqueda ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok; ficha B0G76PM4FZ ok",
@@ -285,7 +284,8 @@
   "11-28 04:24 busqueda 503 de 1669 bytes, reintento ok",
   "11-28 04:38 busqueda ok",
   "11-28 04:52 busqueda ok",
-  "11-28 05:06 busqueda 503 de 1669 bytes, reintento ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76569Q9 ok"
+  "11-28 05:06 busqueda 503 de 1669 bytes, reintento ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76569Q9 ok",
+  "11-28 05:20 busqueda ok; ficha B0G76YF472 ok; ficha B0G75WQKTT ok; ficha B0G76PM4FZ ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -1697,7 +1697,7 @@
    false,
    "ps5",
    12948.0,
-   1795859721
+   1795864836
   ],
   "B0G76569Q9": [
    13314.95,
@@ -1713,7 +1713,7 @@
    false,
    "ps5",
    17998.0,
-   1795859721
+   1795864836
   ],
   "B0G76R6X1Z": [
    15575.64,
@@ -1729,7 +1729,7 @@
    false,
    "ps5",
    14498.0,
-   1795859721
+   1795864836
   ],
   "B0G86XR6F3": [
    15846.86,
