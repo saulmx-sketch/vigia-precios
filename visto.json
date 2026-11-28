@@ -11,37 +11,37 @@
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   },
   "Chedraui|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487/p",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   },
   "Cyberpuerta|ps5|digital": {
    "precio": 13389.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.cyberpuerta.mx/Audio-y-Video/Consolas-y-Juegos/PlayStation-5-PS5/Consolas-PlayStation-5/Sony-PlayStation-5-Slim-Digital-Bundle-Astro-Bot-y-Gran-Turismo-7-1TB-Wi-Fi-Negro-Blanco.html",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   },
   "Gameplanet|ps5|digital": {
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-27 23:49"
+   "visto": "2026-11-28 00:03"
   }
  },
  "cupones_cosechados": {
@@ -226,7 +226,6 @@
   }
  },
  "diag_amazon": [
-  "11-27 09:57 busqueda ok",
   "11-27 10:12 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-27 10:26 busqueda 503 de 1669 bytes, reintento ok",
   "11-27 10:41 busqueda 200 de 2283 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
@@ -285,7 +284,8 @@
   "11-27 23:07 busqueda ok",
   "11-27 23:21 busqueda 503 de 1669 bytes, reintento ok",
   "11-27 23:35 busqueda ok; ficha B0FTP523RH ok; ficha B0G76YF472 ok; ficha B0F6968Y5G ok",
-  "11-27 23:49 busqueda ok; ficha B0G76PM4FZ ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok"
+  "11-27 23:49 busqueda ok; ficha B0G76PM4FZ ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok",
+  "11-28 00:03 busqueda 503 de 1669 bytes, reintento ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -642,9 +642,72 @@
  "promos_bancos": {
   "tiendas": {
    "Amazon": {
-    "error": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins respondio 503 de 1669 bytes",
-    "filas": [],
-    "leido": "2026-11-27 17:56"
+    "error": "",
+    "filas": [
+     {
+      "banco": "tarjetas participantes",
+      "beneficio": "Hasta 12 meses sin intereses con las tarjetas participantes",
+      "meses": [
+       12
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "Nu",
+      "beneficio": "4 y 7 meses sin intereses exclusivos con Nu",
+      "meses": [
+       4,
+       7
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "BBVA",
+      "beneficio": "15 meses sin intereses exclusivos con BBVA",
+      "meses": [
+       15
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     },
+     {
+      "banco": "Banamex",
+      "beneficio": "hasta 18 y 24 meses sin intereses exclusivos con Banamex",
+      "meses": [
+       18,
+       24
+      ],
+      "minimo": null,
+      "tipo": "msi",
+      "tope": null,
+      "unidad": null,
+      "url": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins",
+      "valor": null,
+      "vigencia": "",
+      "vigente": null
+     }
+    ],
+    "leido": "2026-11-28 00:03"
    },
    "BBVA": {
     "error": "",
@@ -1447,10 +1510,10 @@
       "url": "https://www.bbva.mx/black-friday.html",
       "valor": null,
       "vigencia": "27 de noviembre",
-      "vigente": true
+      "vigente": false
      }
     ],
-    "leido": "2026-11-27 17:56"
+    "leido": "2026-11-28 00:03"
    },
    "Liverpool": {
     "error": "",
@@ -1484,7 +1547,7 @@
       "vigente": true
      }
     ],
-    "leido": "2026-11-27 17:56"
+    "leido": "2026-11-28 00:03"
    },
    "Samsung": {
     "error": "",
