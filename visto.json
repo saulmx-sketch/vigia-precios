@@ -4,20 +4,22 @@
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
- "caida_desde": {},
+ "caida_desde": {
+  "Cyberpuerta": "2026-11-28T18:24+00:00"
+ },
  "ciego_avisado": false,
  "conocidos": {
   "Amazon|ps5|digital": {
    "precio": 12399.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-28 12:10"
+   "visto": "2026-11-28 12:24"
   },
   "Chedraui|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487/p",
-   "visto": "2026-11-28 12:10"
+   "visto": "2026-11-28 12:24"
   },
   "Cyberpuerta|ps5|digital": {
    "precio": 13389.0,
@@ -29,19 +31,19 @@
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-28 12:10"
+   "visto": "2026-11-28 12:24"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-28 12:10"
+   "visto": "2026-11-28 12:24"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-28 12:10"
+   "visto": "2026-11-28 12:24"
   }
  },
  "cupones_cosechados": {
@@ -226,7 +228,6 @@
   }
  },
  "diag_amazon": [
-  "11-27 22:11 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok",
   "11-27 22:26 busqueda 503 de 1669 bytes, reintento 200 de 2283 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-27 22:39 busqueda ok",
   "11-27 22:53 busqueda ok",
@@ -285,7 +286,8 @@
   "11-28 11:29 busqueda 503 de 1669 bytes, reintento 503 de 1669 bytes; ficha B09SYJ9NNX ok; ficha B0D9WTKV1B ok; ficha B0F6968Y5G ok; ficha B0FTNL3B9F ok; ficha B0FTP523RH ok; ficha B0G4NPJB3K ok; ficha B0G756CBJ1 ok; ficha B0G75WQKTT ok; ficha B0G76569Q9 ok; ficha B0G76PM4FZ ok; ficha B0G76R6X1Z ok; ficha B0G76YF472 ok; ficha B0G86XR6F3 ok; ficha B0GH2GJD6J ok",
   "11-28 11:43 busqueda 200 de 2290 bytes, reintento ok",
   "11-28 11:57 busqueda ok",
-  "11-28 12:10 busqueda ok"
+  "11-28 12:10 busqueda ok",
+  "11-28 12:24 busqueda ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
@@ -293,7 +295,7 @@
   "Chedraui": 0,
   "Costco": 0,
   "Cupones": 0,
-  "Cyberpuerta": 0,
+  "Cyberpuerta": 1,
   "Elektra": 0,
   "Foro": 0,
   "Gameplanet": 0,
@@ -642,7 +644,7 @@
  "promos_bancos": {
   "tiendas": {
    "Amazon": {
-    "error": "https://www.amazon.com.mx/msi?ref_=footer_pay_ins respondio 503 de 1669 bytes",
+    "error": "",
     "filas": [
      {
       "banco": "tarjetas participantes",
@@ -707,7 +709,7 @@
       "vigente": null
      }
     ],
-    "leido": "2026-11-28 06:16"
+    "leido": "2026-11-28 12:24"
    },
    "BBVA": {
     "error": "",
@@ -1513,7 +1515,7 @@
       "vigente": false
      }
     ],
-    "leido": "2026-11-28 06:16"
+    "leido": "2026-11-28 12:24"
    },
    "Liverpool": {
     "error": "",
@@ -1547,7 +1549,7 @@
       "vigente": true
      }
     ],
-    "leido": "2026-11-28 06:16"
+    "leido": "2026-11-28 12:24"
    },
    "Samsung": {
     "error": "",
@@ -1633,7 +1635,9 @@
   }
  },
  "sembrado": true,
- "ultimo_error": {},
+ "ultimo_error": {
+  "Cyberpuerta": "Cyberpuerta respondio 429 (39567 bytes) sin el bloque ld+json ItemList"
+ },
  "vendedor_amazon": {
   "B09SYJ9NNX": [
    6999.0,
