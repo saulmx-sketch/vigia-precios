@@ -1,8 +1,11 @@
 {
- "agotados": {},
- "ausente": {
-  "Cyberpuerta|ps5|digital": 3
+ "agotados": {
+  "Cyberpuerta|ps5|digital": {
+   "desde": "desde 2026-11-28 07:00",
+   "precio": 13389.0
+  }
  },
+ "ausente": {},
  "avisado": {},
  "avisado_nivel": {},
  "caida_avisada": [],
@@ -13,13 +16,13 @@
    "precio": 12399.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.amazon.com.mx/dp/B0FTP523RH?th=1&psc=1",
-   "visto": "2026-11-28 07:42"
+   "visto": "2026-11-28 07:56"
   },
   "Chedraui|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.chedraui.com.mx/bundle-consola-playstation-5-edicion-digital-de-825-gb-astro-bot-y-gran-turismo-7-3879487/p",
-   "visto": "2026-11-28 07:42"
+   "visto": "2026-11-28 07:56"
   },
   "Cyberpuerta|ps5|digital": {
    "precio": 13389.0,
@@ -31,19 +34,19 @@
    "precio": 10999.99,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.gameplanet.com/products/consola-playstation-5-digital-fortnite-flowering-playstation-5",
-   "visto": "2026-11-28 07:42"
+   "visto": "2026-11-28 07:56"
   },
   "Liverpool|ps5|digital": {
    "precio": 12499.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.liverpool.com.mx/tienda/pdp/p/1186785807?skuId=1186785807",
-   "visto": "2026-11-28 07:42"
+   "visto": "2026-11-28 07:56"
   },
   "Soriana|ps5|digital": {
    "precio": 12490.0,
    "producto": "PS5 Digital (sin lector)",
    "url": "https://www.soriana.com/consola-playstation-5-digital-slim-astro-bot-y-gran-turismo-7-825gb/11912222.html",
-   "visto": "2026-11-28 07:42"
+   "visto": "2026-11-28 07:56"
   }
  },
  "cupones_cosechados": {
@@ -228,7 +231,6 @@
   }
  },
  "diag_amazon": [
-  "11-27 17:43 busqueda ok",
   "11-27 17:57 busqueda 503 de 1669 bytes, reintento ok",
   "11-27 18:11 busqueda ok",
   "11-27 18:25 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok",
@@ -287,7 +289,8 @@
   "11-28 07:00 busqueda ok",
   "11-28 07:14 busqueda 503 de 1669 bytes, reintento ok",
   "11-28 07:28 busqueda ok",
-  "11-28 07:42 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok; ficha B0G76PM4FZ ok"
+  "11-28 07:42 busqueda ok; ficha B0FTP523RH ok; ficha B0F6968Y5G ok; ficha B0G76YF472 ok; ficha B0G76569Q9 ok; ficha B0G75WQKTT ok; ficha B0G76PM4FZ ok",
+  "11-28 07:56 busqueda 200 de 2280 bytes, reintento ok"
  ],
  "fallos": 0,
  "fallos_fuente": {
